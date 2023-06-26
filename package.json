@@ -12,6 +12,7 @@
     "@aws-amplify/ui-vue": "^3.1.19",
     "aws-amplify": "^5.3.1",
     "element-plus": "^2.3.7",
+    "sass": "^1.63.6",
     "vue": "^3.2.47",
     "vue-router": "4"
   },

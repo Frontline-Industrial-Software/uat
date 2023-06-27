@@ -1,26 +1,60 @@
-import { createRouter, createWebHashHistory, createWebHistory } from "vue-router"
-
+import {
+  createRouter,
+  createWebHashHistory,
+  createWebHistory,
+} from "vue-router";
+// 路由守卫
+import { Amplify, Auth } from "aws-amplify";
+import awsconfig from "../utils/aws-exports";
 //1. 定义要使用到的路由组件  （一定要使用文件的全名，得包含文件后缀名）
-import Login from "../components/login.vue"
-
+import Login from "../components/login.vue";
+import Dashboard from "../components/dashborad/index.vue";
+// 子路由
+import InputData from "../components/dashborad/inputData/index.vue";
 //2. 路由配置
 const routes = [
-    //redirect 重定向也是通过 routes 配置来完成，下面就是从 / 重定向到 /index
-    {
-        path: "/",
-        redirect: "/Login",
-    },
-    { path: "/Login", component: Login },
-]
-
+  //redirect 重定向也是通过 routes 配置来完成，下面就是从 / 重定向到 /index
+  {
+    path: "/",
+    redirect: "/dashboard",
+  },
+  { path: "/Login", component: Login, name: "login" },
+  {
+    path: "/dashboard",
+    component: Dashboard,
+    name: "dashboard",
+    children: [{ path: "InputData", component: InputData, name: "InputData", }],
+  },
+];
+Amplify.configure(awsconfig);
 // 3. 创建路由实例
 const router = createRouter({
-    // （1）采用hash 模式
-    history: createWebHashHistory(),
-    // （2）采用 history 模式
-    // history: createWebHistory(),
-    routes, //使用上方定义的路由配置
-})
+  // （1）采用hash 模式
+  history: createWebHashHistory(),
+  // （2）采用 history 模式
+  // history: createWebHistory(),
+  routes, //使用上方定义的路由配置
+});
 
+// 创建 beforeEach 导航守卫
+router.beforeEach(async (to, from, next) => {
+//   if (to.fullPath == "/Login") {
+//     next();
+//     return;
+//   }
+
+//   const userInfo = await Auth.currentUserInfo();
+//   if (to.name == "dashboard") {
+//     if (!userInfo) {
+//       next({ name: "login" });
+//     } else {
+//       next();
+//     }
+//   }
+next();
+  // const userInfo = await Auth.currentAuthenticatedUser();
+  // console.log(userInfo);
+  // 获取当前认证状态的用户信息
+});
 // 4. 导出router
-export default router
+export default router;

@@ -1,43 +1,55 @@
 <script setup>
-  import { Authenticator } from "@aws-amplify/ui-vue";
-  import "@aws-amplify/ui-vue/styles.css";
-  import {
-  Check,
-  Delete,
-  Edit,
-  Message,
-  Search,
-  Star,
-} from '@element-plus/icons-vue'
-  import { Amplify } from 'aws-amplify';
-  import awsconfig from '../utils/aws-exports';
+import { onMounted,ref,watch  } from "vue";
+import { useRouter, useRoute,onBeforeRouteLeave } from 'vue-router'
+import { Authenticator,useAuthenticator  } from "@aws-amplify/ui-vue";
+import "@aws-amplify/ui-vue/styles.css";
+import { Amplify } from 'aws-amplify';
+import awsconfig from '../utils/aws-exports';
+let auth =ref(null)
+const router=useRouter();
+ auth.value = useAuthenticator();
+Amplify.configure(awsconfig);
 
-  Amplify.configure(awsconfig);
+watch(auth,(newdata)=>{
+  router.push("/dashboard")
+},{ deep: true })
 </script>
 
 <template>
-  <div class="content"> 
-    <el-button type="primary">Primary</el-button>
-    <authenticator>
-      <template v-slot="{ user, signOut }">
-        <h1>Hello {{ user.username }}!</h1>
-        <button @click="signOut">Sign Out</button>
-      </template>
-    </authenticator>
+  <div class="content">
+    <div class="introduce">
+      <span>
+        <img class="logo" src="../static/logo.png" alt="Frontline Logo" />
+      </span>
+      <h1>Optimization Platform</h1>
+      Find the best sequence of activities with optimal resource loading
+      <p>to ace your project</p>
+    </div>
+    <div class="auth">
+      <Authenticator >
+      </Authenticator>
+    </div>
   </div>
-
 </template>
 
-
 <style lang="scss" scoped>
-.content{
+.content {
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(rgba(255, 204, 103, 0.196) 0%, rgba(0, 145, 132, 0.3) 100%);
+  background: linear-gradient(
+    rgba(255, 204, 103, 0.196) 0%,
+    rgba(0, 145, 132, 0.3) 100%
+  );
   display: flex;
   -webkit-box-align: center;
   align-items: center;
   -webkit-box-pack: center;
   justify-content: center;
+}
+.logo {
+  width: 300px;
+}
+.auth {
+  margin: 5rem;
 }
 </style>

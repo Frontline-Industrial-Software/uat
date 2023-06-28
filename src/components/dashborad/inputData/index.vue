@@ -21,8 +21,11 @@
           <v-sheet class="pa-2 ma-2" >
        <div class="uploadBox">
         <Upload/>
-        <span style="color: rgb(42, 123, 108); margin-left: 10px"
+        <span v-if="!store.file.name" style="color: rgb(42, 123, 108); margin-left: 10px"
           >No file chosen</span
+        >
+        <span v-else style="color: rgb(42, 123, 108); margin-left: 10px"
+          >{{store.file.name}}</span
         >
        </div>
           </v-sheet>
@@ -45,12 +48,12 @@
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              <span>
-                <v-btn>Upload file</v-btn>
-              </span>
-              <span style="color: rgb(42, 123, 108); margin-left: 10px"
-                >No file chosen</span
-              >
+              <div class="uploadBox">
+                <Upload/>
+                <span style="color: rgb(42, 123, 108); margin-left: 10px"
+                  >No file chosen</span
+                >
+               </div>
             </v-sheet>
           </v-col>
           <v-col>
@@ -68,7 +71,7 @@
             <v-sheet class="pa-2 ma-2">
               <label>Ignore Project Scheduled Dates</label>
   
-              <v-radio-group v-model="setting.IgnoreProject" inline>
+              <v-radio-group v-model="store.setting.IgnoreProject" inline>
                 <v-radio label="Yes" value="true"></v-radio>
                 <v-radio label="No" value="false"></v-radio>
               </v-radio-group>
@@ -78,7 +81,7 @@
             <v-sheet class="pa-2 ma-2">
               Learning Rate
               <p>
-                <v-text-field v-model="setting.Rate"  placeholder="0.025" variant="solo">
+                <v-text-field v-model="store.setting.Rate"  placeholder="0.025" variant="solo">
     
                 </v-text-field>
               </p>
@@ -91,8 +94,8 @@
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              {{ `Optimization Ratio(${setting.Ratio[0]}% -${setting.Ratio[1]}%)`}}
-              <v-range-slider :max="200" :min="1" :step="1"  v-model="setting.Ratio" color="rgb(112, 191, 177)"></v-range-slider>
+              {{ `Optimization Ratio(${store.setting.Ratio[0]}% -${store.setting.Ratio[1]}%)`}}
+              <v-range-slider :max="200" :min="1" :step="1"  v-model="store.setting.Ratio" color="rgb(112, 191, 177)"></v-range-slider>
             </v-sheet>
           </v-col>
         </v-row>
@@ -102,8 +105,8 @@
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              Optimization Steps ({{setting.Steps}})
-              <v-slider :step="1" v-model="setting.Steps" color="rgb(112, 191, 177)"></v-slider>
+              Optimization Steps ({{store.setting.Steps}})
+              <v-slider :step="1" v-model="store.setting.Steps" color="rgb(112, 191, 177)"></v-slider>
             </v-sheet>
           </v-col>
         </v-row>
@@ -129,22 +132,17 @@
 </template>
 
 <script setup>
+import { useCounterStore } from '../../../store'
 import { reactive ,ref} from "vue";
 import Upload from './upload.vue'
 import api from "../../../api/index.js"
-let file=ref(null)
-let setting=reactive({
-  IgnoreProject:false,
-  Rate:0.025,
-  Ratio:[40,150],
-  Steps:20,
-})
+const store = useCounterStore()
 </script>
 
 <style lang="scss" scoped>
 .uploadBox{
 display: flex;
-justify-content: center;
+justify-content: start;
 align-items: baseline;
 }
 .disabled{
@@ -170,7 +168,7 @@ opacity: 0.3;}
   }
 }
 .container {
-  max-width: 1200px;
+  width: 1200px;
   background: rgb(255, 255, 255);
   padding: 1px 20px 20px;
   border-radius: 16px;

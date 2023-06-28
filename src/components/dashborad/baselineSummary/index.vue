@@ -1,22 +1,4 @@
 <script setup>
-// import Echarts from "../Echarts.vue";
-// import { ref, onMounted } from "vue";
-// var options = {
-//   xAxis: {},
-//   yAxis: {},
-//   series: [
-//     {
-//       type: 'scatter',
-//       data: [
-//         [10, 5],
-//         [0, 8],
-//         [6, 10],
-//         [2, 12],
-//         [8, 9]
-//       ]
-//     }
-//   ]
-//   };
 import { ref, onMounted,onUnmounted} from "vue";
 import * as echarts from 'echarts';
 
@@ -242,7 +224,6 @@ const radio = ref(3);
 </template>
 <style lang="scss" scoped>
 .contain {
-  background-color: #d4d7d7;
   height: 100vh;
 }
 h2 {

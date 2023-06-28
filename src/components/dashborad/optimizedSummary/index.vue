@@ -277,7 +277,6 @@ const options = [
     background-color: #40aa97;
   }
 .contain {
-  background-color: #d4d7d7;
   height: 100%;
 }
 .box {

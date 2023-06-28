@@ -13,22 +13,24 @@
     </el-button>
     </el-upload>
   </template>
-  <script lang="ts" setup>
+  <script  setup>
   import { Delete, Edit, Search, Share, Upload } from '@element-plus/icons-vue'
+  import { useCounterStore } from '../../../store'
+  const store = useCounterStore()
   import { ref } from 'vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import api  from "../../../api/index.js"
-  import type { UploadProps, UploadUserFile } from 'element-plus'
+
   
-  const fileList = ref<UploadUserFile[]>([
-  ])
-  const beforeUpload=(file)=>{
-    console.log(file);
-   api.sendFile(file)
+
+  const beforeUpload=(files)=>{
+    console.log(files);
+    store.file.name=files.name;
+   api.sendFile(files)
   return false
   }
 
-  const handleExceed: UploadProps['onExceed'] = (files, uploadFiles) => {
+  const handleExceed = (files, uploadFiles) => {
     ElMessage.warning(
       `The limit is 3, you selected ${files.length} files this time, add up to ${
         files.length + uploadFiles.length
@@ -36,7 +38,7 @@
     )
   }
   
-  const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
+  const beforeRemove = (uploadFile, uploadFiles) => {
     return ElMessageBox.confirm(
       `Cancel the transfer of ${uploadFile.name} ?`
     ).then(

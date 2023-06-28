@@ -11,6 +11,9 @@ import Login from "../components/login.vue";
 import Dashboard from "../components/dashborad/index.vue";
 // 子路由
 import InputData from "../components/dashborad/inputData/index.vue";
+import BaselineSummary from "../components/dashborad/baselineSummary/index.vue";
+import OptimizedReport from "../components/dashborad/optimizedReport/index.vue";
+import optimizedSummary from "../components/dashborad/optimizedSummary/index.vue";
 //2. 路由配置
 const routes = [
   //redirect 重定向也是通过 routes 配置来完成，下面就是从 / 重定向到 /index
@@ -23,7 +26,30 @@ const routes = [
     path: "/dashboard",
     component: Dashboard,
     name: "dashboard",
-    children: [{ path: "InputData", component: InputData, name: "InputData", }],
+    redirect: "/inputData",
+    children: [
+      {
+        path: "/inputData",
+        component: InputData,
+        name: "InputData",
+        
+      },
+      {
+        path: "/baselineSummary",
+        component: BaselineSummary,
+        name: "BaselineSummary",
+      },
+      {
+        path: "/optimizedReport",
+        component: OptimizedReport,
+        name: "OptimizedReport",
+      },
+      {
+        path: "/optimizedSummary",
+        component: optimizedSummary,
+        name: "optimizedSummary",
+      },
+    ],
   },
 ];
 Amplify.configure(awsconfig);
@@ -38,21 +64,23 @@ const router = createRouter({
 
 // 创建 beforeEach 导航守卫
 router.beforeEach(async (to, from, next) => {
-//   if (to.fullPath == "/Login") {
-//     next();
-//     return;
-//   }
+    if (to.name == "InputData") {
+      try {
+        const userInfo = await Auth.currentAuthenticatedUser();
+        next()
+      } catch (error) {
+        next({ name: "login" });
+      }
+    }
+    else if(to.name == "login"){
+      next();
+    }else{
+      console.log('404');
+    next()
+    }
 
-//   const userInfo = await Auth.currentUserInfo();
-//   if (to.name == "dashboard") {
-//     if (!userInfo) {
-//       next({ name: "login" });
-//     } else {
-//       next();
-//     }
-//   }
-next();
-  // const userInfo = await Auth.currentAuthenticatedUser();
+  next();
+
   // console.log(userInfo);
   // 获取当前认证状态的用户信息
 });

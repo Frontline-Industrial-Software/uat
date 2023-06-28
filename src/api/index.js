@@ -1,11 +1,14 @@
 import axios from "axios";
-// !inputDATA 
-const baseUrl="https://app.frontline-optimizer.com/"
-
-export default function sendFile(){
-    axios.post(`${baseUrl}`, {
-        firstName: 'Fred',
-        lastName: 'Flintstone'
+// !inputDATA
+const instance = axios.create({
+  baseURL: "api",
+  timeout: 10000,
+});
+export default {
+  sendFile(file) {
+    instance
+      .post(`upload`, {
+        file,
       })
       .then(function (response) {
         console.log(response);
@@ -13,4 +16,16 @@ export default function sendFile(){
       .catch(function (error) {
         console.log(error);
       });
-}
+  },
+  constraintsfileDownload(constraintsFilename) {
+    instance
+      .get(`fileDownload/constraints/${constraintsFilename}`, {})
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  },
+  
+};

@@ -52,6 +52,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
 .main {
   width: 1200px;
   display: flex;

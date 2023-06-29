@@ -120,7 +120,7 @@
           <v-col>
             <v-sheet class="pa-2 ma-2">
              <div style="display: flex; justify-content: end;">
-              <v-btn @click="api.sendFile" color="rgb(64, 170, 151)" style="color:white">Next</v-btn>
+              <v-btn @click="store.connectWebsocket" color="rgb(64, 170, 151)" style="color:white">Next</v-btn>
              </div>
             </v-sheet>
           </v-col>

@@ -43,6 +43,10 @@ let status=['actived','completed','waiting']
 
 <style lang="scss" scoped>
 
+:deep(.el-step__head.is-success) {
+  color: rgb(64, 167, 149);
+  border-color: rgb(64, 167, 149);
+}
 .main {
   display: flex;
   justify-content: center;

@@ -14,6 +14,8 @@ import InputData from "../components/dashborad/inputData/index.vue";
 import BaselineSummary from "../components/dashborad/baselineSummary/index.vue";
 import OptimizedReport from "../components/dashborad/optimizedReport/index.vue";
 import optimizedSummary from "../components/dashborad/optimizedSummary/index.vue";
+
+import NotFound from '@/components/404/404.vue'
 //2. 路由配置
 const routes = [
   //redirect 重定向也是通过 routes 配置来完成，下面就是从 / 重定向到 /index
@@ -22,6 +24,11 @@ const routes = [
     redirect: "/dashboard",
   },
   { path: "/Login", component: Login, name: "login" },
+  { path: "/NotFound", component: NotFound, name: "NotFound" },
+  {
+    path: "/:catchAll(.*)",
+    redirect: '/NotFound',
+  },
   {
     path: "/dashboard",
     component: Dashboard,
@@ -75,7 +82,6 @@ router.beforeEach(async (to, from, next) => {
     else if(to.name == "login"){
       next();
     }else{
-      console.log('404');
     next()
     }
 

@@ -1,6 +1,5 @@
 <template>
     <el-upload
-      v-model:file-list="fileList"
       class="upload-demo"
       action=""
       multiple

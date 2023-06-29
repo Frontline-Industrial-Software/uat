@@ -13,23 +13,29 @@
         <v-menu>
           <template v-slot:activator="{ props }">
             <v-btn color="rgb(240, 241, 243)" v-bind="props">
-              <v-icon
-              size="large"
-              icon="mdi-format-list-bulleted"
-            ></v-icon>
+              <v-icon size="large" icon="mdi-format-list-bulleted"></v-icon>
             </v-btn>
           </template>
           <v-list>
             <v-list-item>
               <div>
-                <v-btn variant="plain" style="display: block">Log Out</v-btn>
-                <v-btn variant="plain">Back V1.0</v-btn>
+                <div>
+                  <v-btn>
+                    <v-icon start icon="mdi-laptop"></v-icon>
+                    Back to v1.0.0
+                  </v-btn>
+                </div>
+                <div>
+                  <v-btn>
+                    <v-icon start icon="mdi-arrow-left"></v-icon>
+                    Log out    
+                  </v-btn>
+                </div>
               </div>
             </v-list-item>
           </v-list>
         </v-menu>
-        <div>
-        </div>
+        <div></div>
       </div>
     </div>
   </div>
@@ -52,7 +58,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .main {
   width: 1200px;
   display: flex;

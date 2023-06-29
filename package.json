@@ -20,6 +20,8 @@
     "element-plus": "^2.3.7",
     "pinia": "^2.1.4",
     "sass": "^1.63.6",
+    "socket.io": "^4.7.1",
+    "socket.io-client": "^4.7.1",
     "unplugin-icons": "^0.16.3",
     "vite-plugin-vuetify": "^1.0.2",
     "vue": "^3.2.47",

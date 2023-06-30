@@ -120,7 +120,7 @@
           <v-col>
             <v-sheet class="pa-2 ma-2">
              <div style="display: flex; justify-content: end;">
-              <v-btn @click="store.connectWebsocket" color="rgb(64, 170, 151)" style="color:white">Next</v-btn>
+              <v-btn @click="Port" color="rgb(64, 170, 151)" style="color:white">Next</v-btn>
              </div>
             </v-sheet>
           </v-col>
@@ -137,6 +137,12 @@ import { reactive ,ref} from "vue";
 import Upload from './upload.vue'
 import api from "../../../api/index.js"
 const store = useCounterStore()
+async function Port(){
+let port =await api.getPort()
+console.log(port.data.port.port);
+// store.connectWebsocket()
+}
+
 </script>
 
 <style lang="scss" scoped>

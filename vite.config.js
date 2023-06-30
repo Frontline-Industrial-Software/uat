@@ -16,18 +16,18 @@ export default defineConfig({
     }),
     // Enabled by default
   ],
-  serve:{
-    server: {
-      proxy: {
-        '/api': {
-          target: 'http://127.0.0.1:8080', //目标url
-          changeOrigin: true, //支持跨域
-          rewrite: (path) => path.replace(/^\/api/, ""), 
-            //重写路径,替换/api
-        }
-      }
-    }
-  },
+  // serve:{
+  //   server: {
+  //     proxy: {
+  //       '/api': {
+  //         target: 'http://70f626fa.r5.cpolar.top', //目标url
+  //         changeOrigin: true, //支持跨域
+  //         rewrite: (path) => path.replace(/^\/api/, ""), 
+  //           //重写路径,替换/api
+  //       }
+  //     }
+  //   }
+  // },
   resolve: {
     alias: {
       '@': path.resolve('./src') // @代替src

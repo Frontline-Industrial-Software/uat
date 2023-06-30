@@ -22,10 +22,12 @@
 
   
 
-  const beforeUpload=(files)=>{
+  const beforeUpload= async (files)=>{
     console.log(files);
     store.file.name=files.name;
-   api.sendFile(files)
+  let a=  api.sendFile(files)
+    
+   console.log(a);
   return false
   }
 

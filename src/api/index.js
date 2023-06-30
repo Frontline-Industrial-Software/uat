@@ -1,28 +1,31 @@
 import axios from "axios";
 // !inputDATA
 const instance = axios.create({
-  baseURL: "api",
+  baseURL: "http://70f626fa.r5.cpolar.top",
   timeout: 10000,
 });
 export default {
   // !inputDATA
   /**
-   * 
+   * @function 上传初始工程文件
    * @param {*} file 文件内容
    */
-  sendFile(file) {
-    instance
-      .post(`upload`, {
-       param:{
-        file,
-      }
-      })
-      .then(function (response) {
-        console.log(response);
-      })
-      .catch(function (error) {
-        console.log(error);
+  async sendFile(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await instance.post("upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
+
+      return response;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   },
   /**
    * @function 获取约束模板
@@ -41,64 +44,48 @@ export default {
   },
   /**
    * @function 发送约束模板
-   * @param {*} file  
+   * @param {*} file
    */
-  sendConstraintsFile(constraintsFile) {
-    instance
-      .post(`upload`, {
-        constraintsFile,
-      })
-      .then(function (response) {
-        console.log(response);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+  async sendConstraintsFile(constraintsFile) {
+    const res = await instance.post(`upload`, {
+      constraintsFile,
+    });
+    return res;
   },
   /**
    * @function 请求计算端口
    * @param null
    * @return object
    */
-  getPort(){
-    instance
-    .get(`optimizePort`)
-    .then(function (response) {
-      console.log(response);
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
+  async getPort() {
+    const res = await instance.get(`optimizePort`);
+    return res;
   },
   /**
    * @function 获取总结
    * @param {string} preset 优化选项 4选1
    * @param {string} filename 请求端口后返回的文件名
-   * @param {string} steps 优化步数 
+   * @param {string} steps 优化步数
    */
-  getOptimized(preset,filename,steps){
-    instance.get('results',{params: {
-      preset,filename,steps
-    }})
-    .then(function (response) {
-      console.log(response);
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-
+  async getOptimized(preset, filename, steps) {
+    console.log("启动");
+    const res= await instance
+      .get("results", {
+        params: {
+          preset: "Balanced",
+          filename: "22ff83d36cc33de3e337eba08.xer",
+          steps: 20,
+        },
+      })
+      return res;
   },
   /**
    * @function 获得报告结果
    * @param  filename 请求端口后返回的文件名
    */
-  getReport(){
-    instance.get('fileDownload/reports/')
-    .then(function (response) {
-      console.log(response);
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-  }
+  getReport() {
+  const res=  instance
+      .get("fileDownload/reports/")
+    return res
+  },
 };

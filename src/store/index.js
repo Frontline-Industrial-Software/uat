@@ -35,30 +35,24 @@ export const useCounterStore = defineStore(
       data: null,
       name: null,
     };
+    let truefile=ref(null)
     let baseData=ref([])
     const count = ref(0);
 
    async function  connectWebsocket() {
-      const URL =
-        process.env.NODE_ENV === "production"
-          ? undefined
-          : "http://localhost:8080";
+      const URL ="ws://70f626fa.r5.cpolar.top/websockets";
       const socket = io(URL);
       // !连接
       socket.on("connect", () => {
         console.log("连接成功");
-        socket.emit("update item", file, (response) => {
-          baseData.value.push(file)
-          console.log(baseData.value);
-          console.log(response); // ok
-        });
       });
     }
     return {
       count,
       setting,
       file,
-      connectWebsocket
+      connectWebsocket,
+      truefile
     };
   },
   {}

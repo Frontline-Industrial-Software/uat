@@ -13,7 +13,9 @@
         <v-menu>
           <template v-slot:activator="{ props }">
             <v-btn color="rgb(240, 241, 243)" v-bind="props">
-              <v-icon size="large" icon="mdi-format-list-bulleted"></v-icon>
+              <v-icon size="large" icon="mdi-format-list-bulleted">
+                
+              </v-icon>
             </v-btn>
           </template>
           <v-list>
@@ -21,12 +23,15 @@
               <div>
                 <div>
                   <v-btn>
-                    <v-icon start icon="mdi-laptop"></v-icon>
-                    Back to v1.0.0
+                    <v-icon start icon="mdi-laptop">
+                    </v-icon>
+
+                    <a style="text-decoration:none;color:black" href="https://app.frontline-optimizer.com/v1.0.0/" target="_blank"> Back to v1.0.0</a>
+                   
                   </v-btn>
                 </div>
                 <div>
-                  <v-btn>
+                  <v-btn @click="logout">
                     <v-icon start icon="mdi-arrow-left"></v-icon>
                     Log out    
                   </v-btn>
@@ -41,20 +46,13 @@
   </div>
 </template>
 
-<script>
-import SvgIcon from "@jamescoyle/vue-icon";
-import { mdiFormatListBulleted } from "@mdi/js";
-export default {
-  name: "my-component",
-  components: {
-    SvgIcon,
-  },
-  data() {
-    return {
-      path: mdiFormatListBulleted,
-    };
-  },
-};
+<script setup>
+import { useRouter } from "vue-router";
+const router = useRouter();
+function logout() { 
+localStorage.clear();
+router.push(`/login`);
+}
 </script>
 
 <style lang="scss" scoped>

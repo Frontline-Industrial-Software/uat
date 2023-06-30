@@ -1,12 +1,46 @@
-*{
-margin: 0;
-padding: 0;
+* {
+    margin: 0;
+    padding: 0;
 }
+
 body,
 html {
-  margin: 0;
-  padding: 0;
-  font-family: "Inter", sans-serif !important;
-  color: #545454;
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", sans-serif !important;
+    color: #545454;
+}
 
+.legend {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    font-size: 11px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    -webkit-box-pack: start;
+    width: 100%;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+}
+
+.item {
+    display: flex;
+    -webkit-box-pack: start;
+    justify-content: flex-start;
+    -webkit-box-align: center;
+    align-items: center;
+    margin-right: 23px;
+}
+
+.circle {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #ececec;
+    margin-right: 5px;
+}
+
+.circle.critical {
+    background-color: #d53e4f;
 }

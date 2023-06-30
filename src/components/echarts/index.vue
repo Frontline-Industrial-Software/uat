@@ -19,9 +19,7 @@
   onMounted(() => {
     initChart();
   });
-  onUnmounted(() => {
-    myEcharts.dispose;
-  });
+
   function initChart() {
     let chart = myEcharts.init(
       document.getElementById("myEcharts"),

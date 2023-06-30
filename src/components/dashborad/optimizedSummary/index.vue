@@ -6,9 +6,7 @@ import ecStat from "echarts-stat";
 onMounted(() => {
   initChart();
 });
-onUnmounted(() => {
-  myEcharts.dispose;
-});
+
 let myEcharts = echarts;
 
 function initChart() {

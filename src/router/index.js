@@ -15,44 +15,43 @@ import BaselineSummary from "../components/dashborad/baselineSummary/index.vue";
 import OptimizedReport from "../components/dashborad/optimizedReport/index.vue";
 import optimizedSummary from "../components/dashborad/optimizedSummary/index.vue";
 
-import NotFound from '@/components/404/404.vue'
+import NotFound from "@/components/404/404.vue";
 //2. 路由配置
 const routes = [
   //redirect 重定向也是通过 routes 配置来完成，下面就是从 / 重定向到 /index
   {
     path: "/",
-    redirect: "/dashboard",
+    redirect: "/dashboard/inputdata",
   },
   { path: "/Login", component: Login, name: "login" },
   { path: "/NotFound", component: NotFound, name: "NotFound" },
   {
     path: "/:catchAll(.*)",
-    redirect: '/NotFound',
+    redirect: "/NotFound",
   },
   {
     path: "/dashboard",
     component: Dashboard,
     name: "dashboard",
-    redirect: "/inputData",
+    redirect: "inputData",
     children: [
       {
-        path: "/inputData",
+        path: "inputData",
         component: InputData,
         name: "InputData",
-        
       },
       {
-        path: "/baselineSummary",
+        path: "baselineSummary",
         component: BaselineSummary,
         name: "BaselineSummary",
       },
       {
-        path: "/optimizedReport",
+        path: "optimizedReport",
         component: OptimizedReport,
         name: "OptimizedReport",
       },
       {
-        path: "/optimizedSummary",
+        path: "optimizedSummary",
         component: optimizedSummary,
         name: "optimizedSummary",
       },
@@ -69,27 +68,27 @@ const router = createRouter({
   routes, //使用上方定义的路由配置
 });
 
-// 创建 beforeEach 导航守卫
-router.beforeEach(async (to, from, next) => {
-  // console.log(to);
-    if (to.name == "InputData") {
-      try {
-        const userInfo = await Auth.currentAuthenticatedUser();
-        next()
-      } catch (error) {
-        next({ name: "login" });
-      }
-    }
-    else if(to.name == "login"){
-      next();
-    }else{
-    next()
-    }
+// // 创建 beforeEach 导航守卫
+// router.beforeEach(async (to, from, next) => {
+//   // console.log(to);
+//   // if (to.fullPath.includes("dashboard")) {
+//   //   try {
+//   //     const userInfo = await Auth.currentAuthenticatedUser();
+//   //     next();
+//   //   } catch (error) {
+//   //     next({ name: "login" });
+//   //   }
+//   // } else if (to.name == "login") {
+//   //   console.log("1");
+//   //   next();
+//   // } else {
+//   //   next();
+//   // }
 
-  // next();
+//   next();
 
-  // console.log(userInfo);
-  // 获取当前认证状态的用户信息
-});
+//   // console.log(userInfo);
+//   // 获取当前认证状态的用户信息
+// });
 // 4. 导出router
 export default router;

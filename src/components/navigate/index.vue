@@ -14,7 +14,7 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ref } from 'vue'
-const text=['inputData','baselineSummary','optimizedSummary','optimizedReport']
+const text=['dashboard/inputData','dashboard/baselineSummary','dashboard/optimizedSummary','dashboard/optimizedReport']
 const active = ref(0)
 const router = useRouter();
 function navigate(pathname,number) {

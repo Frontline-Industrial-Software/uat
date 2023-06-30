@@ -11,7 +11,11 @@ const router=useRouter();
 Amplify.configure(awsconfig);
 
 watch(auth,(newdata)=>{
-  router.push("/dashboard")
+  console.log(auth.value.authStatus);
+  if (auth.value.authStatus==='authenticated') {
+    router.push("/dashboard/inputdata")
+  }
+
 },{ deep: true })
 </script>
 

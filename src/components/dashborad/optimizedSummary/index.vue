@@ -11,139 +11,220 @@ onUnmounted(() => {
 });
 var option
 let myEcharts=echarts
+
 function initChart() {
-  let chart = myEcharts.init(
+  //表格1
+let chart = myEcharts.init(
     document.getElementById("myEcharts"),
     "purple-passion"
   );
-  echarts.registerTransform(ecStat.transform.clustering);
-  const data = [
-  [3.275154, 2.957587],
-  [-3.344465, 2.603513],
-  [0.355083, -3.376585],
-  [1.852435, 3.547351],
-  [-2.078973, 2.552013],
-  [-0.993756, -0.884433],
-  [2.682252, 4.007573],
-  [-3.087776, 2.878713],
-  [-1.565978, -1.256985],
-  [2.441611, 0.444826],
-  [-0.659487, 3.111284],
-  [-0.459601, -2.618005],
-  [2.17768, 2.387793],
-  [-2.920969, 2.917485],
-  [-0.028814, -4.168078],
-  [3.625746, 2.119041],
-  [-3.912363, 1.325108],
-  [-0.551694, -2.814223],
-  [2.855808, 3.483301],
-  [-3.594448, 2.856651],
-  [0.421993, -2.372646],
-  [1.650821, 3.407572],
-  [-2.082902, 3.384412],
-  [-0.718809, -2.492514],
-  [4.513623, 3.841029],
-  [-4.822011, 4.607049],
-  [-0.656297, -1.449872],
-  [1.919901, 4.439368],
-  [-3.287749, 3.918836],
-  [-1.576936, -2.977622],
-  [3.598143, 1.97597],
-  [-3.977329, 4.900932],
-  [-1.79108, -2.184517],
-  [3.914654, 3.559303],
-  [-1.910108, 4.166946],
-  [-1.226597, -3.317889],
-  [1.148946, 3.345138],
-  [-2.113864, 3.548172],
-  [0.845762, -3.589788],
-  [2.629062, 3.535831],
-  [-1.640717, 2.990517],
-  [-1.881012, -2.485405],
-  [4.606999, 3.510312],
-  [-4.366462, 4.023316],
-  [0.765015, -3.00127],
-  [3.121904, 2.173988],
-  [-4.025139, 4.65231],
-  [-0.559558, -3.840539],
-  [4.376754, 4.863579],
-  [-1.874308, 4.032237],
-  [-0.089337, -3.026809],
-  [3.997787, 2.518662],
-  [-3.082978, 2.884822],
-  [0.845235, -3.454465],
-  [1.327224, 3.358778],
-  [-2.889949, 3.596178],
-  [-0.966018, -2.839827],
-  [2.960769, 3.079555],
-  [-3.275518, 1.577068],
-  [0.639276, -3.41284]
-];
-var CLUSTER_COUNT = 6;
-var DIENSIION_CLUSTER_INDEX = 2;
-var COLOR_ALL = [
-  '#37A2DA',
-  '#e06343',
-  '#37a354',
-  '#b55dba',
-  '#b5bd48',
-  '#8378EA',
-  '#96BFFF'
-];
-var pieces = [];
-for (var i = 0; i < CLUSTER_COUNT; i++) {
-  pieces.push({
-    value: i,
-    label: 'cluster ' + i,
-    color: COLOR_ALL[i]
-  });
+  var option;
+//表格1
+let data01 = [
+  {
+      name: "per1",
+      value: [7,6,5,4],
+      itemStyle: {
+        color: "blue",
+      },
+    },
+    {
+      name: "per2",
+      value: [100,200,300,400],
+      itemStyle: {
+        color: "blue",
+      },
+    },
+    {
+      name: "per3",
+      value: [77,88,99,111],
+      itemStyle: {
+        color: "blue",
+      },
+    },
+  ];
+  let data02 = [
+    {
+      name: "per1",
+      value: [1, 2, 3, 4],
+      itemStyle: {
+        color: "red",
+      },
+    },
+    {
+      name: "per2",
+      value: [2, 3, 20, 30],
+      itemStyle: {
+        color: "red",
+      },
+    },
+    {
+      name: "per3",
+      value: [10, 22, 38, 400],
+      itemStyle: {
+        color: "red",
+      },
+    },
+  ];
+  let renderItem = (params, api) => {
+    let start = api.coord([api.value(1), api.value(0)]);
+    let end = api.coord([api.value(2), api.value(0)]);
+    let height = api.size([0, 1])[1] * 0.5;
+    let shape = echarts.graphic.clipRectByRect(
+      {
+        x: start[0],
+        y: start[1] - height / 2,
+        width: end[0] - start[0],
+        height: height,
+      },
+      params.coordSys
+    );
+
+    return (
+      shape && {
+        type: "rect",
+        shape,
+        style: api.style(),
+      }
+    );
+  };
+  option = {
+    dataZoom: [
+      {
+        type: "slider",
+        filterMode: "weakFilter",
+        xAxisIndex: [0],
+      },
+      {
+        type: "slider",
+        filterMode: "weakFilter",
+        yAxisIndex: [0],
+      },
+      {
+        type: "inside",
+        filterMode: "weakFilter",
+        xAxisIndex: [0],
+      },
+      {
+        type: "inside",
+        filterMode: "weakFilter",
+        yAxisIndex: [0],
+      },
+    ],
+    legend: {
+      data: ["baseline", "new"],
+    },
+    xAxis: {
+      name: "date",
+    //   type: "time",
+    },
+    yAxis: {
+      name: "tasks",
+    },
+    series: [
+      {
+        name: "baseline",
+        type: "custom",
+        data: data01,
+        large: true,
+        renderItem: renderItem,
+        encode: {
+          x: [1, 2],
+          y: 0,
+        },
+      },
+      {
+        name: "new",
+        type: "custom",
+        data: data02,
+        large: true,
+        renderItem: renderItem,
+        encode: {
+          x: [1, 2],
+          y: 0,
+        },
+      },
+    ],
+    tooltip: {
+      formatter: (p) => p.name,
+    },
+  };
+  option && chart.setOption(option);
+
+//   //表格2
+  let chart01 = myEcharts.init(
+    document.getElementById("myEcharts01"),
+    "purple-passion"
+  );
+ 
+var xAxisData = [];
+var data1 = [];
+var data2 = [];
+for (var i = 0; i < 100; i++) {
+  xAxisData.push('A' + i);
+  data1.push((Math.sin(i / 5) * (i / 5 - 10) + i / 6) * 5);
+  data2.push((Math.cos(i / 5) * (i / 5 - 10) + i / 6) * 5);
 }
 option = {
-  dataset: [
-    {
-      source: data
-    },
-    {
-      transform: {
-        type: 'ecStat:clustering',
-        // print: true,
-        config: {
-          clusterCount: CLUSTER_COUNT,
-          outputType: 'single',
-          outputClusterIndexDimension: DIENSIION_CLUSTER_INDEX
-        }
+  // title: {
+  //   text: 'Bar Animation Delay'
+  // },
+  legend: {
+    data: ['bar', 'bar2']
+  },
+  //控制一下下载功能
+  toolbox: {
+    // y: 'bottom',
+    feature: {
+      magicType: {
+        type: ['stack']
+      },
+      dataView: {},
+      saveAsImage: {
+        pixelRatio: 2
       }
     }
-  ],
-  tooltip: {
-    position: 'top'
   },
-  visualMap: {
-    type: 'piecewise',
-    top: 'middle',
-    min: 0,
-    max: CLUSTER_COUNT,
-    left: 10,
-    splitNumber: CLUSTER_COUNT,
-    dimension: DIENSIION_CLUSTER_INDEX,
-    pieces: pieces
+  tooltip: {},
+  xAxis: {
+    data: xAxisData,
+    splitLine: {
+      show: false
+    }
   },
-  grid: {
-    left: 120
-  },
-  xAxis: {},
   yAxis: {},
-  series: {
-    type: 'scatter',
-    encode: { tooltip: [0, 1] },
-    symbolSize: 15,
-    itemStyle: {
-      borderColor: '#555'
+  series: [
+    {
+      name: 'bar',
+      type: 'bar',
+      data: data1,
+      emphasis: {
+        focus: 'series'
+      },
+      //动画秒数
+      // animationDelay: function (idx) {
+      //   return idx * 10;
+      // }
     },
-    datasetIndex: 1
+    {
+      name: 'bar2',
+      type: 'bar',
+      data: data2,
+      emphasis: {
+        focus: 'series'
+      },
+      //动画秒数
+      // animationDelay: function (idx) {
+      //   return idx * 10 + 100;
+      // }
+    }
+  ],
+  animationEasing: 'elasticOut',
+  animationDelayUpdate: function (idx) {
+    return idx * 5;
   }
 };
-option && chart.setOption(option);
+option && chart01.setOption(option);
 }
 const value = ref('Type to search...')
 const options = [
@@ -226,7 +307,7 @@ const options = [
           <el-checkbox v-model="checked1" label="Show Optimized" size="large" />
           <el-checkbox v-model="checked2" label="Show Baseline" size="large" />
         </div>
-        <div ref="main1" style="width:1150px; height:610px"></div>
+        <div ref="main01" style="width:1150px; height:610px"   id="myEcharts01"></div>
         <h4>Labor Legend</h4>
         <div class="Echar2choose">
           <div class="item1">
@@ -277,6 +358,7 @@ const options = [
     background-color: #40aa97;
   }
 .contain {
+  background-color: #d4d7d7;
   height: 100%;
 }
 .box {
@@ -490,4 +572,4 @@ line-height: 36px;
     font-size: 1rem;
   }
 }
-</style>s
+</style>

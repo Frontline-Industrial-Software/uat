@@ -1,43 +1,42 @@
 <script setup>
-import { ref, onMounted,onUnmounted} from "vue";
-import * as echarts from 'echarts';
+import { ref, onMounted, onUnmounted } from "vue";
+import * as echarts from "echarts";
 
-import ecStat from 'echarts-stat';
+import ecStat from "echarts-stat";
 onMounted(() => {
   initChart();
 });
 onUnmounted(() => {
   myEcharts.dispose;
 });
-var option
-let myEcharts=echarts
+let myEcharts = echarts;
 
 function initChart() {
   //表格1
-let chart = myEcharts.init(
+  let chart = myEcharts.init(
     document.getElementById("myEcharts"),
     "purple-passion"
   );
   var option;
-//表格1
-let data01 = [
-  {
+  //表格1
+  let data01 = [
+    {
       name: "per1",
-      value: [7,6,5,4],
+      value: [7, 6, 5, 4],
       itemStyle: {
         color: "blue",
       },
     },
     {
       name: "per2",
-      value: [100,200,300,400],
+      value: [100, 200, 300, 400],
       itemStyle: {
         color: "blue",
       },
     },
     {
       name: "per3",
-      value: [77,88,99,111],
+      value: [77, 88, 99, 111],
       itemStyle: {
         color: "blue",
       },
@@ -116,7 +115,7 @@ let data01 = [
     },
     xAxis: {
       name: "date",
-    //   type: "time",
+      //   type: "time",
     },
     yAxis: {
       name: "tasks",
@@ -151,104 +150,104 @@ let data01 = [
   };
   option && chart.setOption(option);
 
-//   //表格2
+  //   //表格2
   let chart01 = myEcharts.init(
     document.getElementById("myEcharts01"),
     "purple-passion"
   );
- 
-var xAxisData = [];
-var data1 = [];
-var data2 = [];
-for (var i = 0; i < 100; i++) {
-  xAxisData.push('A' + i);
-  data1.push((Math.sin(i / 5) * (i / 5 - 10) + i / 6) * 5);
-  data2.push((Math.cos(i / 5) * (i / 5 - 10) + i / 6) * 5);
-}
-option = {
-  // title: {
-  //   text: 'Bar Animation Delay'
-  // },
-  legend: {
-    data: ['bar', 'bar2']
-  },
-  //控制一下下载功能
-  toolbox: {
-    // y: 'bottom',
-    feature: {
-      magicType: {
-        type: ['stack']
-      },
-      dataView: {},
-      saveAsImage: {
-        pixelRatio: 2
-      }
-    }
-  },
-  tooltip: {},
-  xAxis: {
-    data: xAxisData,
-    splitLine: {
-      show: false
-    }
-  },
-  yAxis: {},
-  series: [
-    {
-      name: 'bar',
-      type: 'bar',
-      data: data1,
-      emphasis: {
-        focus: 'series'
-      },
-      //动画秒数
-      // animationDelay: function (idx) {
-      //   return idx * 10;
-      // }
-    },
-    {
-      name: 'bar2',
-      type: 'bar',
-      data: data2,
-      emphasis: {
-        focus: 'series'
-      },
-      //动画秒数
-      // animationDelay: function (idx) {
-      //   return idx * 10 + 100;
-      // }
-    }
-  ],
-  animationEasing: 'elasticOut',
-  animationDelayUpdate: function (idx) {
-    return idx * 5;
+
+  var xAxisData = [];
+  var data1 = [];
+  var data2 = [];
+  for (var i = 0; i < 100; i++) {
+    xAxisData.push("A" + i);
+    data1.push((Math.sin(i / 5) * (i / 5 - 10) + i / 6) * 5);
+    data2.push((Math.cos(i / 5) * (i / 5 - 10) + i / 6) * 5);
   }
-};
-option && chart01.setOption(option);
+  option = {
+    // title: {
+    //   text: 'Bar Animation Delay'
+    // },
+    legend: {
+      data: ["bar", "bar2"],
+    },
+    //控制一下下载功能
+    toolbox: {
+      // y: 'bottom',
+      feature: {
+        magicType: {
+          type: ["stack"],
+        },
+        dataView: {},
+        saveAsImage: {
+          pixelRatio: 2,
+        },
+      },
+    },
+    tooltip: {},
+    xAxis: {
+      data: xAxisData,
+      splitLine: {
+        show: false,
+      },
+    },
+    yAxis: {},
+    series: [
+      {
+        name: "bar",
+        type: "bar",
+        data: data1,
+        emphasis: {
+          focus: "series",
+        },
+        //动画秒数
+        // animationDelay: function (idx) {
+        //   return idx * 10;
+        // }
+      },
+      {
+        name: "bar2",
+        type: "bar",
+        data: data2,
+        emphasis: {
+          focus: "series",
+        },
+        //动画秒数
+        // animationDelay: function (idx) {
+        //   return idx * 10 + 100;
+        // }
+      },
+    ],
+    animationEasing: "elasticOut",
+    animationDelayUpdate: function (idx) {
+      return idx * 5;
+    },
+  };
+  option && chart01.setOption(option);
 }
-const value = ref('Type to search...')
+const value = ref("Type to search...");
 const options = [
   {
-    value: 'Option1',
-    label: 'Option1',
+    value: "Option1",
+    label: "Option1",
   },
   {
-    value: 'Option2',
-    label: 'Option2',
+    value: "Option2",
+    label: "Option2",
   },
   {
-    value: 'Option3',
-    label: 'Option3',
+    value: "Option3",
+    label: "Option3",
   },
   {
-    value: 'Option4',
-    label: 'Option4',
+    value: "Option4",
+    label: "Option4",
   },
   {
-    value: 'Option5',
-    label: 'Option5',
+    value: "Option5",
+    label: "Option5",
   },
-]
+];
 </script>
 
 <template>
@@ -294,7 +293,11 @@ const options = [
           </div>
         </div>
         <div id="main"></div>
-        <div ref="main" style="width:1150px; height:610px"   id="myEcharts"></div>
+        <div
+          ref="main"
+          style="width: 1150px; height: 610px"
+          id="myEcharts"
+        ></div>
       </div>
 
       <div class="mainEchar2">
@@ -307,22 +310,38 @@ const options = [
           <el-checkbox v-model="checked1" label="Show Optimized" size="large" />
           <el-checkbox v-model="checked2" label="Show Baseline" size="large" />
         </div>
-        <div ref="main01" style="width:1150px; height:610px"   id="myEcharts01"></div>
+        <div
+          ref="main01"
+          style="width: 1150px; height: 610px"
+          id="myEcharts01"
+        ></div>
         <h4>Labor Legend</h4>
         <div class="Echar2choose">
           <div class="item1">
-            <el-checkbox class="check1" v-model="checked1" label="Show Optimized" size="large" />
+            <el-checkbox
+              class="check1"
+              v-model="checked1"
+              label="Show Optimized"
+              size="large"
+            />
           </div>
           <div class="item2"></div>
           <div class="item3">
-            <el-select class="item3sel" placement="top" v-model="value" filterable placeholder="Select">
-    <el-option class="ok"
-      v-for="item in options"
-      :key="item.value"
-      :label="item.label"
-      :value="item.value"
-    />
-  </el-select>
+            <el-select
+              class="item3sel"
+              placement="top"
+              v-model="value"
+              filterable
+              placeholder="Select"
+            >
+              <el-option
+                class="ok"
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
           </div>
         </div>
         <div class="Echar2foot">
@@ -353,12 +372,12 @@ const options = [
 </template>
 <style lang="scss" scoped>
 .b11111 {
-    width: 1150px;
-    height: 610px;
-    background-color: #40aa97;
-  }
+  width: 1150px;
+  height: 610px;
+  background-color: #40aa97;
+}
 .contain {
-  background-color: #d4d7d7;
+  background-color: rgb(240, 241, 243);
   height: 100%;
 }
 .box {
@@ -489,22 +508,22 @@ h2 {
     color: #b5b5b5;
     font-size: 16px;
   }
-  
+
   .Echar2choose {
     width: 1160px;
     height: 40px;
     display: flex;
     margin-top: 15px;
     height: 36px;
-   
+
     .item1 {
       width: 154px;
       margin-right: 7px;
       border-radius: 8px;
       border: 2px solid;
       padding: 0 10px 0 10px;
-      .check1{
-line-height: 36px;
+      .check1 {
+        line-height: 36px;
       }
     }
     .item2 {
@@ -513,33 +532,33 @@ line-height: 36px;
       border-radius: 8px;
       border: 2px solid #dadada;
     }
-    .item3{
+    .item3 {
       width: 300px;
       border-radius: 8px;
       border: 2px solid #dadada;
-      .item3sel{
+      .item3sel {
         width: 296px;
       }
     }
   }
-  .Echar2foot{
+  .Echar2foot {
     display: flex;
     flex-wrap: wrap;
     .choose {
       width: 162px;
       height: 20px;
-    display: flex;
-    margin-top: 20px;
-    margin-left: 10px;
-    font-size: 10px;
-    .item {
-      width: 16px;
-      height: 16px;
-      background: #cccccc;
-      border-radius: 50%;
-      margin-right: 5px;
+      display: flex;
+      margin-top: 20px;
+      margin-left: 10px;
+      font-size: 10px;
+      .item {
+        width: 16px;
+        height: 16px;
+        background: #cccccc;
+        border-radius: 50%;
+        margin-right: 5px;
+      }
     }
-  }
   }
 }
 .button {

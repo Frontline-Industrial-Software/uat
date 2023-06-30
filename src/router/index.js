@@ -71,6 +71,7 @@ const router = createRouter({
 
 // 创建 beforeEach 导航守卫
 router.beforeEach(async (to, from, next) => {
+  // console.log(to);
     if (to.name == "InputData") {
       try {
         const userInfo = await Auth.currentAuthenticatedUser();
@@ -85,7 +86,7 @@ router.beforeEach(async (to, from, next) => {
     next()
     }
 
-  next();
+  // next();
 
   // console.log(userInfo);
   // 获取当前认证状态的用户信息

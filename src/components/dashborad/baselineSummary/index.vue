@@ -26,9 +26,7 @@ onMounted(() => {
   initChart();
 });
 //页面关闭销毁
-onUnmounted(() => {
-  myEcharts.dispose();
-});
+
 //用来装图表数据以及一些配置项
 var option
 let myEcharts=echarts
@@ -277,7 +275,7 @@ const radio = ref(3);
 </template>
 <style lang="scss" scoped>
 .contain {
-  background-color: #d4d7d7;
+  background-color: rgb(240, 241, 243);
   height: 100vh;
 }
 h2 {

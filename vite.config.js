@@ -16,13 +16,16 @@ export default defineConfig({
     }),
     // Enabled by default
   ],
+
+
   // serve:{
   //   server: {
   //     proxy: {
-  //       '/api': {
-  //         target: 'http://70f626fa.r5.cpolar.top', //目标url
+  //       '/wsUrl': {
+  //         target: 'wss://18.138.11.201:', //目标url
   //         changeOrigin: true, //支持跨域
-  //         rewrite: (path) => path.replace(/^\/api/, ""), 
+  //         ws: true,
+  //         rewrite: (path)=> path.replace(/~\/wsUrl/,""), //拦截路径去除
   //           //重写路径,替换/api
   //       }
   //     }

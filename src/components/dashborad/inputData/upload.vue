@@ -1,51 +1,52 @@
 <template>
-    <el-upload
-      class="upload-demo"
-      action=""
-      multiple
-      :before-upload="beforeUpload"
-      :limit="3"
-      :on-exceed="handleExceed"
+  <el-upload
+    class="upload-demo"
+    action=""
+    multiple
+    :before-upload="beforeUpload"
+    :limit="3"
+    :on-exceed="handleExceed"
+  >
+    <el-button
+      :icon="Upload"
+      color="rgb(42, 123, 108)"
+      style="color: white"
+      type="primary"
     >
-    <el-button :icon="Upload" color="rgb(42, 123, 108)" style="color: white;" type="primary">
       Upload
     </el-button>
-    </el-upload>
-  </template>
-  <script  setup>
-  import { Delete, Edit, Search, Share, Upload } from '@element-plus/icons-vue'
-  import { useCounterStore } from '../../../store'
-  const store = useCounterStore()
-  import { ref } from 'vue'
-  import { ElMessage, ElMessageBox } from 'element-plus'
-  import api  from "../../../api/index.js"
+  </el-upload>
+</template>
+<script setup>
+import { Delete, Edit, Search, Share, Upload } from "@element-plus/icons-vue";
+import { useCounterStore } from "../../../store";
+const store = useCounterStore();
+import { ref } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import api from "../../../api/index.js";
 
-  
+const beforeUpload = async (files) => {
+  store.file.size = files.size;
+  let a = await api.sendFile(files);
+  store.file.name = a.data.mapping[files.name];
 
-  const beforeUpload= async (files)=>{
-    console.log(files);
-    store.file.name=files.name;
-  let a=  api.sendFile(files)
-    
-   console.log(a);
-  return false
-  }
+  return false;
+};
 
-  const handleExceed = (files, uploadFiles) => {
-    ElMessage.warning(
-      `The limit is 3, you selected ${files.length} files this time, add up to ${
-        files.length + uploadFiles.length
-      } totally`
-    )
-  }
-  
-  const beforeRemove = (uploadFile, uploadFiles) => {
-    return ElMessageBox.confirm(
-      `Cancel the transfer of ${uploadFile.name} ?`
-    ).then(
-      () => true,
-      () => false
-    )
-  }
-  </script>
-  
+const handleExceed = (files, uploadFiles) => {
+  ElMessage.warning(
+    `The limit is 3, you selected ${files.length} files this time, add up to ${
+      files.length + uploadFiles.length
+    } totally`
+  );
+};
+
+const beforeRemove = (uploadFile, uploadFiles) => {
+  return ElMessageBox.confirm(
+    `Cancel the transfer of ${uploadFile.name} ?`
+  ).then(
+    () => true,
+    () => false
+  );
+};
+</script>

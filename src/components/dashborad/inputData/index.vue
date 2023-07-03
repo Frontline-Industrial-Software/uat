@@ -129,6 +129,7 @@
       
     </v-container>
   </div>
+  
 </template>
 
 <script setup>
@@ -138,9 +139,9 @@ import Upload from './upload.vue'
 import api from "../../../api/index.js"
 const store = useCounterStore()
 async function Port(){
-let port =await api.getPort()
-console.log(port.data.port.port);
-// store.connectWebsocket()
+// let port =await api.getPort()
+// console.log(port.data.port.port);
+await store.connectWebsocket()
 }
 
 </script>

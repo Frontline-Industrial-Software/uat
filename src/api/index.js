@@ -1,7 +1,7 @@
 import axios from "axios";
 // !inputDATA
 const instance = axios.create({
-  baseURL: "http://70f626fa.r5.cpolar.top",
+  baseURL: "https://api.frontline-optimizer.com/",
   timeout: 10000,
 });
 export default {

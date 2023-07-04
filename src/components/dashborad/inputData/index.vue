@@ -25,7 +25,7 @@
           >No file chosen</span
         >
         <span v-else style="color: rgb(42, 123, 108); margin-left: 10px"
-          >{{store.file.name}}</span
+          >{{store.truefile}}</span
         >
        </div>
           </v-sheet>
@@ -38,7 +38,7 @@
         </v-col>
       </v-row>
       <v-divider></v-divider>
-      <div class="disabled">
+      <div :class="{disabled:!store.file.name}" >
         <v-row no-gutters>
           <v-col>
             <v-sheet class="pa-2 ma-2">
@@ -94,8 +94,8 @@
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              {{ `Optimization Ratio(${store.setting.Ratio[0]}% -${store.setting.Ratio[1]}%)`}}
-              <v-range-slider :max="200" :min="1" :step="1"  v-model="store.setting.Ratio" color="rgb(112, 191, 177)"></v-range-slider>
+              {{ `Optimization Ratio(${store.setting.Ratio[0]*100}% -${store.setting.Ratio[1]*100}%)`}}
+              <v-range-slider :max="2" :min="0.1" :step="0.1"  v-model="store.setting.Ratio" color="rgb(112, 191, 177)"></v-range-slider>
             </v-sheet>
           </v-col>
         </v-row>
@@ -120,7 +120,7 @@
           <v-col>
             <v-sheet class="pa-2 ma-2">
              <div style="display: flex; justify-content: end;">
-              <v-btn @click="Port" color="rgb(64, 170, 151)" style="color:white">Next</v-btn>
+              <v-btn :disabled="!store.file.name" @click="Port" color="rgb(64, 170, 151)" style="color:white">Next</v-btn>
              </div>
             </v-sheet>
           </v-col>
@@ -137,11 +137,15 @@ import { useCounterStore } from '../../../store'
 import { reactive ,ref} from "vue";
 import Upload from './upload.vue'
 import api from "../../../api/index.js"
+import { useRouter } from "vue-router";
+const router = useRouter();
 const store = useCounterStore()
 async function Port(){
 // let port =await api.getPort()
 // console.log(port.data.port.port);
 await store.connectWebsocket()
+router.push({name:'BaselineSummary'});
+store.active=1
 }
 
 </script>

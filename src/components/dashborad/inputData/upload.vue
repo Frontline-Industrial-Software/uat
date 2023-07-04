@@ -5,7 +5,6 @@
     multiple
     :before-upload="beforeUpload"
     :limit="3"
-    :on-exceed="handleExceed"
   >
     <el-button
       :icon="Upload"
@@ -26,6 +25,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import api from "../../../api/index.js";
 
 const beforeUpload = async (files) => {
+  store.truefile = files.name;
   store.file.size = files.size;
   let a = await api.sendFile(files);
   store.file.name = a.data.mapping[files.name];
@@ -33,20 +33,4 @@ const beforeUpload = async (files) => {
   return false;
 };
 
-const handleExceed = (files, uploadFiles) => {
-  ElMessage.warning(
-    `The limit is 3, you selected ${files.length} files this time, add up to ${
-      files.length + uploadFiles.length
-    } totally`
-  );
-};
-
-const beforeRemove = (uploadFile, uploadFiles) => {
-  return ElMessageBox.confirm(
-    `Cancel the transfer of ${uploadFile.name} ?`
-  ).then(
-    () => true,
-    () => false
-  );
-};
 </script>

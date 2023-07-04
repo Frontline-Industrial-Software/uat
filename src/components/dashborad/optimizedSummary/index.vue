@@ -1,8 +1,12 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import * as echarts from "echarts";
-
+import { useRouter } from "vue-router";
 import ecStat from "echarts-stat";
+import { useCounterStore } from "../../../store";
+const store = useCounterStore();
+const router = useRouter();
+import api from "../../../api/index.js";
 onMounted(() => {
   initChart();
 });
@@ -246,6 +250,27 @@ const options = [
     label: "Option5",
   },
 ];
+function downloadFile(url) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'file.xer';
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+async function nextReport() {
+  console.log(store.file.name.split(".")[0]);
+
+  let Url = `Balanced-${store.file.name.split(".")[0]}_FrontlineExport.xer`;
+  downloadFile(Url)
+  // window.location.href=`fileDownload/reports/Balanced-${
+  //     store.file.name.split(".")[0]
+  //   }_FrontlineExport.xer`
+  // let data = await api.getReport(name);
+  // console.log(data);
+  router.push({ name: "OptimizedReport" });
+}
 </script>
 
 <template>
@@ -363,7 +388,9 @@ const options = [
       </div>
       <div class="button">
         <el-button class="btnback">BACK</el-button>
-        <el-button class="btngo">VIEW DETALED REPORT</el-button>
+        <el-button @click="nextReport" class="btngo"
+          >VIEW DETALED REPORT</el-button
+        >
       </div>
     </div>
   </div>

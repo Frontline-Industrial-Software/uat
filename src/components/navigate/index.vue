@@ -1,7 +1,7 @@
 <template>
   <div class="main">
    <div class="steps">
-    <el-steps  :align-center="true" :active="active" finish-status="success">
+    <el-steps  :align-center="true" :active="store.active" finish-status="success">
       <el-step  @click="navigate(text[0],0)" title="Input Data" />
       <el-step @click="navigate(text[1],1)" title="Baseline Summary" />
       <el-step @click="navigate(text[2],2)" title="Optimized Summary" />
@@ -14,28 +14,15 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ref } from 'vue'
+import { useCounterStore } from '../../store'
+const store = useCounterStore()
 const text=['dashboard/inputData','dashboard/baselineSummary','dashboard/optimizedSummary','dashboard/optimizedReport']
-const active = ref(0)
+
 const router = useRouter();
 function navigate(pathname,number) {
   router.push(`/${pathname}`);
-  active.value = number
+  store.active = number
 }
-const next = () => {
-  if (active.value++ > 2) 
-  switch (active.value) {
-    case '1':
-    navigate(pathname)
-      break;
-      case '2':
-    navigate(pathname)
-      break;
-    default:
-      break;
-  }
-}
-
-let status=['actived','completed','waiting']
 
 </script>
 

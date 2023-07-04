@@ -2,7 +2,6 @@ import axios from "axios";
 // !inputDATA
 const instance = axios.create({
   baseURL: "https://api.frontline-optimizer.com/",
-  timeout: 10000,
 });
 export default {
   // !inputDATA
@@ -47,9 +46,17 @@ export default {
    * @param {*} file
    */
   async sendConstraintsFile(constraintsFile) {
-    const res = await instance.post(`upload`, {
-      constraintsFile,
-    });
+    const res = await instance.post(
+      `upload`,
+      {
+        constraintsFile,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
     return res;
   },
   /**
@@ -67,25 +74,21 @@ export default {
    * @param {string} filename 请求端口后返回的文件名
    * @param {string} steps 优化步数
    */
-  async getOptimized(preset, filename, steps) {
-    console.log("启动");
-    const res= await instance
-      .get("results", {
-        params: {
-          preset: "Balanced",
-          filename: "22ff83d36cc33de3e337eba08.xer",
-          steps: 20,
-        },
-      })
-      return res;
+  async getOptimized(data) {
+    console.log(data);
+    const res = await instance.get("results", {
+      params: {
+        ...data,
+      },
+    });
+    return res;
   },
   /**
    * @function 获得报告结果
    * @param  filename 请求端口后返回的文件名
    */
-  getReport() {
-  const res=  instance
-      .get("fileDownload/reports/")
-    return res
+  getReport(data) {
+    const res = instance.get(`fileDownload/reports/${data}`,);
+    return res;
   },
 };

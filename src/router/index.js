@@ -68,27 +68,25 @@ const router = createRouter({
   routes, //使用上方定义的路由配置
 });
 
-// // 创建 beforeEach 导航守卫
-// router.beforeEach(async (to, from, next) => {
-//   // console.log(to);
-//   // if (to.fullPath.includes("dashboard")) {
-//   //   try {
-//   //     const userInfo = await Auth.currentAuthenticatedUser();
-//   //     next();
-//   //   } catch (error) {
-//   //     next({ name: "login" });
-//   //   }
-//   // } else if (to.name == "login") {
-//   //   console.log("1");
-//   //   next();
-//   // } else {
-//   //   next();
-//   // }
+// 创建 beforeEach 导航守卫
+router.beforeEach(async (to, from, next) => {
+  console.log(to);
+  if (to.fullPath.includes("dashboard")) {
 
-//   next();
+    try {
+      const userInfo = await Auth.currentAuthenticatedUser();
+      next();
+    } catch (error) {
+      next({ name: "login" });
+    }
+  } else if (to.name === "login") {
+    next();
+  }
 
-//   // console.log(userInfo);
-//   // 获取当前认证状态的用户信息
-// });
+  next();
+
+  // console.log(userInfo);
+  // 获取当前认证状态的用户信息
+});
 // 4. 导出router
 export default router;

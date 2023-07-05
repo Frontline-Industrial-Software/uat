@@ -45,191 +45,7 @@
         </div>
         <!-- 表格 -->
         <div class="table">
-          <el-table
-            :data="tableData"
-            height="400px"
-            style="width: 100%"
-            :header-cell-style="{ padding: 0, background: '#F0F1F3' }"
-          >
-            <el-table-column width="100px">
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                      <!-- <el-icon><Bottom /></el-icon> -->
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                  "
-                >
-                  <div class="circle"></div>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.address }}
-              </template>
-            </el-table-column>
-          </el-table>
-          <div class="pagin">
-            <span style="margin-right: 10px">Rows per page:</span>
-            <el-pagination
-              v-model:current-page="paginData.pageNum"
-              v-model:page-size="paginData.pageSize"
-              :page-sizes="[25, 50, 100]"
-              :small="small"
-              :disabled="disabled"
-              :background="background"
-              layout="sizes, prev, pager, next"
-              :total="1000"
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
-            />
-          </div>
+          <Table :tableOptions="tableOptions"></Table>
         </div>
       </div>
       <!-- All Resources -->
@@ -239,190 +55,7 @@
         </div>
         <!-- 表格 -->
         <div class="table">
-          <el-table
-            :data="tableData"
-            height="400px"
-            style="width: 100%"
-            :header-cell-style="{ padding: 0, background: '#F0F1F3' }"
-          >
-            <el-table-column width="100px">
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                  "
-                >
-                  <div class="circle"></div>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.address }}
-              </template>
-            </el-table-column>
-          </el-table>
-          <div class="pagin">
-            <span style="margin-right: 10px">Rows per page:</span>
-            <el-pagination
-              v-model:current-page="paginData.pageNum"
-              v-model:page-size="paginData.pageSize"
-              :page-sizes="[25, 50, 100]"
-              :small="small"
-              :disabled="disabled"
-              :background="background"
-              layout="sizes, prev, pager, next"
-              :total="1000"
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
-            />
-          </div>
+          <Table :tableOptions="tableOptions2"></Table>
         </div>
       </div>
       <!-- Task-Resources -->
@@ -432,176 +65,8 @@
         </div>
         <!-- 表格 -->
         <div class="table">
-          <el-table
-            :data="tableData"
-            height="400px"
-            style="width: 100%"
-            :header-cell-style="{ padding: 0, background: '#F0F1F3' }"
-          >
-            <el-table-column width="100px">
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                  "
-                >
-                  <div class="circle"></div>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column>
-              <template #header>
-                <div class="title">
-                  <span>Critical</span>
-                  <div class="icon">
-                    <div class="icon-sub">
-                      <el-icon><Top /></el-icon>
-                    </div>
-                    <div class="icon-sub">
-                      <el-icon
-                        class="morefilled"
-                        style="transform: rotate(90deg)"
-                        ><MoreFilled
-                      /></el-icon>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #default="scope">
-                {{ scope.row.address }}
-              </template>
-            </el-table-column>
-          </el-table>
-          <div class="pagin">
+          <Table :tableOptions="tableOptions3"></Table>
+          <!-- <div class="pagin">
             <span style="margin-right: 10px">Rows per page:</span>
             <el-pagination
               v-model:current-page="paginData.pageNum"
@@ -615,7 +80,7 @@
               @size-change="handleSizeChange"
               @current-change="handleCurrentChange"
             />
-          </div>
+          </div> -->
         </div>
       </div>
       <!-- Optimization Iteration Charts -->
@@ -696,26 +161,86 @@
     </div>
   </div>
 </template>
-    
+
 <script setup>
+import Table from "./Table.vue";
 import Echarts from "./Echarts.vue";
 import { ref, reactive } from "vue";
+import { toRaw } from '@vue/reactivity'
+import { data } from "@/utils/constants"; //数据要删
+import { useCounterStore } from "../../../store";
+const store = useCounterStore();
+console.log(store.selectedData);
+let changedTask = store.selectedData.tasks.map((e) => {
+  return {
+    Critical: e.critical,
+    Code: e.ID,
+    Name: e.name,
+    "Duration(Baseline)": e.remainingDuration,
+    "Duration(New)": e.newDuration,
+    Ratio: e.durationRatio,
+  };
+});
+let allResources=store.selectedData.newResources.map((e) => {
+  return {
+    ID:e.id,
+    Code:e.ID,
+    Type:e.type,
+    Name:e.name,
+    Distribution:e.distribution.min,
+    Max:e.distribution.max,
+    Span:e.distribution.span,
+  };
+});
+// tasks.resources
+let TaskResources = store.selectedData.tasks.filter((e) => {
+  let length = Object.keys(e.resources).length;
+  return length !== 0; // 返回 resources 不为空的任务对象
+});
+let TaskResourcesData=[]
+TaskResources=TaskResources.map((e)=>{
+for (const key in e.resources) {
+ let taskobj= store.selectedData.tasks.find((obj)=>{
+    return obj.id==e.resources[key].taskId
+  })
+  let resourceobj=store.selectedData.newResources.find((obj)=>{
+    return obj.id==e.resources[key].resourceId
+  })
+  e.resources[key].resourceId=resourceobj
+  e.resources[key].taskId=taskobj
+  // e.resources[key].resourceId
+  TaskResourcesData.push( e.resources[key])
+
+}
+})
+TaskResources=TaskResourcesData.map((e)=>{console.log(e);
+return {
+    Critical:e.taskId.critical,
+    "Task Code":e.taskId.ID,
+    "Resource Name":e.resourceId.name,
+    "Task Name":e.taskId.name,
+    "Duration(Old)":e.taskId.plannedDuration,
+    "Duration(New)":e.taskId.newDuration,
+    'Utils(Old)':e.plannedUntisPerHour,
+    'Utils(Nes)':e.newUnitsPerHour,
+    'ToTal Planned Units':e.remainingUnits
+}
+})
+console.log(TaskResources);
+
+
 const childComponent = ref(null);
 //数据块的种类（比如图中有6种颜色的数据块）显示在头部里面的
 var CLUSTER_COUNT = 6;
-var DIENSIION_CLUSTER_INDEX = 2;//维度？
+var DIENSIION_CLUSTER_INDEX = 2; //维度？
 //区分不同数据的颜色
-var COLOR_ALL = [
-  '#e61717',
-  '#00beae',
-  '#cccccc',
-];
+var COLOR_ALL = ["#e61717", "#00beae", "#cccccc"];
 var pieces = [];
 for (var i = 0; i < CLUSTER_COUNT; i++) {
   pieces.push({
     value: i,
     // label: 'cluster ' + i,
-    color: COLOR_ALL[i]
+    color: COLOR_ALL[i],
   });
 }
 const optionsData = ref({
@@ -726,7 +251,6 @@ const optionsData = ref({
       },
       xAxis: {
         name: "asfdfsda",
-        
       },
       yAxis: {},
       series: [
@@ -801,71 +325,52 @@ const optionsData = ref({
     },
   ],
 });
-const tableData = [
-  {
-    date: "2016-05-03",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-02",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-04",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-01",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-08",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-06",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-07",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-07",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-07",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-07",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-07",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-07",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-];
-const paginData = reactive({ pageNum: 1, pageSize: 25 });
+//表格
+const tableOptions = reactive({
+  data: changedTask,
+  colWidths: [100, 245, 250, 250, 245, 200],
+  colHeaders: [
+    "Critical",
+    "Code",
+    "Name",
+    "Duration(Baseline)",
+    "Duration(New)",
+    "Ratio",
+  ],
+  tableName: "one",
+});
+const tableOptions2 = reactive({
+  data: allResources,
+  colWidths: [100, 245, 250, 250, 245, 200],
+  colHeaders: [
+    "ID",
+    "Code",
+    "Type",
+    "Name",
+    "Distribution",
+    "Max",
+    "Span",
+  ],
+  tableName: "two",
+});
+const tableOptions3 = reactive({
+  data: TaskResources,
+  colWidths: [100, 245, 250, 250, 245, 200],
+  colHeaders: [
+    "Critical",
+    "Task Code",
+    "Resource Name",
+    "Task Name",
+    "Duration(Old)",
+    "Duration(New)",
+    'Utils(Old)',
+    'Utils(Nes)',
+    'ToTal Planned Units'
+  ],
+  tableName: "three",
+});
 </script>
-    
+
 <style lang="scss" scoped>
 .optimize-content {
   margin: 20px auto;
@@ -979,48 +484,6 @@ const paginData = reactive({ pageNum: 1, pageSize: 25 });
         border: 1px solid rgba(224, 224, 224, 1);
         border-radius: 4px;
         color: rgba(0, 0, 0, 0.87);
-        .title {
-          height: 56px;
-          display: flex;
-          align-items: center;
-          color: rgba(0, 0, 0, 0.87);
-          font-weight: 400;
-          font-size: 0.875rem;
-          letter-spacing: 0.01071em;
-          cursor: pointer;
-          -webkit-tap-highlight-color: transparent;
-          position: relative;
-          &:hover span {
-            width: 20px;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-          }
-          &:hover .icon {
-            display: flex;
-          }
-          .icon {
-            position: absolute;
-            width: 80%;
-            right: 0px;
-            height: 25px;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            margin-left: 10px;
-            .icon-sub {
-              width: 25px;
-              height: 25px;
-              border-radius: 50%;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              &:hover {
-                background-color: rgba(0, 0, 0, 0.04);
-              }
-            }
-          }
-        }
         .pagin {
           height: 52px;
           display: flex;

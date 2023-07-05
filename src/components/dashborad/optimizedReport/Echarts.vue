@@ -14,7 +14,9 @@ onMounted(() => {
   initChart();
 });
 //组件卸载
-
+// onUnmounted(() => {
+//   myEcharts.dispose();
+// });
 //渲染
 const initChart=()=> {
   let chartDom = echart.value;

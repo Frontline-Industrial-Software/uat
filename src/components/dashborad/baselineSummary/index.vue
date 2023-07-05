@@ -11,6 +11,10 @@ const router = useRouter();
 onMounted(() => {
   initChart();
 });
+
+
+// 
+let radio
 //页面关闭销毁
 let data = store.taskData;
 //   //数据块的种类（比如图中有6种颜色的数据块）显示在头部里面的
@@ -41,19 +45,20 @@ function getColorByValue(value) {
   let data = value.data[3];
   switch (data) {
     case "Balanced":
-      return "#37A2DA";
+  
+      return "rgba(130, 181, 199, 0.9)";
       break;
     case "baseline":
-      return "#b641e0";
+      return "#rgb(204, 204, 204)";
       break;
     case "Fastest":
-      return "#37A2DA";
+      return "rgba(247, 220, 91, 0.9)";
       break;
     case "Minimum Resources":
-      return "#a477e0";
+      return "rgba(219, 121, 48, 0.9)";
       break;
     case "Levelled Resources":
-      return "#0400e0";
+      return "rgba(170, 187, 93, 0.9)";
       break;
     default:
       break;
@@ -134,13 +139,14 @@ function initChart() {
   chart.on("click", function (param) {
     console.log(param.data[4]);
    let datas=param.data[4]
-    SummaryData.baseDuration=datas.baselineDurationDays
-    SummaryData.changedDuration=datas.projectDurationDays
-    SummaryData.changgedTasks=datas.baselineTasksLen
-    SummaryData.TotalTasks=datas.changedTasksLen
-    SummaryData.baseCriticalPath=datas.baselineCriticalTasksLen
-    SummaryData.changedCriticalPath=datas.newCriticalTasksLen
-    SummaryData.TotalResources=datas.totalResourceCount
+    SummaryData.baseDuration=Math.floor(datas.baselineDurationDays)
+    SummaryData.changedDuration=Math.floor(datas.projectDurationDays)
+    SummaryData.changgedTasks=Math.floor(datas.changedTasksLen)
+    SummaryData.TotalTasks=Math.floor(datas.baselineTasksLen)
+    SummaryData.baseCriticalPath=Math.floor(datas.baselineCriticalTasksLen)
+    SummaryData.changedCriticalPath=Math.floor(datas.newCriticalTasksLen)
+    SummaryData.TotalResources=Math.floor(datas.totalResourceCount)
+    console.log(SummaryData);
   });
 }
 function renderChart() {
@@ -154,7 +160,8 @@ let selectData = {
 async function nextOptimized() {
   console.log(selectData);
   let data = await api.getOptimized({ ...selectData });
-  console.log(data);
+  // console.log(data);
+  store.selectedData=data.data;
   router.push({ name: "optimizedSummary" });
 }
 watch(store.taskData, () => {
@@ -192,23 +199,23 @@ let SummaryData=reactive({
         </div>
         <div class="choosebox">
           <div class="choose">
-            <div class="item"></div>
+            <div style="background-color:rgb(204, 204, 204);" class="item"></div>
             <div>Baseline</div>
           </div>
           <div class="choose">
-            <div class="item"></div>
-            <div>Fastest</div>
+            <div style="background-color:rgba(247, 220, 91, 0.9);" class="item"></div>
+            <div >Fastest</div>
           </div>
           <div class="choose">
-            <div class="item"></div>
+            <div  style="background-color:rgba(219, 121, 48, 0.9);" class="item"></div>
             <div>Minimum Resources</div>
           </div>
           <div class="choose">
-            <div class="item"></div>
+            <div style="background-color:rgba(170, 187, 93, 0.9);" class="item"></div>
             <div>Levelled Resources</div>
           </div>
           <div class="choose">
-            <div class="item"></div>
+            <div style="background-color:rgba(130, 181, 199, 0.9);"  class="item"></div>
             <div>Balanced</div>
           </div>
         </div>
@@ -217,13 +224,13 @@ let SummaryData=reactive({
       <div class="right">
         <div class="righttop">
           <div>Project Duration 27.33%</div>
-          <h1>125 <span>172</span> days</h1>
+          <h1>{{SummaryData.changedDuration}} <span>{{SummaryData.baseDuration}}</span> days</h1>
           <div>Changed Tasks vs Total N of Tasks</div>
-          <h1>41/80</h1>
+          <h1>{{SummaryData.changgedTasks}}/{{SummaryData.TotalTasks}}</h1>
           <div>Tasks on Critical Path 36.36%</div>
-          <h1>15 <span>11</span></h1>
+          <h1>{{ SummaryData.baseCriticalPath }} <span>{{SummaryData.changedCriticalPath}}</span></h1>
           <div>Total Resources</div>
-          <h1>8</h1>
+          <h1>{{SummaryData.TotalResources}}</h1>
         </div>
         <div class="rightbutton">
           <h1>Optimization Presets</h1>

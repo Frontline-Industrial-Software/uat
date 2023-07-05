@@ -3,25 +3,6 @@ import { ref, computed, reactive } from "vue";
 
 import { useRouter } from "vue-router";
 const router = useRouter();
-// useStore 可以是 useUser、useCart 之类的任何东西
-// 第一个参数是应用程序中 store 的唯一 id
-// 选项式写法
-// export const useCounterStore = defineStore(
-//   "counter",
-
-//   {
-//     state: () => ({ count: 0 }),
-//     // state: () => {
-//     //   return { count: 0 }
-//     // },
-//     actions: {
-//       increment() {
-//         this.count++;
-//       },
-//     },
-//   }
-// );
-
 // 组合式写法
 export const useCounterStore = defineStore(
   "counter",
@@ -43,6 +24,7 @@ export const useCounterStore = defineStore(
     };
     // 任务数据
     let taskData = ref([]);
+    let selectedData=ref()
     // 真实文件名称
     let truefile = ref(null);
     let baseData = ref([]);
@@ -103,25 +85,35 @@ export const useCounterStore = defineStore(
         // 发送心跳防止ws协议自动断联
       };
       socket.onclose = function () {
-        console.log("连接关闭");
-      };
-      socket.onmessage = function (e) {
-        console.log(e);
-        let data = JSON.parse(JSON.parse(e.data));
-        console.log(data);
 
-        taskData.value.push([
-          data.result.maxResourceUnit,
-          data.result.projectDurationDays,
-          data.name,
-          data.result.group,
-          data.result
-        ]);
       };
-      // !连接
-      // socket.on("connect", () => {
-      //   console.log("连接成功");
-      // });
+      // 发送
+      socket.onmessage = function (e) {
+        let data = JSON.parse(JSON.parse(e.data));
+        let baseline
+        if (!baseline) {
+          baseline=data
+          taskData.value.push([
+            baseline.result.maxResourceUnit,
+            baseline.result.projectDurationDays,
+            baseline.name,
+            baseline.result.group,
+            baseline.result
+          ]);
+        }
+        if (data.result.group!=='baseline') {
+          
+           taskData.value.push([
+            data.result.maxResourceUnit,
+            data.result.projectDurationDays,
+            data.name,
+            data.result.group,
+            data.result
+          ]);
+        }
+      };
+
+
     }
     return {
       count,
@@ -131,6 +123,7 @@ export const useCounterStore = defineStore(
       truefile,
       taskData,
       active,
+      selectedData
     };
   },
   {}

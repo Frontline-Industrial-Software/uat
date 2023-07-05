@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch ,watchEffect,computed} from "vue";
 import * as echarts from "echarts";
 import { useRouter } from "vue-router";
 import ecStat from "echarts-stat";
@@ -9,11 +9,51 @@ const router = useRouter();
 import api from "../../../api/index.js";
 onMounted(() => {
   initChart();
+  renderChart()
 });
 
 let myEcharts = echarts;
-
+let types = ref();
+let type = ref(2);
+let resourcesChart
 function initChart() {
+  let changedlineTasks = [];
+  // 基础任务
+  let baselineTasks = store.selectedData.baselineTasks.map(
+    (baselineTask, idx) => {
+      // console.log(baselineTask.id);
+
+      let newBaselineTask = store.selectedData.tasks.find(
+        (task) => task.id === baselineTask.id
+      );
+
+      changedlineTasks.push(newBaselineTask);
+      // console.log(baselineTask);
+      idx = store.selectedData.baselineTasks.length - idx;
+      return {
+        name: baselineTask.name,
+        value: [idx, baselineTask.newStart, baselineTask.newFinish],
+        itemStyle: {
+          color: baselineTask.critical ? "pink" : undefined,
+        },
+      };
+    }
+  );
+  // 优化任务
+  changedlineTasks = changedlineTasks.map((changedlineTask, idx) => {
+    // console.log(changedlineTask);
+    idx = changedlineTasks.length - idx;
+
+    return {
+      id: changedlineTask.id,
+      name: changedlineTask.name,
+      value: [idx, changedlineTask.newStart, changedlineTask.newFinish],
+      itemStyle: {
+        color: changedlineTask.critical ? "pink" : undefined,
+      },
+    };
+  });
+
   //表格1
   let chart = myEcharts.init(
     document.getElementById("myEcharts"),
@@ -21,52 +61,6 @@ function initChart() {
   );
   var option;
   //表格1
-  let data01 = [
-    {
-      name: "per1",
-      value: [7, 6, 5, 4],
-      itemStyle: {
-        color: "blue",
-      },
-    },
-    {
-      name: "per2",
-      value: [100, 200, 300, 400],
-      itemStyle: {
-        color: "blue",
-      },
-    },
-    {
-      name: "per3",
-      value: [77, 88, 99, 111],
-      itemStyle: {
-        color: "blue",
-      },
-    },
-  ];
-  let data02 = [
-    {
-      name: "per1",
-      value: [1, 2, 3, 4],
-      itemStyle: {
-        color: "red",
-      },
-    },
-    {
-      name: "per2",
-      value: [2, 3, 20, 30],
-      itemStyle: {
-        color: "red",
-      },
-    },
-    {
-      name: "per3",
-      value: [10, 22, 38, 400],
-      itemStyle: {
-        color: "red",
-      },
-    },
-  ];
   let renderItem = (params, api) => {
     let start = api.coord([api.value(1), api.value(0)]);
     let end = api.coord([api.value(2), api.value(0)]);
@@ -117,7 +111,7 @@ function initChart() {
     },
     xAxis: {
       name: "date",
-      //   type: "time",
+      type: "time",
     },
     yAxis: {
       name: "tasks",
@@ -126,7 +120,7 @@ function initChart() {
       {
         name: "baseline",
         type: "custom",
-        data: data01,
+        data: baselineTasks,
         large: true,
         renderItem: renderItem,
         encode: {
@@ -137,7 +131,7 @@ function initChart() {
       {
         name: "new",
         type: "custom",
-        data: data02,
+        data: changedlineTasks,
         large: true,
         renderItem: renderItem,
         encode: {
@@ -151,82 +145,166 @@ function initChart() {
     },
   };
   option && chart.setOption(option);
-
-  //   //表格2
-  let chart01 = myEcharts.init(
-    document.getElementById("myEcharts01"),
-    "purple-passion"
-  );
-
-  var xAxisData = [];
-  var data1 = [];
-  var data2 = [];
-  for (var i = 0; i < 100; i++) {
-    xAxisData.push("A" + i);
-    data1.push((Math.sin(i / 5) * (i / 5 - 10) + i / 6) * 5);
-    data2.push((Math.cos(i / 5) * (i / 5 - 10) + i / 6) * 5);
-  }
-  option = {
-    // title: {
-    //   text: 'Bar Animation Delay'
-    // },
-    legend: {
-      data: ["bar", "bar2"],
-    },
-    //控制一下下载功能
-    toolbox: {
-      // y: 'bottom',
-      feature: {
-        magicType: {
-          type: ["stack"],
-        },
-        dataView: {},
-        saveAsImage: {
-          pixelRatio: 2,
-        },
-      },
-    },
-    tooltip: {},
-    xAxis: {
-      data: xAxisData,
-      splitLine: {
-        show: false,
-      },
-    },
-    yAxis: {},
-    series: [
-      {
-        name: "bar",
-        type: "bar",
-        data: data1,
-        emphasis: {
-          focus: "series",
-        },
-        //动画秒数
-        // animationDelay: function (idx) {
-        //   return idx * 10;
-        // }
-      },
-      {
-        name: "bar2",
-        type: "bar",
-        data: data2,
-        emphasis: {
-          focus: "series",
-        },
-        //动画秒数
-        // animationDelay: function (idx) {
-        //   return idx * 10 + 100;
-        // }
-      },
-    ],
-    animationEasing: "elasticOut",
-    animationDelayUpdate: function (idx) {
-      return idx * 5;
-    },
-  };
-  option && chart01.setOption(option);
+  resourcesChart = myEcharts.init(
+  document.getElementById("myEcharts01"),
+  "purple-passion"
+);
+  // types.value = store.selectedData.baselineResources.map((e) => {
+  //   return e.name;
+  // });
+  // let baselineResources = store.selectedData.baselineResources[type.value].distribution;
+  // let newResources = store.selectedData.newResources[type.value].distribution;
+  // const toArray = (distribution) =>
+  //   Object.entries(distribution.xy).map(([x, y]) => {
+  //     let values = Object.keys(y);
+  //     return [y[values[0]], values[0]];
+  //   });
+  // //   //表格2
+  // let resourcesChart = myEcharts.init(
+  //   document.getElementById("myEcharts01"),
+  //   "purple-passion"
+  // );
+  // let option2 = {
+  //   dataZoom: [
+  //     {
+  //       type: "slider",
+  //       filterMode: "weakFilter",
+  //       xAxisIndex: [0],
+  //     },
+  //     {
+  //       type: "slider",
+  //       filterMode: "weakFilter",
+  //       yAxisIndex: [0],
+  //     },
+  //     {
+  //       type: "inside",
+  //       filterMode: "weakFilter",
+  //       xAxisIndex: [0],
+  //     },
+  //     {
+  //       type: "inside",
+  //       filterMode: "weakFilter",
+  //       yAxisIndex: [0],
+  //     },
+  //   ],
+  //   tooltip: {
+  //     trigger: "axis",
+  //   },
+  //   animation: false,
+  //   legend: {
+  //     data: ["baseline", "new"],
+  //   },
+  //   xAxis: {
+  //     name: "date",
+  //     type: "time",
+  //   },
+  //   yAxis: {
+  //     name: "units / hour",
+  //   },
+  //   series: [
+  //     {
+  //       name: "baseline",
+  //       type: "bar",
+  //       data: toArray(baselineResources),
+  //       large: true,
+  //     },
+  //     {
+  //       name: "new",
+  //       type: "bar",
+  //       data: toArray(newResources),
+  //       large: true,
+  //     },
+  //   ],
+  // };
+  // option2 && resourcesChart.setOption(option2);
 }
+// resourcesChart
+
+
+types.value = store.selectedData.baselineResources.map((e) => {
+  return e.name;
+});
+  const toArray = (distribution) =>
+    Object.entries(distribution.xy).map(([x, y]) => {
+      let values = Object.keys(y);
+      console.log(x, y);
+      return [y[values[0]], values[0]];
+    });
+// let baselineResources =
+//   store.selectedData.baselineResources[type.value].distribution;
+let baselineResources = computed(() => {
+  const selectedType = type.value;
+  const baselineResources = store.selectedData.baselineResources;
+  console.log(baselineResources);
+  return baselineResources[selectedType].distribution;
+});
+// let newResources = store.selectedData.newResources[type.value].distribution;
+let newResources = computed(() => {
+  const selectedType = type.value;
+  const newResources = store.selectedData.newResources;
+  return newResources[selectedType].distribution;
+});
+ 
+let resourcesOption=computed(()=>{
+ return {
+  dataZoom: [
+    {
+      type: "slider",
+      filterMode: "weakFilter",
+      xAxisIndex: [0],
+    },
+    {
+      type: "slider",
+      filterMode: "weakFilter",
+      yAxisIndex: [0],
+    },
+    {
+      type: "inside",
+      filterMode: "weakFilter",
+      xAxisIndex: [0],
+    },
+    {
+      type: "inside",
+      filterMode: "weakFilter",
+      yAxisIndex: [0],
+    },
+  ],
+  tooltip: {
+    trigger: "axis",
+  },
+  animation: false,
+  legend: {
+    data: ["baseline", "new"],
+  },
+  xAxis: {
+    name: "date",
+    type: "time",
+  },
+  yAxis: {
+    name: "units / hour",
+  },
+  series: [
+    {
+      name: "baseline",
+      type: "bar",
+      data: toArray(baselineResources.value),
+      large: true,
+    },
+    {
+      name: "new",
+      type: "bar",
+      data: toArray(newResources.value),
+      large: true,
+    },
+  ],
+};
+})
+function renderChart() {
+  resourcesChart.setOption(resourcesOption.value);
+}
+watch(type, () => {
+  renderChart()
+});
 const value = ref("Type to search...");
 const options = [
   {
@@ -251,26 +329,43 @@ const options = [
   },
 ];
 function downloadFile(url) {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'file.xer';
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "file.xer";
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 async function nextReport() {
-  console.log(store.file.name.split(".")[0]);
+  // console.log(store.file.name.split(".")[0]);
 
-  let Url = `Balanced-${store.file.name.split(".")[0]}_FrontlineExport.xer`;
-  downloadFile(Url)
+  // let Url = `Balanced-${store.file.name.split(".")[0]}_FrontlineExport.xer`;
+  // downloadFile(Url);
   // window.location.href=`fileDownload/reports/Balanced-${
   //     store.file.name.split(".")[0]
   //   }_FrontlineExport.xer`
   // let data = await api.getReport(name);
   // console.log(data);
   router.push({ name: "OptimizedReport" });
+  store.active = 3;
 }
+function chooseType(number) {
+  console.log(number);
+  type.value = number;
+}
+// async function nextReport() {
+//   console.log(store.file.name.split(".")[0]);
+
+//   let Url = `Balanced-${store.file.name.split(".")[0]}_FrontlineExport.xer`;
+//   downloadFile(Url);
+//   // window.location.href=`fileDownload/reports/Balanced-${
+//   //     store.file.name.split(".")[0]
+//   //   }_FrontlineExport.xer`
+//   // let data = await api.getReport(name);
+//   // console.log(data);
+//   router.push({ name: "OptimizedReport" });
+// }
 </script>
 
 <template>
@@ -329,6 +424,17 @@ async function nextReport() {
           <el-button class="btn">DOWNLOAD</el-button>
         </div>
         <span>Total utilization of multiple resources over time</span>
+        <div v-for="(items, i) in types" class="type">
+          <v-btn
+            @click="
+              () => {
+                chooseType(i);
+              }
+            "
+          >
+            {{ items }}</v-btn
+          >
+        </div>
         <div>
           <el-checkbox v-model="checked1" label="Show Optimized" size="large" />
           <el-checkbox v-model="checked2" label="Show Baseline" size="large" />
@@ -396,6 +502,9 @@ async function nextReport() {
   </div>
 </template>
 <style lang="scss" scoped>
+.type {
+  display: inline;
+}
 .b11111 {
   width: 1150px;
   height: 610px;

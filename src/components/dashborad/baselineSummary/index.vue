@@ -1,70 +1,37 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch,reactive } from "vue";
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+  onBeforeUnmount,
+  watch,
+  reactive,
+  computed,
+} from "vue";
 import * as echarts from "echarts";
 import { useRouter } from "vue-router";
 import { useCounterStore } from "../../../store";
 const store = useCounterStore();
 import ecStat from "echarts-stat";
 import api from "../../../api/index.js";
-const router = useRouter();
-//页面加载创建
-onMounted(() => {
-  initChart();
-});
-
-
-// 
-let radio
-//页面关闭销毁
-let data = store.taskData;
-//   //数据块的种类（比如图中有6种颜色的数据块）显示在头部里面的
-var CLUSTER_COUNT = 6;
-var DIENSIION_CLUSTER_INDEX = 2; //维度？
-//区分不同数据的颜色
-var COLOR_ALL = [
-  "#37A2DA",
-  "#e06343",
-  "#37a354",
-  "#b55dba",
-  "#b5bd48",
-  "#8378EA",
-  "#96BFFF",
-];
-var pieces = [];
-for (var i = 0; i < CLUSTER_COUNT; i++) {
-  pieces.push({
-    value: i,
-    // label: 'cluster ' + i,
-    color: COLOR_ALL[i],
-  });
-}
-function getColorByValue(value) {
-  // 在这里根据具体的逻辑判断来返回相应的颜色
-  // 例如使用条件语句、switch语句、映射关系等
-  // 下面是一个示例，根据值的范围来设置颜色
-  let data = value.data[3];
-  switch (data) {
-    case "Balanced":
-  
-      return "rgba(130, 181, 199, 0.9)";
-      break;
-    case "baseline":
-      return "#rgb(204, 204, 204)";
-      break;
-    case "Fastest":
-      return "rgba(247, 220, 91, 0.9)";
-      break;
-    case "Minimum Resources":
-      return "rgba(219, 121, 48, 0.9)";
-      break;
-    case "Levelled Resources":
-      return "rgba(170, 187, 93, 0.9)";
-      break;
-    default:
-      break;
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
+onBeforeRouteLeave((to, from) => {
+  if (to.name == "InputData") {
+    clear();
   }
+});
+// 组件销毁时摧毁实例
+function clear() {
+  store.taskData = [];
+  data = null;
+  chart.dispose();
+  chart.clear();
+  chart = null;
 }
-//用来装图表数据以及一些配置项
+const router = useRouter();
+// 获取数据
+let data = store.taskData;
+// 配置项
 var option = {
   // title:
   //   {
@@ -100,9 +67,9 @@ var option = {
     height: 100,
     nameTextStyle: {
       align: "center",
-      padding:[30,0,0,0],
-      fontWeight: 'lighter',
-      fontSize:16
+      padding: [30, 0, 0, 0],
+      fontWeight: "lighter",
+      fontSize: 16,
     },
   },
   yAxis: {
@@ -110,9 +77,9 @@ var option = {
     nameLocation: "end",
     nameTextStyle: {
       align: "center",
-      padding:[0,0,0,100],
-      fontWeight: 'lighter',
-      fontSize:16
+      padding: [0, 0, 0, 100],
+      fontWeight: "lighter",
+      fontSize: 16,
     },
   },
   series: {
@@ -127,69 +94,181 @@ var option = {
     datasetIndex: 1, //数据集。通常默认1.有多个数据的时候才会有用
   },
 };
-let myEcharts = echarts;
-let chart;
-function initChart() {
-  chart = myEcharts.init(
-    document.getElementById("myEcharts"),
-    "purple-passion"
-  );
-  echarts.registerTransform(ecStat.transform.clustering);
-  // 点击事件获取值
-  chart.on("click", function (param) {
-    console.log(param.data[4]);
-   let datas=param.data[4]
-    SummaryData.baseDuration=Math.floor(datas.baselineDurationDays)
-    SummaryData.changedDuration=Math.floor(datas.projectDurationDays)
-    SummaryData.changgedTasks=Math.floor(datas.changedTasksLen)
-    SummaryData.TotalTasks=Math.floor(datas.baselineTasksLen)
-    SummaryData.baseCriticalPath=Math.floor(datas.baselineCriticalTasksLen)
-    SummaryData.changedCriticalPath=Math.floor(datas.newCriticalTasksLen)
-    SummaryData.TotalResources=Math.floor(datas.totalResourceCount)
-    console.log(SummaryData);
-  });
-}
-function renderChart() {
-  chart.setOption(option);
-}
+
 let selectData = {
   preset: "Balanced",
   fileName: store.file.name,
   step: 3,
 };
+
+// 初始化图表实例
+let chart;
+function initChart() {
+  chart = echarts.init(document.getElementById("myEcharts"), "purple-passion");
+  echarts.registerTransform(ecStat.transform.clustering);
+  // 点击事件获取值
+  chart.on("click", function (param) {
+    let datas = param.data[4];
+    selectData.preset = param.data[2].replace(/ /g, "_");
+    selectData.step = param.data[4].step;
+    updateData(datas);
+  });
+}
+
+// 更新图表
+function renderChart() {
+  chart.setOption(option);
+}
+// 更新选中值
+// 数据绑定
+let SummaryData = reactive({
+  baseDuration: 12,
+  changedDuration: 12,
+  changgedTasks: 22,
+  TotalTasks: 22,
+  baseCriticalPath: 22,
+  changedCriticalPath: 20,
+  TotalResources: 1,
+});
+//页面加载创建
+onMounted(() => {
+  initChart();
+  console.log(SummaryData);
+  // if ( store.SummaryData) {
+  //   SummaryData=reactive({...store.SummaryData})
+  // }
+});
+// 销毁生命周期
+// onBeforeUnmount(() => {
+//   clear();
+// });
+//
+let radio = ref(0);
+
+let defoultData = computed(() => {
+  return [
+    store.taskData.find((e) => e[4].group === "Balanced"),
+    store.taskData.find((e) => e[4].group === "Fastest"),
+    store.taskData.find((e) => e[4].group === "Minimum_Resources"),
+    store.taskData.find((e) => e[4].group === "Levelled_Resources"),
+    store.taskData.find((e) => e[4].group === "baseline"),
+  ];
+});
+
+function updateData(data) {
+  SummaryData.baseDuration = Math.floor(data.baselineDurationDays);
+  SummaryData.changedDuration = Math.floor(data.projectDurationDays);
+  SummaryData.changgedTasks = Math.floor(data.changedTasksLen);
+  SummaryData.TotalTasks = Math.floor(data.baselineTasksLen);
+  SummaryData.baseCriticalPath = Math.floor(data.baselineCriticalTasksLen);
+  SummaryData.changedCriticalPath = Math.floor(data.newCriticalTasksLen);
+  SummaryData.TotalResources = Math.floor(data.totalResourceCount);
+}
+
+//   //数据块的种类（比如图中有6种颜色的数据块）显示在头部里面的
+var CLUSTER_COUNT = 6;
+var DIENSIION_CLUSTER_INDEX = 2; //维度？
+//区分不同数据的颜色
+var COLOR_ALL = [
+  "#37A2DA",
+  "#e06343",
+  "#37a354",
+  "#b55dba",
+  "#b5bd48",
+  "#8378EA",
+  "#96BFFF",
+];
+var pieces = [];
+for (var i = 0; i < CLUSTER_COUNT; i++) {
+  pieces.push({
+    value: i,
+    // label: 'cluster ' + i,
+    color: COLOR_ALL[i],
+  });
+}
+function getColorByValue(value) {
+  // 在这里根据具体的逻辑判断来返回相应的颜色
+  // 例如使用条件语句、switch语句、映射关系等
+  // 下面是一个示例，根据值的范围来设置颜色
+  let data = value.data[3];
+  switch (data) {
+    case "Balanced":
+      return "rgba(130, 181, 199, 0.9)";
+      break;
+    case "baseline":
+      return "#rgb(204, 204, 204)";
+      break;
+    case "Fastest":
+      return "rgba(247, 220, 91, 0.9)";
+      break;
+    case "Minimum_Resources":
+      return "rgba(219, 121, 48, 0.9)";
+      break;
+    case "Levelled_Resources":
+      return "rgba(170, 187, 93, 0.9)";
+      break;
+    default:
+      break;
+  }
+}
+
 async function nextOptimized() {
-  console.log(selectData);
   let data = await api.getOptimized({ ...selectData });
   // console.log(data);
-  store.selectedData=data.data;
+  store.SummaryData = { ...SummaryData };
+  store.selectedData = data.data;
+  store.active = 2;
   router.push({ name: "optimizedSummary" });
 }
 watch(store.taskData, () => {
   renderChart();
 });
+// watch(defoultData, (old) => {
+//   if (old[0].value) {
+//     updateData(old[0].value[0][4]);
+//   }
+// });
+watch(
+  store.end,
+  () => {
+    console.log(1);
+    updateData(defoultData.value[0][4]);
+  },
+  { deep: true }
+);
+watch(radio, () => {
+  updateData(defoultData.value[radio.value][4]);
+});
 onMounted(() => {
   initChart();
   renderChart();
 });
-// 数据绑定
-let SummaryData=reactive({
-  baseDuration:12,
-  changedDuration:12,
-  changgedTasks:22,
-  TotalTasks:22,
-  baseCriticalPath:22,
-  changedCriticalPath:20,
-  TotalResources:1
-})
 
-
+// console.log(defoultData[0][4]);
+// let SummaryData = reactive({
+//   baseDuration: Math.floor(defoultData[0][4].baselineDurationDays),
+//   changedDuration:  Math.floor(defoultData[0][4].projectDurationDays),
+//   changgedTasks: Math.floor(defoultData[0][4].changedTasksLen),
+//   TotalTasks: Math.floor(defoultData[0][4].baselineTasksLen),
+//   baseCriticalPath: Math.floor(defoultData[0][4].baselineCriticalTasksLen),
+//   changedCriticalPath: Math.floor(defoultData[0][4].newCriticalTasksLen),
+//   TotalResources:  Math.floor(defoultData[0][4].totalResourceCount),
+// });
 </script>
 <template>
   <div class="contain">
     <h2>
       Baseline Summary
-      <div class="step"><span>20 steps</span></div>
-      <div class="step"><span>50%-200% ratio</span></div>
+      <div class="step">
+        <span>{{ store.setting.Steps }} steps</span>
+      </div>
+      <div class="step">
+        <span>{{
+          `${store.setting.Ratio[0] * 100}% - ${
+            store.setting.Ratio[1] * 100
+          }% ratio`
+        }}</span>
+      </div>
     </h2>
     <div class="main">
       <div class="left">
@@ -199,23 +278,38 @@ let SummaryData=reactive({
         </div>
         <div class="choosebox">
           <div class="choose">
-            <div style="background-color:rgb(204, 204, 204);" class="item"></div>
+            <div
+              style="background-color: rgb(204, 204, 204)"
+              class="item"
+            ></div>
             <div>Baseline</div>
           </div>
           <div class="choose">
-            <div style="background-color:rgba(247, 220, 91, 0.9);" class="item"></div>
-            <div >Fastest</div>
+            <div
+              style="background-color: rgba(247, 220, 91, 0.9)"
+              class="item"
+            ></div>
+            <div>Fastest</div>
           </div>
           <div class="choose">
-            <div  style="background-color:rgba(219, 121, 48, 0.9);" class="item"></div>
+            <div
+              style="background-color: rgba(219, 121, 48, 0.9)"
+              class="item"
+            ></div>
             <div>Minimum Resources</div>
           </div>
           <div class="choose">
-            <div style="background-color:rgba(170, 187, 93, 0.9);" class="item"></div>
+            <div
+              style="background-color: rgba(170, 187, 93, 0.9)"
+              class="item"
+            ></div>
             <div>Levelled Resources</div>
           </div>
           <div class="choose">
-            <div style="background-color:rgba(130, 181, 199, 0.9);"  class="item"></div>
+            <div
+              style="background-color: rgba(130, 181, 199, 0.9)"
+              class="item"
+            ></div>
             <div>Balanced</div>
           </div>
         </div>
@@ -223,14 +317,34 @@ let SummaryData=reactive({
       </div>
       <div class="right">
         <div class="righttop">
-          <div>Project Duration 27.33%</div>
-          <h1>{{SummaryData.changedDuration}} <span>{{SummaryData.baseDuration}}</span> days</h1>
+          <div>
+            Project Duration
+            {{
+              (SummaryData.changedDuration / SummaryData.baseDuration).toFixed(
+                2
+              ) * 100
+            }}%
+          </div>
+          <h1>
+            {{ SummaryData.changedDuration }}
+            <span>{{ SummaryData.baseDuration }}</span> days
+          </h1>
           <div>Changed Tasks vs Total N of Tasks</div>
-          <h1>{{SummaryData.changgedTasks}}/{{SummaryData.TotalTasks}}</h1>
-          <div>Tasks on Critical Path 36.36%</div>
-          <h1>{{ SummaryData.baseCriticalPath }} <span>{{SummaryData.changedCriticalPath}}</span></h1>
+          <h1>{{ SummaryData.changgedTasks }}/{{ SummaryData.TotalTasks }}</h1>
+          <div>
+            Tasks on Critical Path
+            {{
+              (
+                SummaryData.baseCriticalPath / SummaryData.changedCriticalPath
+              ).toFixed(2) * 100
+            }}%
+          </div>
+          <h1>
+            {{ SummaryData.baseCriticalPath }}
+            <span>{{ SummaryData.changedCriticalPath }}</span>
+          </h1>
           <div>Total Resources</div>
-          <h1>{{SummaryData.TotalResources}}</h1>
+          <h1>{{ SummaryData.TotalResources }}</h1>
         </div>
         <div class="rightbutton">
           <h1>Optimization Presets</h1>
@@ -240,24 +354,28 @@ let SummaryData=reactive({
             individual specific use case.
           </div>
           <el-radio-group v-model="radio" class="radiobox">
-            <el-radio :label="3"
+            <el-radio :label="0"
               >Balanced Best <span>combination of the others</span></el-radio
             >
-            <el-radio :label="6"
+            <el-radio :label="1"
               >Fastest <span>Shortest project duration</span></el-radio
             >
-            <el-radio :label="9"
+            <el-radio :label="2"
               >Minimum Resources
               <span>Least amount of required resources</span></el-radio
             >
-            <el-radio :label="12"
-              >Minimum Resources
-              <span>Least amount of required resources</span></el-radio
+            <el-radio :label="3"
+              >Levelled Resources
+              <span>Best resource distribution</span></el-radio
             >
           </el-radio-group>
         </div>
-        <el-button @click="nextOptimized" class="btn" icon="el-icon-delete"
-          >NEXT</el-button
+        <v-btn
+          :disabled="!store.end"
+          @click="nextOptimized"
+          class="btn"
+          icon="el-icon-delete"
+          >NEXT</v-btn
         >
       </div>
     </div>

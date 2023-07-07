@@ -14,8 +14,9 @@ export const useCounterStore = defineStore(
       Ratio: [0.5, 2],
       Steps: 20,
     });
+    let end = reactive({ data: false });
     // 导航栏控制
-    let active=ref(0)
+    let active = ref(0);
     let port = null;
     // 后端处理项目信息
     let file = {
@@ -24,11 +25,11 @@ export const useCounterStore = defineStore(
     };
     // 任务数据
     let taskData = ref([]);
-    let selectedData=ref()
+    let selectedData = ref();
     // 真实文件名称
     let truefile = ref(null);
-    let baseData = ref([]);
     const count = ref(0);
+    let SummaryData=ref(null)
     // size大小转换函数
     function formatBytes(size) {
       if (!size) return "";
@@ -43,10 +44,7 @@ export const useCounterStore = defineStore(
     }
     // 建立websocket连接
     async function connectWebsocket() {
-      // const URL = `ws://api.frontline-optimizer.com:${port.toString()}/`;
 
-      // const URL = `ws://wss.frontline-optimizer.com:${port.toString()}/`;
-      // const URL = `wss://ws.postman-echo.com/raw`;
       const URL = "wss://api.frontline-optimizer.com/websockets";
       const socket = new WebSocket(
         // 此处填写你要连接的ws地址
@@ -57,7 +55,8 @@ export const useCounterStore = defineStore(
         headers["Content-Type"] = "application/x-www-form-urlencoded";
       };
       socket.onopen = function () {
-        console.log('成功')
+        console.log("成功");
+        // taskData.value=[]
         /*
          * 连接成功
          * */
@@ -84,36 +83,23 @@ export const useCounterStore = defineStore(
 
         // 发送心跳防止ws协议自动断联
       };
-      socket.onclose = function () {
-
-      };
+      socket.onclose = function () {};
       // 发送
       socket.onmessage = function (e) {
-        let data = JSON.parse(JSON.parse(e.data));
-        let baseline
-        if (!baseline) {
-          baseline=data
+        let data = JSON.parse(JSON.parse(e?.data));
+        if (data.name && data.result?.group !== "baseline") {
           taskData.value.push([
-            baseline.result.maxResourceUnit,
-            baseline.result.projectDurationDays,
-            baseline.name,
-            baseline.result.group,
-            baseline.result
-          ]);
-        }
-        if (data.result.group!=='baseline') {
-          
-           taskData.value.push([
-            data.result.maxResourceUnit,
             data.result.projectDurationDays,
+            data.result.maxResourceUnit,
             data.name,
             data.result.group,
-            data.result
+            data.result,
           ]);
+        } else if (!data.name) {
+          end.data = true;
+          // taskData.value=[]
         }
       };
-
-
     }
     return {
       count,
@@ -123,7 +109,9 @@ export const useCounterStore = defineStore(
       truefile,
       taskData,
       active,
-      selectedData
+      selectedData,
+      end,
+      SummaryData
     };
   },
   {}

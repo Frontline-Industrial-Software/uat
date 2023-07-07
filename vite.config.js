@@ -16,7 +16,7 @@ export default defineConfig({
     }),
     // Enabled by default
   ],
-
+  publicPath: './',
 
   // serve:{
   //   server: {

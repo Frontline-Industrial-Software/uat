@@ -14,7 +14,6 @@
     height: { type: String },
     options: { type: Object },
   });
-  console.log(props.options);
   let myEcharts = echarts;
   onMounted(() => {
     initChart();

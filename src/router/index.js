@@ -71,19 +71,21 @@ const router = createRouter({
 // 创建 beforeEach 导航守卫
 router.beforeEach(async (to, from, next) => {
   // console.log(to);
-  // if (to.fullPath.includes("dashboard")) {
+  if (to.fullPath.includes("dashboard")) {
 
-  //   try {
-  //     const userInfo = await Auth.currentAuthenticatedUser();
-  //     next();
-  //   } catch (error) {
-  //     next({ name: "login" });
-  //   }
-  // } else if (to.name === "login") {
-  //   next();
-  // }
+    try {
+      const userInfo = await Auth.currentAuthenticatedUser();
+      next();
+    } catch (error) {
+      next({ name: "login" });
+    }
+  } else if (to.name === "login") {
+    next();
+  }else{
+    next();
+  }
 
-  next();
+  
 
   // console.log(userInfo);
   // 获取当前认证状态的用户信息

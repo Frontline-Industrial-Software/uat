@@ -12,7 +12,6 @@ import { progressBarRenderer } from "@/utils/constants";
 import { HotTable, HotColumn } from "@handsontable/vue3";
 registerAllModules();
 const props = defineProps(["tableOptions"]);
-console.log(props.tableOptions);
 const alignHeadersProp = computed(() => alignHeaders);
 const addClassesToRowsProp = computed(() => addClassesToRows);
 const drawCheckboxInRowHeadersProp = computed(() => drawCheckboxInRowHeaders);
@@ -75,7 +74,7 @@ const progressBarRendererProp = computed(() => progressBarRenderer);
       <HotColumn data="Duration(Old)" />
       <HotColumn data="Duration(New)" />
       <HotColumn data="Utils(Old)" />
-      <HotColumn data="Utils(Nes)" />
+      <HotColumn data="Utils(New)" />
       <HotColumn data="ToTal Planned Units" />
     </template>
   </HotTable>

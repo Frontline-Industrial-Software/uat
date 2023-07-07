@@ -20,8 +20,11 @@ const text=['dashboard/inputData','dashboard/baselineSummary','dashboard/optimiz
 
 const router = useRouter();
 function navigate(pathname,number) {
-  router.push(`/${pathname}`);
+  if (store.taskData.length!=0) {
+    router.push(`/${pathname}`);
   store.active = number
+  }
+
 }
 
 </script>
@@ -38,7 +41,7 @@ function navigate(pathname,number) {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 50px;
+  margin-top: 30px;
 }
 .steps{
  width: 1200px;

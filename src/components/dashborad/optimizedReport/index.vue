@@ -11,7 +11,7 @@
         <div class="chip primary"><small>20 steps</small></div>
         <div class="chip primary"><small>50% - 200% ratio</small></div>
       </h2>
-      <el-button class="row-btn">Export Report</el-button>
+      <el-button @click="exportReport" class="row-btn">Export Report</el-button>
     </div>
     <!-- 内容区 -->
     <div class="content-box">
@@ -157,7 +157,7 @@
     <!-- 尾部 -->
     <div class="content-row">
       <el-button class="back">BACK</el-button>
-      <el-button class="report">Export Report</el-button>
+      <el-button @click="exportReport" class="report">Export Report</el-button>
     </div>
   </div>
 </template>
@@ -165,13 +165,45 @@
 <script setup>
 import Table from "./Table.vue";
 import Echarts from "./Echarts.vue";
-import { ref, reactive } from "vue";
-import { toRaw } from '@vue/reactivity'
+import { ref, reactive, computed } from "vue";
+import { toRaw } from "@vue/reactivity";
 import { data } from "@/utils/constants"; //数据要删
 import { useCounterStore } from "../../../store";
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
+function downloadFile(url) {
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "file.xer";
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+function exportReport(){
+  // console.log(store.selectedData);
+  let Url = `Balanced-${store.file.name.split(".")[0]}_FrontlineExport.xer`;
+  downloadFile(Url);
+  // window.location.href=`fileDownload/reports/Balanced-${
+  //     store.file.name.split(".")[0]
+  //   }_FrontlineExport.xer`
+
+}
+onBeforeRouteLeave((to, from) => {
+  if (to.name=='InputData') {
+    clear()
+  }
+    })
+    // 组件销毁时摧毁实例
+function clear() {
+  store.taskData=[]
+}
 const store = useCounterStore();
-console.log(store.selectedData);
 let changedTask = store.selectedData.tasks.map((e) => {
+  if (!e.critical) {
+    e.critical = false;
+  } else {
+    e.critical = true;
+  }
   return {
     Critical: e.critical,
     Code: e.ID,
@@ -181,53 +213,84 @@ let changedTask = store.selectedData.tasks.map((e) => {
     Ratio: e.durationRatio,
   };
 });
-let allResources=store.selectedData.newResources.map((e) => {
+let allResources = store.selectedData.newResources.map((e) => {
+  console.log(e);
   return {
-    ID:e.id,
-    Code:e.ID,
-    Type:e.type,
-    Name:e.name,
-    Distribution:e.distribution.min,
-    Max:e.distribution.max,
-    Span:e.distribution.span,
+    ID: e.id,
+    Code: e.ID,
+    Type: e.type,
+    Name: e.name,
+    Distribution: e.distribution.min,
+    Max: e.distribution.max,
+    Span: e.distribution.span,
   };
 });
-// tasks.resources
-let TaskResources = store.selectedData.tasks.filter((e) => {
-  let length = Object.keys(e.resources).length;
-  return length !== 0; // 返回 resources 不为空的任务对象
+let TaskResource = computed(() => {
+  let TaskResources = store.selectedData.tasks.filter((e) => {
+    let length = Object.keys(e.resources).length;
+    return length !== 0; // 返回 resources 不为空的任务对象
+  });
+
+  let TaskResourcesData = TaskResources.flatMap((e) => {
+    
+    let resources = Object.values(e.resources);
+    let taskobj = store.selectedData.tasks.find((obj) => obj.id == e.id);
+
+    return resources.map((resource) => ({
+      Critical: taskobj.critical,
+      "Task Code": taskobj.ID,
+      "Resource Name": store.selectedData.newResources.find((obj) => obj.id == resource.resourceId)?.name,
+      "Task Name": taskobj.name,
+      "Duration(Old)": taskobj.plannedDuration,
+      "Duration(New)": taskobj.newDuration,
+      "Utils(Old)": resource.plannedUnitsPerHour,
+      "Utils(New)": resource.newUnitsPerHour,
+      "ToTal Planned Units": resource.remainingUnits,
+    }));
+  });
+
+  return TaskResourcesData;
 });
-let TaskResourcesData=[]
-TaskResources=TaskResources.map((e)=>{
-for (const key in e.resources) {
- let taskobj= store.selectedData.tasks.find((obj)=>{
-    return obj.id==e.resources[key].taskId
-  })
-  let resourceobj=store.selectedData.newResources.find((obj)=>{
-    return obj.id==e.resources[key].resourceId
-  })
-  e.resources[key].resourceId=resourceobj
-  e.resources[key].taskId=taskobj
-  // e.resources[key].resourceId
-  TaskResourcesData.push( e.resources[key])
 
-}
-})
-TaskResources=TaskResourcesData.map((e)=>{console.log(e);
-return {
-    Critical:e.taskId.critical,
-    "Task Code":e.taskId.ID,
-    "Resource Name":e.resourceId.name,
-    "Task Name":e.taskId.name,
-    "Duration(Old)":e.taskId.plannedDuration,
-    "Duration(New)":e.taskId.newDuration,
-    'Utils(Old)':e.plannedUntisPerHour,
-    'Utils(Nes)':e.newUnitsPerHour,
-    'ToTal Planned Units':e.remainingUnits
-}
-})
-console.log(TaskResources);
+// TaskResources = store.selectedData.tasks.filter((e) => {
+//   let length = Object.keys(e.resources).length;
+//   return length !== 0; // 返回 resources 不为空的任务对象
+// });
+// let TaskResourcesData=[]
+// TaskResources=TaskResources.map((e)=>{
+// for (const key in e.resources) {
+//  let taskobj= store.selectedData.tasks.find((obj)=>{
+//     return obj.id==e.resources[key].taskId
+//   })
+//   let resourceobj=store.selectedData.newResources.find((obj)=>{
+//     return obj.id==e.resources[key].resourceId
+//   })
+//   e.resources[key].resourceId=resourceobj
+//   e.resources[key].taskId=taskobj
+//   // e.resources[key].resourceId
+//   TaskResourcesData.push( e.resources[key])
 
+// }
+// })
+// TaskResources=TaskResourcesData.map((e)=>{console.log(e);
+//   if (!e.taskId.critical) {
+//     e.taskId.critical=false;
+//   }else{
+//     e.taskId.critical=true;
+//   }
+// return {
+//     Critical:e.taskId.critical,
+//     "Task Code":e.taskId.ID,
+//     "Resource Name":e.resourceId.name,
+//     "Task Name":e.taskId.name,
+//     "Duration(Old)":e.taskId.plannedDuration,
+//     "Duration(New)":e.taskId.newDuration,
+//     'Utils(Old)':e.plannedUntisPerHour,
+//     'Utils(Nes)':e.newUnitsPerHour,
+//     'ToTal Planned Units':e.remainingUnits
+// }
+// })
+// console.log(TaskResources);
 
 const childComponent = ref(null);
 //数据块的种类（比如图中有6种颜色的数据块）显示在头部里面的
@@ -342,19 +405,11 @@ const tableOptions = reactive({
 const tableOptions2 = reactive({
   data: allResources,
   colWidths: [100, 245, 250, 250, 245, 200],
-  colHeaders: [
-    "ID",
-    "Code",
-    "Type",
-    "Name",
-    "Distribution",
-    "Max",
-    "Span",
-  ],
+  colHeaders: ["ID", "Code", "Type", "Name", "Distribution", "Max", "Span"],
   tableName: "two",
 });
 const tableOptions3 = reactive({
-  data: TaskResources,
+  data: TaskResource.value,
   colWidths: [100, 245, 250, 250, 245, 200],
   colHeaders: [
     "Critical",
@@ -363,9 +418,9 @@ const tableOptions3 = reactive({
     "Task Name",
     "Duration(Old)",
     "Duration(New)",
-    'Utils(Old)',
-    'Utils(Nes)',
-    'ToTal Planned Units'
+    "Utils(Old)",
+    "Utils(Nes)",
+    "ToTal Planned Units",
   ],
   tableName: "three",
 });

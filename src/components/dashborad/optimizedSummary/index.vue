@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch ,watchEffect,computed} from "vue";
+import { ref, onMounted, onUnmounted, watch, watchEffect, computed } from "vue";
 import * as echarts from "echarts";
 import { useRouter } from "vue-router";
 import ecStat from "echarts-stat";
@@ -7,15 +7,26 @@ import { useCounterStore } from "../../../store";
 const store = useCounterStore();
 const router = useRouter();
 import api from "../../../api/index.js";
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
+onBeforeRouteLeave((to, from) => {
+  if (to.name == "InputData") {
+    clear();
+  }
+});
+// 组件销毁时摧毁实例
+function clear() {
+  store.taskData = [];
+}
+
 onMounted(() => {
   initChart();
-  renderChart()
+  renderChart();
 });
 
 let myEcharts = echarts;
 let types = ref();
 let type = ref(2);
-let resourcesChart
+let resourcesChart;
 function initChart() {
   let changedlineTasks = [];
   // 基础任务
@@ -28,8 +39,13 @@ function initChart() {
       );
 
       changedlineTasks.push(newBaselineTask);
-      // console.log(baselineTask);
+      // console.log(baselineTask.critical);
+      if (baselineTask.critical) {
+        console.log(baselineTask.critical);
+      }
+      
       idx = store.selectedData.baselineTasks.length - idx;
+      
       return {
         name: baselineTask.name,
         value: [idx, baselineTask.newStart, baselineTask.newFinish],
@@ -146,16 +162,16 @@ function initChart() {
   };
   option && chart.setOption(option);
   resourcesChart = myEcharts.init(
-  document.getElementById("myEcharts01"),
-  "purple-passion"
-);
+    document.getElementById("myEcharts01"),
+    "purple-passion"
+  );
   // types.value = store.selectedData.baselineResources.map((e) => {
   //   return e.name;
   // });
   // let baselineResources = store.selectedData.baselineResources[type.value].distribution;
   // let newResources = store.selectedData.newResources[type.value].distribution;
   // const toArray = (distribution) =>
-  //   Object.entries(distribution.xy).map(([x, y]) => {
+  //   Object.entries(distribution.xy).map(([x, y]) => {z
   //     let values = Object.keys(y);
   //     return [y[values[0]], values[0]];
   //   });
@@ -220,22 +236,20 @@ function initChart() {
 }
 // resourcesChart
 
-
 types.value = store.selectedData.baselineResources.map((e) => {
   return e.name;
 });
-  const toArray = (distribution) =>
-    Object.entries(distribution.xy).map(([x, y]) => {
-      let values = Object.keys(y);
-      console.log(x, y);
-      return [y[values[0]], values[0]];
-    });
+
+const toArray = (distribution) =>
+  distribution.xy.map((obj) => {
+    const [x, y] = Object.entries(obj)[0];
+    return [parseInt(x), y];
+  });
 // let baselineResources =
 //   store.selectedData.baselineResources[type.value].distribution;
 let baselineResources = computed(() => {
   const selectedType = type.value;
   const baselineResources = store.selectedData.baselineResources;
-  console.log(baselineResources);
   return baselineResources[selectedType].distribution;
 });
 // let newResources = store.selectedData.newResources[type.value].distribution;
@@ -244,66 +258,66 @@ let newResources = computed(() => {
   const newResources = store.selectedData.newResources;
   return newResources[selectedType].distribution;
 });
- 
-let resourcesOption=computed(()=>{
- return {
-  dataZoom: [
-    {
-      type: "slider",
-      filterMode: "weakFilter",
-      xAxisIndex: [0],
+
+let resourcesOption = computed(() => {
+  return {
+    dataZoom: [
+      {
+        type: "slider",
+        filterMode: "weakFilter",
+        xAxisIndex: [0],
+      },
+      {
+        type: "slider",
+        filterMode: "weakFilter",
+        yAxisIndex: [0],
+      },
+      {
+        type: "inside",
+        filterMode: "weakFilter",
+        xAxisIndex: [0],
+      },
+      {
+        type: "inside",
+        filterMode: "weakFilter",
+        yAxisIndex: [0],
+      },
+    ],
+    tooltip: {
+      trigger: "axis",
     },
-    {
-      type: "slider",
-      filterMode: "weakFilter",
-      yAxisIndex: [0],
+    animation: false,
+    legend: {
+      data: ["baseline", "new"],
     },
-    {
-      type: "inside",
-      filterMode: "weakFilter",
-      xAxisIndex: [0],
+    xAxis: {
+      name: "date",
+      type: "time",
     },
-    {
-      type: "inside",
-      filterMode: "weakFilter",
-      yAxisIndex: [0],
+    yAxis: {
+      name: "units / hour",
     },
-  ],
-  tooltip: {
-    trigger: "axis",
-  },
-  animation: false,
-  legend: {
-    data: ["baseline", "new"],
-  },
-  xAxis: {
-    name: "date",
-    type: "time",
-  },
-  yAxis: {
-    name: "units / hour",
-  },
-  series: [
-    {
-      name: "baseline",
-      type: "bar",
-      data: toArray(baselineResources.value),
-      large: true,
-    },
-    {
-      name: "new",
-      type: "bar",
-      data: toArray(newResources.value),
-      large: true,
-    },
-  ],
-};
-})
+    series: [
+      {
+        name: "baseline",
+        type: "bar",
+        data: toArray(baselineResources.value),
+        large: true,
+      },
+      {
+        name: "new",
+        type: "bar",
+        data: toArray(newResources.value),
+        large: true,
+      },
+    ],
+  };
+});
 function renderChart() {
   resourcesChart.setOption(resourcesOption.value);
 }
 watch(type, () => {
-  renderChart()
+  renderChart();
 });
 const value = ref("Type to search...");
 const options = [
@@ -328,15 +342,7 @@ const options = [
     label: "Option5",
   },
 ];
-function downloadFile(url) {
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "file.xer";
-  link.style.display = "none";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
+
 async function nextReport() {
   // console.log(store.file.name.split(".")[0]);
 
@@ -351,7 +357,6 @@ async function nextReport() {
   store.active = 3;
 }
 function chooseType(number) {
-  console.log(number);
   type.value = number;
 }
 // async function nextReport() {
@@ -374,19 +379,24 @@ function chooseType(number) {
       <h2>
         Overview
         <span class="sp">Balanced</span>
-        <div class="step"><span>20 steps</span></div>
-        <div class="step"><span>50%-200% ratio</span></div>
+        <div class="step"><span>{{ store.setting.Steps }}  steps</span></div>
+        <div class="step">
+          <span>
+            {{
+          `${store.setting.Ratio[0] * 100}% - ${store.setting.Ratio[1] * 100}`}}
+          </span>
+        </div>
       </h2>
       <div class="maintop">
         <div class="item">
           Project Duration (days)
-          <h1>139 <span>172</span></h1>
-          <div>20%</div>
+          <h1>{{store.SummaryData.changedDuration}} <span>{{store.SummaryData.baseDuration}}</span></h1>
+          <div> {{Math.round(store.SummaryData.changedDuration / store.SummaryData.baseDuration * 10000) / 100 +'%'}}</div>
         </div>
         <div class="item">
           Tasks
-          <h1>58 <span>80</span></h1>
-          <div>72%</div>
+          <h1>{{store.SummaryData.changgedTasks}} <span>{{store.SummaryData.TotalTasks}}</span></h1>
+          <div>{{Math.round(store.SummaryData.changgedTasks / store.SummaryData.TotalTasks * 10000) / 100 +'%'}}</div>
         </div>
         <div class="item">
           Tasks on Critical Path

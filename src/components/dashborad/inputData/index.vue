@@ -1,5 +1,4 @@
 <template>
-
   <div class="contentData">
     <v-container class="container">
       <v-row no-gutters>
@@ -18,27 +17,33 @@
           </v-sheet>
         </v-col>
         <v-col>
-          <v-sheet class="pa-2 ma-2" >
-       <div class="uploadBox">
-        <Upload/>
-        <span v-if="!store.file.name" style="color: rgb(42, 123, 108); margin-left: 10px"
-          >No file chosen</span
-        >
-        <span v-else style="color: rgb(42, 123, 108); margin-left: 10px"
-          >{{store.truefile}}</span
-        >
-       </div>
+          <v-sheet class="pa-2 ma-2">
+            <div class="uploadBox">
+              <Upload />
+              <span
+                v-if="!store.file.name"
+                style="color: rgb(42, 123, 108); margin-left: 10px"
+                >No file chosen</span
+              >
+              <span
+                v-else
+                style="color: rgb(42, 123, 108); margin-left: 10px"
+                >{{ store.truefile }}</span
+              >
+            </div>
           </v-sheet>
         </v-col>
         <v-col>
           <v-sheet class="pa-2 ma-2">
             or
-            <span style="text-decoration: underline">use a demo project</span>
+            <span @click="uploadDemo()" style="text-decoration: underline"
+              >use a demo project</span
+            >
           </v-sheet>
         </v-col>
       </v-row>
       <v-divider></v-divider>
-      <div :class="{disabled:!store.file.name}" >
+      <div :class="{ disabled: !store.file.name }">
         <v-row no-gutters>
           <v-col>
             <v-sheet class="pa-2 ma-2">
@@ -49,11 +54,11 @@
           <v-col>
             <v-sheet class="pa-2 ma-2">
               <div class="uploadBox">
-                <Upload/>
+                <Upload />
                 <span style="color: rgb(42, 123, 108); margin-left: 10px"
                   >No file chosen</span
                 >
-               </div>
+              </div>
             </v-sheet>
           </v-col>
           <v-col>
@@ -70,7 +75,7 @@
           <v-col>
             <v-sheet class="pa-2 ma-2">
               <label>Ignore Project Scheduled Dates</label>
-  
+
               <v-radio-group v-model="store.setting.IgnoreProject" inline>
                 <v-radio label="Yes" value="true"></v-radio>
                 <v-radio label="No" value="false"></v-radio>
@@ -81,8 +86,11 @@
             <v-sheet class="pa-2 ma-2">
               Learning Rate
               <p>
-                <v-text-field v-model="store.setting.Rate"  placeholder="0.025" variant="solo">
-    
+                <v-text-field
+                  v-model="store.setting.Rate"
+                  placeholder="0.025"
+                  variant="solo"
+                >
                 </v-text-field>
               </p>
             </v-sheet>
@@ -94,8 +102,18 @@
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              {{ `Optimization Ratio(${store.setting.Ratio[0]*100}% -${store.setting.Ratio[1]*100}%)`}}
-              <v-range-slider :max="2" :min="0.1" :step="0.1"  v-model="store.setting.Ratio" color="rgb(112, 191, 177)"></v-range-slider>
+              {{
+                `Optimization Ratio(${store.setting.Ratio[0] * 100}% -${
+                  store.setting.Ratio[1] * 100
+                }%)`
+              }}
+              <v-range-slider
+                :max="2"
+                :min="0.1"
+                :step="0.1"
+                v-model="store.setting.Ratio"
+                color="rgb(112, 191, 177)"
+              ></v-range-slider>
             </v-sheet>
           </v-col>
         </v-row>
@@ -105,8 +123,12 @@
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              Optimization Steps ({{store.setting.Steps}})
-              <v-slider :step="1" v-model="store.setting.Steps" color="rgb(112, 191, 177)"></v-slider>
+              Optimization Steps ({{ store.setting.Steps }})
+              <v-slider
+                :step="1"
+                v-model="store.setting.Steps"
+                color="rgb(112, 191, 177)"
+              ></v-slider>
             </v-sheet>
           </v-col>
         </v-row>
@@ -119,50 +141,70 @@
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-             <div style="display: flex; justify-content: end;">
-              <v-btn :disabled="!store.file.name" @click="Port" color="rgb(64, 170, 151)" style="color:white">Next</v-btn>
-             </div>
+              <div style="display: flex; justify-content: end">
+                <v-btn
+                  :disabled="!store.file.name"
+                  @click="Port"
+                  color="rgb(64, 170, 151)"
+                  style="color: white"
+                  >Next</v-btn
+                >
+              </div>
             </v-sheet>
           </v-col>
         </v-row>
       </div>
-      
     </v-container>
   </div>
-  
 </template>
 
 <script setup>
-import { useCounterStore } from '../../../store'
-import { reactive ,ref} from "vue";
-import Upload from './upload.vue'
-import api from "../../../api/index.js"
+import { useCounterStore } from "../../../store";
+import { reactive, ref,onMounted } from "vue";
+import Upload from "./upload.vue";
+import api from "../../../api/index.js";
 import { useRouter } from "vue-router";
 const router = useRouter();
-const store = useCounterStore()
-async function Port(){
-// let port =await api.getPort()
-// console.log(port.data.port.port);
-await store.connectWebsocket()
-router.push({name:'BaselineSummary'});
-store.active=1
+const store = useCounterStore();
+async function Port() {
+  // let port =await api.getPort()
+  // console.log(port.data.port.port);
+  await store.connectWebsocket();
+  router.push({ name: "BaselineSummary" });
+  store.active = 1;
 }
-
+onMounted(()=>{
+  clear()
+})
+function clear(){
+  store.taskData.data=[]
+}
+async function uploadDemo() {
+  fetch("src/utils/demo_project.xml")
+    .then((r) => r.blob())
+    .then(async (r) => {
+      const files = new File([r], "demo_project.xml");
+      store.truefile = files.name;
+      store.file.size = files.size;
+      let a = await api.sendFile(files);
+      store.file.name = a.data.mapping[files.name];
+    });
+}
 </script>
 
 <style lang="scss" scoped>
-.uploadBox{
-display: flex;
-justify-content: start;
-align-items: baseline;
+.uploadBox {
+  display: flex;
+  justify-content: start;
+  align-items: baseline;
 }
-.disabled{
-opacity: 0.3;}
+.disabled {
+  opacity: 0.3;
+}
 .contentData {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 60vh;
 }
 .main {
   width: 1200px;

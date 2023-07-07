@@ -25,5 +25,7 @@ align-items: center;
     margin: 0px;
     min-height: 100vh;
     min-width: 1200px;
+    display: flex;
+    flex-direction: column;
 }
 </style> 

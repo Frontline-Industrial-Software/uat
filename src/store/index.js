@@ -2,6 +2,9 @@ import { defineStore, storeToRefs } from "pinia";
 import { ref, computed, reactive } from "vue";
 
 import { useRouter } from "vue-router";
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
+
 const router = useRouter();
 // 组合式写法
 export const useCounterStore = defineStore(
@@ -25,7 +28,7 @@ export const useCounterStore = defineStore(
     };
     // 任务数据
     let taskData = ref([]);
-    let selectedData = ref();
+    let selectedData = ref(null);
     // 真实文件名称
     let truefile = ref(null);
     const count = ref(0);
@@ -56,6 +59,8 @@ export const useCounterStore = defineStore(
       };
       socket.onopen = function () {
         console.log("成功");
+           // 显示进度条
+    NProgress.start();
         // taskData.value=[]
         /*
          * 连接成功
@@ -83,7 +88,9 @@ export const useCounterStore = defineStore(
 
         // 发送心跳防止ws协议自动断联
       };
-      socket.onclose = function () {};
+      socket.onclose = function () {
+       
+      };
       // 发送
       socket.onmessage = function (e) {
         let data = JSON.parse(JSON.parse(e?.data));
@@ -97,6 +104,7 @@ export const useCounterStore = defineStore(
           ]);
         } else if (!data.name) {
           end.data = true;
+          NProgress.done();
           // taskData.value=[]
         }
       };

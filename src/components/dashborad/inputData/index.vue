@@ -30,13 +30,14 @@
                 style="color: rgb(42, 123, 108); margin-left: 10px"
                 >{{ store.truefile }}</span
               >
+             
             </div>
           </v-sheet>
         </v-col>
         <v-col>
           <v-sheet class="pa-2 ma-2">
             or
-            <span @click="uploadDemo()" style="text-decoration: underline"
+            <span @click="uploadDemo()" style="text-decoration: underline ;cursor:pointer;"
               >use a demo project</span
             >
           </v-sheet>
@@ -48,7 +49,7 @@
           <v-col>
             <v-sheet class="pa-2 ma-2">
               <h2>Constraints</h2>
-              <h3>Upload your constraints (download template)</h3>
+              <h3>Upload your constraints <span style="cursor:pointer;" @click="downloadTemplate">(download template)</span></h3>
             </v-sheet>
           </v-col>
           <v-col>
@@ -87,9 +88,11 @@
               Learning Rate
               <p>
                 <v-text-field
-                  v-model="store.setting.Rate"
+                density="compact"
+                
+                v-model="store.setting.Rate"
                   placeholder="0.025"
-                  variant="solo"
+                  variant="outlined"
                 >
                 </v-text-field>
               </p>
@@ -180,7 +183,7 @@ function clear(){
   store.taskData.data=[]
 }
 async function uploadDemo() {
-  fetch("src/utils/demo_project.xml")
+  fetch("demo_project.xml")
     .then((r) => r.blob())
     .then(async (r) => {
       const files = new File([r], "demo_project.xml");
@@ -189,6 +192,16 @@ async function uploadDemo() {
       let a = await api.sendFile(files);
       store.file.name = a.data.mapping[files.name];
     });
+}
+function downloadTemplate(){
+  const link = document.createElement("a");
+  let url='https://api.frontline-optimizer.com/fileDownload/constraints/8995bdc7b2f1fb2d50730000000.xlsx'
+  link.href = url;
+  link.download = "constraints.xlsx";
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 </script>
 

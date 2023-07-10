@@ -14,16 +14,24 @@ import { useCounterStore } from "../../../store";
 const store = useCounterStore();
 import ecStat from "echarts-stat";
 import api from "../../../api/index.js";
-import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
-onBeforeRouteLeave((to, from) => {
+import { onBeforeRouteLeave } from "vue-router";
+onBeforeRouteLeave((to, from, next) => {
   if (to.name == "InputData") {
     clear();
   }
+  next()
 });
+
+// 去百分比
+function toPercent(num, total) {
+  return Math.round((num / total) * 10000) / 100.0 + "%"; // 小数点后两位百分比
+}
 // 组件销毁时摧毁实例
 function clear() {
   store.taskData = [];
   data = null;
+  console.log(store.end.data);
+  store.end.data = false;
   chart.dispose();
   chart.clear();
   chart = null;
@@ -32,68 +40,88 @@ const router = useRouter();
 // 获取数据
 let data = store.taskData;
 // 配置项
-var option = {
-  // title:
-  //   {
-  //     text: 'Different Easing Functions',
-  //     top: 'bottom',
-  //     left: 'center'
-  //   },
-  dataset: [
-    {
-      transform: {
-        type: "ecStat:clustering",
-        // print: true,
-        config: {
-          //是直接显示在图表里面的
-          clusterCount: CLUSTER_COUNT,
-          outputType: "single",
-          outputClusterIndexDimension: DIENSIION_CLUSTER_INDEX,
+
+var option = computed(() => {
+  const proxyArray = store.taskData.map((e) => {
+    return e[0];
+  });
+
+  const proxyArray2 = store.taskData.map((e) => {
+    return e[1];
+  });
+  const max = parseFloat(Math.max(...proxyArray).toFixed(2));
+const min = parseFloat(Math.min(...proxyArray).toFixed(2));
+const max2 = parseFloat(Math.max(...proxyArray2).toFixed(2));
+const min2 = parseFloat(Math.min(...proxyArray2).toFixed(2));
+  return {
+
+    toolbox: {
+      show: true,
+      feature: {
+        dataZoom: {
+          yAxisIndex: "none",
         },
+        dataView: { show: true, readOnly: false },
+        saveAsImage: { show: true },
       },
     },
-  ],
-  // tooltip: {
-  //   position: 'top'
-  // },
+    dataset: [
+      {
+        transform: {
+          type: "ecStat:clustering",
+          // print: true,
+          config: {
+            //是直接显示在图表里面的
+            clusterCount: CLUSTER_COUNT,
+            outputType: "single",
+            outputClusterIndexDimension: DIENSIION_CLUSTER_INDEX,
+          },
+        },
+      },
+    ],
 
-  grid: {
-    // left: 120
-  },
-  xAxis: {
-    name: "Duration (days)",
-    nameLocation: "middle",
-    padding: [10],
-    height: 100,
-    nameTextStyle: {
-      align: "center",
-      padding: [30, 0, 0, 0],
-      fontWeight: "lighter",
-      fontSize: 16,
+    grid: {
+      // left: 120
     },
-  },
-  yAxis: {
-    name: "Maximum Resource (units/hour)",
-    nameLocation: "end",
-    nameTextStyle: {
-      align: "center",
-      padding: [0, 0, 0, 100],
-      fontWeight: "lighter",
-      fontSize: 16,
+    xAxis: {
+      name: "Duration (days)",
+      nameLocation: "middle",
+      padding: [10],
+      height: 100,
+      min: min,
+      max: max,
+      nameTextStyle: {
+        align: "center",
+        padding: [30, 0, 0, 0],
+        fontWeight: "lighter",
+        fontSize: 16,
+      },
     },
-  },
-  series: {
-    type: "scatter",
-    data: data,
-    // encode: { tooltip: [0, 1] },
-    //原点大小设置
-    symbolSize: 15,
-    itemStyle: {
-      color: (data) => getColorByValue(data),
+    yAxis: {
+      name: "Maximum Resource (units/day)",
+      max: max2,
+      min: min2,
+      nameLocation: "end",
+      nameTextStyle: {
+        align: "center",
+        padding: [0, 0, 0, 100],
+        fontWeight: "lighter",
+        fontSize: 16,
+      },
     },
-    datasetIndex: 1, //数据集。通常默认1.有多个数据的时候才会有用
-  },
-};
+    series: {
+      type: "scatter",
+      data: data,
+      // encode: { tooltip: [0, 1] },
+      //原点大小设置
+      symbolSize: 15,
+      itemStyle: {
+        color: (data) => getColorByValue(data),
+      },
+      datasetIndex: 1, //数据集。通常默认1.有多个数据的时候才会有用
+    },
+  };
+});
 
 let selectData = {
   preset: "Balanced",
@@ -111,13 +139,30 @@ function initChart() {
     let datas = param.data[4];
     selectData.preset = param.data[2].replace(/ /g, "_");
     selectData.step = param.data[4].step;
+    switch (selectData.preset) {
+      case "Balanced":
+        radio.value = 0;
+        break;
+      case "Fastest":
+        radio.value = 1;
+        break;
+      case "Minimum_Resources":
+        radio.value = 2;
+        break;
+      case "Levelled_Resources":
+        radio.value = 3;
+        break;
+
+      default:
+        break;
+    }
     updateData(datas);
   });
 }
 
 // 更新图表
 function renderChart() {
-  chart.setOption(option);
+  chart.setOption(option.value);
 }
 // 更新选中值
 // 数据绑定
@@ -129,20 +174,12 @@ let SummaryData = reactive({
   baseCriticalPath: 22,
   changedCriticalPath: 20,
   TotalResources: 1,
+  group: "",
 });
 //页面加载创建
 onMounted(() => {
   initChart();
-  console.log(SummaryData);
-  // if ( store.SummaryData) {
-  //   SummaryData=reactive({...store.SummaryData})
-  // }
 });
-// 销毁生命周期
-// onBeforeUnmount(() => {
-//   clear();
-// });
-//
 let radio = ref(0);
 
 let defoultData = computed(() => {
@@ -156,6 +193,8 @@ let defoultData = computed(() => {
 });
 
 function updateData(data) {
+  console.log(data);
+  SummaryData.group = data.group;
   SummaryData.baseDuration = Math.floor(data.baselineDurationDays);
   SummaryData.changedDuration = Math.floor(data.projectDurationDays);
   SummaryData.changgedTasks = Math.floor(data.changedTasksLen);
@@ -213,7 +252,8 @@ function getColorByValue(value) {
 }
 
 async function nextOptimized() {
-  let data = await api.getOptimized({ ...selectData });
+  store.selectedData = null;
+  let data = await api.getOptimized({ ...selectData }, store.file.size);
   // console.log(data);
   store.SummaryData = { ...SummaryData };
   store.selectedData = data.data;
@@ -223,37 +263,34 @@ async function nextOptimized() {
 watch(store.taskData, () => {
   renderChart();
 });
-// watch(defoultData, (old) => {
-//   if (old[0].value) {
-//     updateData(old[0].value[0][4]);
-//   }
-// });
+
 watch(
   store.end,
   () => {
-    console.log(1);
-    updateData(defoultData.value[0][4]);
+    if (store.end.data) {
+      updateData(defoultData.value[0][4]);
+    }
   },
   { deep: true }
 );
+
 watch(radio, () => {
   updateData(defoultData.value[radio.value][4]);
 });
 onMounted(() => {
   initChart();
   renderChart();
+  if (store.SummaryData) {
+    SummaryData.group = store.SummaryData.group;
+    SummaryData.baseDuration = store.SummaryData.baseDuration;
+    SummaryData.changedDuration = store.SummaryData.changedDuration;
+    SummaryData.changgedTasks = store.SummaryData.changgedTasks;
+    SummaryData.TotalTasks = store.SummaryData.TotalTasks;
+    SummaryData.baseCriticalPath = store.SummaryData.baseCriticalPath;
+    SummaryData.changedCriticalPath = store.SummaryData.changedCriticalPath;
+    SummaryData.TotalResources = store.SummaryData.TotalResources;
+  }
 });
-
-// console.log(defoultData[0][4]);
-// let SummaryData = reactive({
-//   baseDuration: Math.floor(defoultData[0][4].baselineDurationDays),
-//   changedDuration:  Math.floor(defoultData[0][4].projectDurationDays),
-//   changgedTasks: Math.floor(defoultData[0][4].changedTasksLen),
-//   TotalTasks: Math.floor(defoultData[0][4].baselineTasksLen),
-//   baseCriticalPath: Math.floor(defoultData[0][4].baselineCriticalTasksLen),
-//   changedCriticalPath: Math.floor(defoultData[0][4].newCriticalTasksLen),
-//   TotalResources:  Math.floor(defoultData[0][4].totalResourceCount),
-// });
 </script>
 <template>
   <div class="contain">
@@ -274,7 +311,6 @@ onMounted(() => {
       <div class="left">
         <div class="lefttop">
           <div>Comparison Chart</div>
-          <el-button class="btn">DOWNLOAD</el-button>
         </div>
         <div class="choosebox">
           <div class="choose">
@@ -283,6 +319,13 @@ onMounted(() => {
               class="item"
             ></div>
             <div>Baseline</div>
+          </div>
+          <div class="choose">
+            <div
+              style="background-color: rgba(130, 181, 199, 0.9)"
+              class="item"
+            ></div>
+            <div>Balanced</div>
           </div>
           <div class="choose">
             <div
@@ -305,13 +348,6 @@ onMounted(() => {
             ></div>
             <div>Levelled Resources</div>
           </div>
-          <div class="choose">
-            <div
-              style="background-color: rgba(130, 181, 199, 0.9)"
-              class="item"
-            ></div>
-            <div>Balanced</div>
-          </div>
         </div>
         <Echarts style="width: 700px; height: 400px" id="myEcharts"></Echarts>
       </div>
@@ -320,28 +356,28 @@ onMounted(() => {
           <div>
             Project Duration
             {{
-              (SummaryData.changedDuration / SummaryData.baseDuration).toFixed(
-                2
-              ) * 100
-            }}%
+              toPercent(SummaryData.changedDuration, SummaryData.baseDuration)
+            }}
           </div>
           <h1>
             {{ SummaryData.changedDuration }}
             <span>{{ SummaryData.baseDuration }}</span> days
           </h1>
           <div>Changed Tasks vs Total N of Tasks</div>
-          <h1>{{ SummaryData.changgedTasks }}/{{ SummaryData.TotalTasks }}</h1>
+          <h1>
+            {{ SummaryData.changgedTasks }}/
+            <span>{{ SummaryData.TotalTasks }}</span>
+          </h1>
           <div>
             Tasks on Critical Path
+
             {{
-              (
-                SummaryData.baseCriticalPath / SummaryData.changedCriticalPath
-              ).toFixed(2) * 100
-            }}%
+              toPercent(SummaryData.baseCriticalPath, SummaryData.TotalTasks)
+            }}
           </div>
           <h1>
-            {{ SummaryData.baseCriticalPath }}
-            <span>{{ SummaryData.changedCriticalPath }}</span>
+            {{ SummaryData.baseCriticalPath }}/
+            <span>{{ SummaryData.TotalTasks }}</span>
           </h1>
           <div>Total Resources</div>
           <h1>{{ SummaryData.TotalResources }}</h1>
@@ -355,7 +391,7 @@ onMounted(() => {
           </div>
           <el-radio-group v-model="radio" class="radiobox">
             <el-radio :label="0"
-              >Balanced Best <span>combination of the others</span></el-radio
+              >Balanced <span>best combination of the others</span></el-radio
             >
             <el-radio :label="1"
               >Fastest <span>Shortest project duration</span></el-radio
@@ -384,7 +420,7 @@ onMounted(() => {
 <style lang="scss" scoped>
 .contain {
   background-color: rgb(240, 241, 243);
-  height: 100vh;
+  height: 80vh;
 }
 h2 {
   width: 100%;

@@ -27,6 +27,17 @@ let myEcharts = echarts;
 let types = ref();
 let type = ref(2);
 let resourcesChart;
+// 去百分比
+function toPercent(num, total) {
+  return Math.round((num / total) * 10000) / 100.0 + "%"; // 小数点后两位百分比
+}
+let criticalTask = computed(() => {
+  let critical = store.selectedData.baselineTasks.filter((e) => {
+    return e.critical;
+  });
+  return critical;
+});
+
 function initChart() {
   let changedlineTasks = [];
   // 基础任务
@@ -40,12 +51,15 @@ function initChart() {
 
       changedlineTasks.push(newBaselineTask);
       // console.log(baselineTask.critical);
-      if (baselineTask.critical) {
-        console.log(baselineTask.critical);
-      }
-      
+      // if (baselineTask.critical) {
+      //   if (baselineTask.newDuration!==0) {
+      //     // console.log(baselineTask);
+      //   }
+
+      // }
+
       idx = store.selectedData.baselineTasks.length - idx;
-      
+
       return {
         name: baselineTask.name,
         value: [idx, baselineTask.newStart, baselineTask.newFinish],
@@ -65,7 +79,7 @@ function initChart() {
       name: changedlineTask.name,
       value: [idx, changedlineTask.newStart, changedlineTask.newFinish],
       itemStyle: {
-        color: changedlineTask.critical ? "pink" : undefined,
+        color: changedlineTask.critical ? "red" : undefined,
       },
     };
   });
@@ -100,6 +114,16 @@ function initChart() {
     );
   };
   option = {
+    toolbox: {
+      show: true,
+      feature: {
+        dataZoom: {
+          yAxisIndex: "none",
+        },
+        dataView: { show: true, readOnly: false },
+        saveAsImage: { show: true },
+      },
+    },
     dataZoom: [
       {
         type: "slider",
@@ -165,74 +189,6 @@ function initChart() {
     document.getElementById("myEcharts01"),
     "purple-passion"
   );
-  // types.value = store.selectedData.baselineResources.map((e) => {
-  //   return e.name;
-  // });
-  // let baselineResources = store.selectedData.baselineResources[type.value].distribution;
-  // let newResources = store.selectedData.newResources[type.value].distribution;
-  // const toArray = (distribution) =>
-  //   Object.entries(distribution.xy).map(([x, y]) => {z
-  //     let values = Object.keys(y);
-  //     return [y[values[0]], values[0]];
-  //   });
-  // //   //表格2
-  // let resourcesChart = myEcharts.init(
-  //   document.getElementById("myEcharts01"),
-  //   "purple-passion"
-  // );
-  // let option2 = {
-  //   dataZoom: [
-  //     {
-  //       type: "slider",
-  //       filterMode: "weakFilter",
-  //       xAxisIndex: [0],
-  //     },
-  //     {
-  //       type: "slider",
-  //       filterMode: "weakFilter",
-  //       yAxisIndex: [0],
-  //     },
-  //     {
-  //       type: "inside",
-  //       filterMode: "weakFilter",
-  //       xAxisIndex: [0],
-  //     },
-  //     {
-  //       type: "inside",
-  //       filterMode: "weakFilter",
-  //       yAxisIndex: [0],
-  //     },
-  //   ],
-  //   tooltip: {
-  //     trigger: "axis",
-  //   },
-  //   animation: false,
-  //   legend: {
-  //     data: ["baseline", "new"],
-  //   },
-  //   xAxis: {
-  //     name: "date",
-  //     type: "time",
-  //   },
-  //   yAxis: {
-  //     name: "units / hour",
-  //   },
-  //   series: [
-  //     {
-  //       name: "baseline",
-  //       type: "bar",
-  //       data: toArray(baselineResources),
-  //       large: true,
-  //     },
-  //     {
-  //       name: "new",
-  //       type: "bar",
-  //       data: toArray(newResources),
-  //       large: true,
-  //     },
-  //   ],
-  // };
-  // option2 && resourcesChart.setOption(option2);
 }
 // resourcesChart
 
@@ -261,6 +217,16 @@ let newResources = computed(() => {
 
 let resourcesOption = computed(() => {
   return {
+    toolbox: {
+      show: true,
+      feature: {
+        dataZoom: {
+          yAxisIndex: "none",
+        },
+        dataView: { show: true, readOnly: false },
+        saveAsImage: { show: true },
+      },
+    },
     dataZoom: [
       {
         type: "slider",
@@ -295,7 +261,7 @@ let resourcesOption = computed(() => {
       type: "time",
     },
     yAxis: {
-      name: "units / hour",
+      name: "units / day",
     },
     series: [
       {
@@ -356,8 +322,11 @@ async function nextReport() {
   router.push({ name: "OptimizedReport" });
   store.active = 3;
 }
+let typeActive = ref(0);
 function chooseType(number) {
+  typeActive.value = number;
   type.value = number;
+  console.log(typeActive.value, type.value);
 }
 // async function nextReport() {
 //   console.log(store.file.name.split(".")[0]);
@@ -379,45 +348,87 @@ function chooseType(number) {
       <h2>
         Overview
         <span class="sp">Balanced</span>
-        <div class="step"><span>{{ store.setting.Steps }}  steps</span></div>
+        <div class="step">
+          <span>{{ store.setting.Steps }} steps</span>
+        </div>
         <div class="step">
           <span>
             {{
-          `${store.setting.Ratio[0] * 100}% - ${store.setting.Ratio[1] * 100}`}}
+              `${store.setting.Ratio[0] * 100}% - ${
+                store.setting.Ratio[1] * 100
+              }`
+            }}
           </span>
         </div>
       </h2>
       <div class="maintop">
         <div class="item">
-          Project Duration (days)
-          <h1>{{store.SummaryData.changedDuration}} <span>{{store.SummaryData.baseDuration}}</span></h1>
-          <div> {{Math.round(store.SummaryData.changedDuration / store.SummaryData.baseDuration * 10000) / 100 +'%'}}</div>
+          <div class="title">Project Duration (days)</div>
+          <div class="center">
+            <span class="changed"
+              >{{ store.SummaryData.changedDuration }}/</span
+            >
+            <span class="base">{{ store.SummaryData.baseDuration }}</span>
+          </div>
+          <div class="bottom">
+            {{
+              toPercent(
+                store.SummaryData.changedDuration,
+                store.SummaryData.baseDuration
+              )
+            }}
+          </div>
         </div>
         <div class="item">
-          Tasks
-          <h1>{{store.SummaryData.changgedTasks}} <span>{{store.SummaryData.TotalTasks}}</span></h1>
-          <div>{{Math.round(store.SummaryData.changgedTasks / store.SummaryData.TotalTasks * 10000) / 100 +'%'}}</div>
+          <div class="title">Tasks</div>
+          <div class="center">
+            <span class="changed">{{ store.SummaryData.changgedTasks }}/</span>
+            <span class="base">{{ store.SummaryData.TotalTasks }}</span>
+          </div>
+          <div class="bottom">
+            {{
+              toPercent(
+                store.SummaryData.changgedTasks,
+                store.SummaryData.TotalTasks
+              )
+            }}
+          </div>
         </div>
         <div class="item">
-          Tasks on Critical Path
-          <h1>15 <span>172</span></h1>
-          <div>11%</div>
+          <div class="title">Tasks on Critical Path</div>
+          <div class="center">
+            <span class="changed">{{ criticalTask.length }}/</span>
+            <span class="base">{{
+              store.selectedData.baselineTasks.length
+            }}</span>
+          </div>
+          <div class="bottom">
+            {{
+              toPercent(
+                criticalTask.length,
+                store.selectedData.baselineTasks.length
+              )
+            }}
+          </div>
         </div>
       </div>
       <div class="mainEchar1">
         <div class="Echar1top">
           <div>Comparison Chart</div>
-          <el-button class="btn">DOWNLOAD</el-button>
         </div>
         <span>Overview of all tasks over time</span>
         <div class="choosebox">
           <div class="choose">
-            <div class="item"></div>
+            <div style="background-color: #b0e054" class="item"></div>
             <div>Optimized</div>
           </div>
           <div class="choose">
-            <div class="item"></div>
+            <div style="background-color: #5474c4" class="item"></div>
             <div>Baseline</div>
+          </div>
+          <div class="choose">
+            <div style="background-color: red" class="item"></div>
+            <div>Critical Path</div>
           </div>
         </div>
         <div id="main"></div>
@@ -431,30 +442,30 @@ function chooseType(number) {
       <div class="mainEchar2">
         <div class="Echar2top">
           <div>Labor Resources</div>
-          <el-button class="btn">DOWNLOAD</el-button>
         </div>
         <span>Total utilization of multiple resources over time</span>
-        <div v-for="(items, i) in types" class="type">
-          <v-btn
-            @click="
-              () => {
-                chooseType(i);
-              }
-            "
-          >
-            {{ items }}</v-btn
-          >
-        </div>
-        <div>
-          <el-checkbox v-model="checked1" label="Show Optimized" size="large" />
-          <el-checkbox v-model="checked2" label="Show Baseline" size="large" />
+        <div class="types">
+          <div v-for="(items, i) in types" class="type">
+            <v-btn
+              variant="text"
+              :value="i"
+              :class="{ activeType: typeActive == i }"
+              @click="
+                () => {
+                  chooseType(i);
+                }
+              "
+            >
+              {{ items }}</v-btn
+            >
+          </div>
         </div>
         <div
           ref="main01"
           style="width: 1150px; height: 610px"
           id="myEcharts01"
         ></div>
-        <h4>Labor Legend</h4>
+        <!-- <h4>Labor Legend</h4>
         <div class="Echar2choose">
           <div class="item1">
             <el-checkbox
@@ -500,7 +511,7 @@ function chooseType(number) {
             <div class="item"></div>
             <div>Optimized</div>
           </div>
-        </div>
+        </div> -->
       </div>
       <div class="button">
         <el-button class="btnback">BACK</el-button>
@@ -512,8 +523,20 @@ function chooseType(number) {
   </div>
 </template>
 <style lang="scss" scoped>
-.type {
-  display: inline;
+.types {
+  display: flex;
+  width: 1100px;
+  flex-wrap: wrap;
+  overflow-y: auto;
+  min-width:100px;
+  max-height: 300px;
+  .type {
+    margin-bottom: 20px;
+  }
+}
+.activeType {
+  color: #fff;
+  background-color: #40a795;
 }
 .b11111 {
   width: 1150px;
@@ -565,18 +588,27 @@ h2 {
     width: 290px;
     height: 148px;
     padding: 20px;
-    h1 {
-      span {
-        color: #545454;
-        font-size: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    .title {
+      font-size: 14px;
+    }
+    .center {
+      font-size: 40px;
+
+      .changed {
+        color: rgb(0, 0, 0);
+      }
+      .base {
+        color: rgb(136, 136, 136);
       }
     }
-    div {
-      background: #e2f5e2;
-      color: #499249;
-      width: 60px;
+    .bottom {
+      background: rgb(226, 245, 226);
+      color: rgb(73, 146, 73);
       border-radius: 8px;
-      text-align: center;
+      font-size: 12px;
     }
   }
 }
@@ -628,7 +660,7 @@ h2 {
 .mainEchar2 {
   width: 1200px;
   border-radius: 16px;
-  height: 948px;
+  height: 1100px;
   margin-bottom: 20px;
   border-radius: 15px;
   background-color: #fff;
@@ -710,7 +742,6 @@ h2 {
   height: 44px;
   display: flex;
   justify-content: space-between;
-
   .btnback {
     text-align: center;
     width: 98px;

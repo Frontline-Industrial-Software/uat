@@ -3,7 +3,10 @@
     <Header/>
     <Navigate/>
     <div class="subject">
-        <router-view></router-view>
+        <keep-alive>
+            <router-view></router-view>
+        </keep-alive>
+       
     </div>
    </div>
 </template>

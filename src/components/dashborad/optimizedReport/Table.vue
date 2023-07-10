@@ -36,6 +36,7 @@ const progressBarRendererProp = computed(() => progressBarRenderer);
     :afterGetRowHeader="drawCheckboxInRowHeadersProp"
     :afterOnCellMouseDown="changeCheckboxCellProp"
     :manualRowMove="true"
+    :readOnly='true'
     licenseKey="non-commercial-and-evaluation"
   >
     <template v-if="tableOptions.tableName == 'one'">

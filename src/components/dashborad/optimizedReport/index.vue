@@ -84,7 +84,7 @@
         </div>
       </div>
       <!-- Optimization Iteration Charts -->
-      <div class="box-one">
+      <!-- <div class="box-one">
         <div class="content-row">
           <h2>Optimization Iteration Charts</h2>
         </div>
@@ -152,7 +152,7 @@
           </div>
           <Echarts :options="item" ref="childComponent"></Echarts>
         </div>
-      </div>
+      </div> -->
     </div>
     <!-- 尾部 -->
     <div class="content-row">
@@ -173,19 +173,16 @@ import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 function downloadFile(url) {
   const link = document.createElement("a");
   link.href = url;
-  link.download = "file.xer";
+  link.download = `${store.truefile.split(".")[0]}.${store.file.name.split(".")[1]}`;
+  // console.log(`${store.truefile.split(".")[0]}.${store.file.name.split(".")[1]}`);
   link.style.display = "none";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
 function exportReport(){
-  // console.log(store.selectedData);
-  let Url = `Balanced-${store.file.name.split(".")[0]}_FrontlineExport.xer`;
+  let Url = `https://api.frontline-optimizer.com/fileDownload/reports/${store.SummaryData.group}-${store.file.name.split(".")[0]}_FrontlineExport.${store.file.name.split(".")[1]}`;
   downloadFile(Url);
-  // window.location.href=`fileDownload/reports/Balanced-${
-  //     store.file.name.split(".")[0]
-  //   }_FrontlineExport.xer`
 
 }
 onBeforeRouteLeave((to, from) => {
@@ -214,7 +211,6 @@ let changedTask = store.selectedData.tasks.map((e) => {
   };
 });
 let allResources = store.selectedData.newResources.map((e) => {
-  console.log(e);
   return {
     ID: e.id,
     Code: e.ID,
@@ -391,7 +387,7 @@ const optionsData = ref({
 //表格
 const tableOptions = reactive({
   data: changedTask,
-  colWidths: [100, 245, 250, 250, 245, 200],
+  colWidths: [100, 245, 250, 150, 170, 170],
   colHeaders: [
     "Critical",
     "Code",
@@ -404,13 +400,13 @@ const tableOptions = reactive({
 });
 const tableOptions2 = reactive({
   data: allResources,
-  colWidths: [100, 245, 250, 250, 245, 200],
+  colWidths: [100, 245, 250, 250, 100, 200,100,100],
   colHeaders: ["ID", "Code", "Type", "Name", "Distribution", "Max", "Span"],
   tableName: "two",
 });
 const tableOptions3 = reactive({
   data: TaskResource.value,
-  colWidths: [100, 245, 250, 250, 245, 200],
+  colWidths: [100, 245, 250, 150, 100, 100,100,100,100],
   colHeaders: [
     "Critical",
     "Task Code",

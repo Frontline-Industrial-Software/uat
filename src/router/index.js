@@ -39,21 +39,40 @@ const routes = [
         path: "inputData",
         component: InputData,
         name: "InputData",
+        
       },
       {
         path: "baselineSummary",
         component: BaselineSummary,
         name: "BaselineSummary",
+        beforeEnter: (to, from,next) => {
+          if (!from.name) {
+            next({name:'InputData'})
+          }
+          next()
+        },
       },
       {
         path: "optimizedReport",
         component: OptimizedReport,
         name: "OptimizedReport",
+        beforeEnter: (to, from,next) => {
+          if (!from.name) {
+            next({name:'InputData'})
+          }
+          next()
+        },
       },
       {
         path: "optimizedSummary",
         component: optimizedSummary,
         name: "optimizedSummary",
+        beforeEnter: (to, from,next) => {
+          if (!from.name) {
+            next({name:'InputData'})
+          }
+          next()
+        },
       },
     ],
   },
@@ -75,6 +94,9 @@ router.beforeEach(async (to, from, next) => {
 
     try {
       const userInfo = await Auth.currentAuthenticatedUser();
+      if (!to.fullPath.includes("inputdata")) {
+        console.log('返回');
+      }
       next();
     } catch (error) {
       next({ name: "login" });

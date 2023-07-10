@@ -156,7 +156,7 @@
     </div>
     <!-- 尾部 -->
     <div class="content-row">
-      <el-button class="back">BACK</el-button>
+      <el-button @click="back" class="back">BACK</el-button>
       <el-button @click="exportReport" class="report">Export Report</el-button>
     </div>
   </div>
@@ -170,6 +170,8 @@ import { toRaw } from "@vue/reactivity";
 import { data } from "@/utils/constants"; //数据要删
 import { useCounterStore } from "../../../store";
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
+import { useRouter } from "vue-router";
+const router = useRouter();
 function downloadFile(url) {
   const link = document.createElement("a");
   link.href = url;
@@ -184,6 +186,10 @@ function exportReport(){
   let Url = `https://api.frontline-optimizer.com/fileDownload/reports/${store.SummaryData.group}-${store.file.name.split(".")[0]}_FrontlineExport.${store.file.name.split(".")[1]}`;
   downloadFile(Url);
 
+}
+function back(){
+  router.push({ name: "optimizedSummary"});
+  store.active = 2;
 }
 onBeforeRouteLeave((to, from) => {
   if (to.name=='InputData') {
@@ -247,46 +253,6 @@ let TaskResource = computed(() => {
 
   return TaskResourcesData;
 });
-
-// TaskResources = store.selectedData.tasks.filter((e) => {
-//   let length = Object.keys(e.resources).length;
-//   return length !== 0; // 返回 resources 不为空的任务对象
-// });
-// let TaskResourcesData=[]
-// TaskResources=TaskResources.map((e)=>{
-// for (const key in e.resources) {
-//  let taskobj= store.selectedData.tasks.find((obj)=>{
-//     return obj.id==e.resources[key].taskId
-//   })
-//   let resourceobj=store.selectedData.newResources.find((obj)=>{
-//     return obj.id==e.resources[key].resourceId
-//   })
-//   e.resources[key].resourceId=resourceobj
-//   e.resources[key].taskId=taskobj
-//   // e.resources[key].resourceId
-//   TaskResourcesData.push( e.resources[key])
-
-// }
-// })
-// TaskResources=TaskResourcesData.map((e)=>{console.log(e);
-//   if (!e.taskId.critical) {
-//     e.taskId.critical=false;
-//   }else{
-//     e.taskId.critical=true;
-//   }
-// return {
-//     Critical:e.taskId.critical,
-//     "Task Code":e.taskId.ID,
-//     "Resource Name":e.resourceId.name,
-//     "Task Name":e.taskId.name,
-//     "Duration(Old)":e.taskId.plannedDuration,
-//     "Duration(New)":e.taskId.newDuration,
-//     'Utils(Old)':e.plannedUntisPerHour,
-//     'Utils(Nes)':e.newUnitsPerHour,
-//     'ToTal Planned Units':e.remainingUnits
-// }
-// })
-// console.log(TaskResources);
 
 const childComponent = ref(null);
 //数据块的种类（比如图中有6种颜色的数据块）显示在头部里面的

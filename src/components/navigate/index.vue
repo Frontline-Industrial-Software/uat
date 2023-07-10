@@ -21,9 +21,7 @@ const text=['dashboard/inputData','dashboard/baselineSummary','dashboard/optimiz
 const router = useRouter();
 function navigate(pathname,number) {
   if (store.taskData.length!=0) {
-    if (store.selectedData.length!=0) {
-      console.log('通过');
-    }
+
     router.push(`/${pathname}`);
   store.active = number
   }

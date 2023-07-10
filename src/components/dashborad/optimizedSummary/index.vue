@@ -310,23 +310,18 @@ const options = [
 ];
 
 async function nextReport() {
-  // console.log(store.file.name.split(".")[0]);
 
-  // let Url = `Balanced-${store.file.name.split(".")[0]}_FrontlineExport.xer`;
-  // downloadFile(Url);
-  // window.location.href=`fileDownload/reports/Balanced-${
-  //     store.file.name.split(".")[0]
-  //   }_FrontlineExport.xer`
-  // let data = await api.getReport(name);
-  // console.log(data);
   router.push({ name: "OptimizedReport" });
   store.active = 3;
 }
 let typeActive = ref(0);
+function back(){
+  router.push({ name: "BaselineSummary" });
+  store.active = 1;
+}
 function chooseType(number) {
   typeActive.value = number;
   type.value = number;
-  console.log(typeActive.value, type.value);
 }
 // async function nextReport() {
 //   console.log(store.file.name.split(".")[0]);
@@ -514,7 +509,7 @@ function chooseType(number) {
         </div> -->
       </div>
       <div class="button">
-        <el-button class="btnback">BACK</el-button>
+        <el-button @click="back" class="btnback">BACK</el-button>
         <el-button @click="nextReport" class="btngo"
           >VIEW DETALED REPORT</el-button
         >

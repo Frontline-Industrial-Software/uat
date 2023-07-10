@@ -13,27 +13,29 @@
         <v-menu>
           <template v-slot:activator="{ props }">
             <v-btn color="rgb(240, 241, 243)" v-bind="props">
-              <v-icon size="large" icon="mdi-format-list-bulleted">
-                
-              </v-icon>
+              <v-icon size="large" icon="mdi-format-list-bulleted"> </v-icon>
             </v-btn>
           </template>
           <v-list>
             <v-list-item>
               <div>
                 <div>
-                  <v-btn>
-                    <v-icon start icon="mdi-laptop">
-                    </v-icon>
+                  <v-btn elevation="0">
+                    <v-icon start icon="mdi-laptop"> </v-icon>
 
-                    <a style="text-decoration:none;color:black" href="https://app.frontline-optimizer.com/v1.0.0/" target="_blank"> Back to v1.0.0</a>
-                   
+                    <a
+                      style="text-decoration: none; color: black"
+                      href="https://app.frontline-optimizer.com/v1.0.0/"
+                      target="_blank"
+                    >
+                      Back to v1.0.0 </a
+                    >
                   </v-btn>
                 </div>
                 <div>
-                  <v-btn @click="logout">
+                  <v-btn elevation="0" @click="logout">
                     <v-icon start icon="mdi-arrow-left"></v-icon>
-                    Log out    
+                    Log out &nbsp &nbsp &nbsp &nbsp &nbsp&nbsp
                   </v-btn>
                 </div>
               </div>
@@ -49,13 +51,16 @@
 <script setup>
 import { useRouter } from "vue-router";
 const router = useRouter();
-function logout() { 
-localStorage.clear();
-router.push(`/login`);
+function logout() {
+  localStorage.clear();
+  router.push(`/login`);
 }
 </script>
 
 <style lang="scss" scoped>
+:deep(.v-btn--variant-elevated){
+box-shadow: 0px;
+}
 .main {
   width: 1200px;
   display: flex;

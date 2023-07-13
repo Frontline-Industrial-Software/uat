@@ -8,6 +8,7 @@ const store = useCounterStore();
 const router = useRouter();
 import api from "../../../api/index.js";
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
+
 onBeforeRouteLeave((to, from) => {
   if (to.name == "InputData") {
     clear();
@@ -24,7 +25,7 @@ onMounted(() => {
 });
 
 let myEcharts = echarts;
-let types = ref();
+
 let type = ref(2);
 let resourcesChart;
 // 去百分比
@@ -50,13 +51,6 @@ function initChart() {
       );
 
       changedlineTasks.push(newBaselineTask);
-      // console.log(baselineTask.critical);
-      // if (baselineTask.critical) {
-      //   if (baselineTask.newDuration!==0) {
-      //     // console.log(baselineTask);
-      //   }
-
-      // }
 
       idx = store.selectedData.baselineTasks.length - idx;
 
@@ -117,9 +111,6 @@ function initChart() {
     toolbox: {
       show: true,
       feature: {
-        dataZoom: {
-          yAxisIndex: "none",
-        },
         dataView: { show: true, readOnly: false },
         saveAsImage: { show: true },
       },
@@ -191,38 +182,61 @@ function initChart() {
   );
 }
 // resourcesChart
-
-types.value = store.selectedData.baselineResources.map((e) => {
-  return e.name;
+let searchData = ref("");
+// let types = ref();
+let types = computed(() => {
+  let data = store.selectedData.baselineResources.map((e) => {
+    return e.name;
+  });
+  if (searchData.value) {
+    const regex = new RegExp(searchData.value, "i");
+    return data.filter((e) => {
+      return regex.test(e);
+    });
+  } else {
+    return data;
+  }
 });
-
-const toArray = (distribution) =>
-  distribution.xy.map((obj) => {
+// types.value = store.selectedData.baselineResources.map((e) => {
+//   return e.name;
+// });
+const toArray = (distribution) => {
+  return distribution.xy.map((obj) => {
     const [x, y] = Object.entries(obj)[0];
     return [parseInt(x), y];
   });
+};
 // let baselineResources =
 //   store.selectedData.baselineResources[type.value].distribution;
 let baselineResources = computed(() => {
-  const selectedType = type.value;
   const baselineResources = store.selectedData.baselineResources;
-  return baselineResources[selectedType].distribution;
+  if (typeActive.value) {
+    const filteredArray = baselineResources.filter(
+      (item) => item.name && item.name === typeActive.value
+    );
+    return filteredArray[0].distribution;
+  } else {
+    return baselineResources[1].distribution;
+  }
 });
 // let newResources = store.selectedData.newResources[type.value].distribution;
 let newResources = computed(() => {
-  const selectedType = type.value;
   const newResources = store.selectedData.newResources;
-  return newResources[selectedType].distribution;
+  if (typeActive.value) {
+    let datas = newResources.filter(
+      (item) => item.name && item.name === typeActive.value
+    );
+    // console.log(datas);
+    return datas[0].distribution;
+  } else {
+    return newResources[1].distribution;
+  }
 });
 
 let resourcesOption = computed(() => {
   return {
     toolbox: {
-      show: true,
       feature: {
-        dataZoom: {
-          yAxisIndex: "none",
-        },
         dataView: { show: true, readOnly: false },
         saveAsImage: { show: true },
       },
@@ -231,6 +245,8 @@ let resourcesOption = computed(() => {
       {
         type: "slider",
         filterMode: "weakFilter",
+        start: 0, // 调整缩放范围的起始位置
+        end: 100,
         xAxisIndex: [0],
       },
       {
@@ -285,6 +301,7 @@ function renderChart() {
 watch(type, () => {
   renderChart();
 });
+
 const value = ref("Type to search...");
 const options = [
   {
@@ -310,31 +327,20 @@ const options = [
 ];
 
 async function nextReport() {
-
   router.push({ name: "OptimizedReport" });
   store.active = 3;
 }
-let typeActive = ref(0);
-function back(){
+let typeActive = ref("");
+function back() {
   router.push({ name: "BaselineSummary" });
   store.active = 1;
 }
-function chooseType(number) {
-  typeActive.value = number;
-  type.value = number;
+function chooseType(name) {
+  typeActive.value = name;
 }
-// async function nextReport() {
-//   console.log(store.file.name.split(".")[0]);
-
-//   let Url = `Balanced-${store.file.name.split(".")[0]}_FrontlineExport.xer`;
-//   downloadFile(Url);
-//   // window.location.href=`fileDownload/reports/Balanced-${
-//   //     store.file.name.split(".")[0]
-//   //   }_FrontlineExport.xer`
-//   // let data = await api.getReport(name);
-//   // console.log(data);
-//   router.push({ name: "OptimizedReport" });
-// }
+watch(typeActive, () => {
+  renderChart();
+});
 </script>
 
 <template>
@@ -342,7 +348,7 @@ function chooseType(number) {
     <div class="box">
       <h2>
         Overview
-        <span class="sp">Balanced</span>
+        <span class="sp">{{ store.SummaryData.group }}</span>
         <div class="step">
           <span>{{ store.setting.Steps }} steps</span>
         </div>
@@ -351,7 +357,7 @@ function chooseType(number) {
             {{
               `${store.setting.Ratio[0] * 100}% - ${
                 store.setting.Ratio[1] * 100
-              }`
+              }% ratio`
             }}
           </span>
         </div>
@@ -439,15 +445,17 @@ function chooseType(number) {
           <div>Labor Resources</div>
         </div>
         <span>Total utilization of multiple resources over time</span>
+
+        <el-input v-model="searchData" placeholder="Search Resources" />`
         <div class="types">
           <div v-for="(items, i) in types" class="type">
             <v-btn
               variant="text"
               :value="i"
-              :class="{ activeType: typeActive == i }"
+              :class="{ activeType: typeActive == items }"
               @click="
                 () => {
-                  chooseType(i);
+                  chooseType(items);
                 }
               "
             >
@@ -460,53 +468,6 @@ function chooseType(number) {
           style="width: 1150px; height: 610px"
           id="myEcharts01"
         ></div>
-        <!-- <h4>Labor Legend</h4>
-        <div class="Echar2choose">
-          <div class="item1">
-            <el-checkbox
-              class="check1"
-              v-model="checked1"
-              label="Show Optimized"
-              size="large"
-            />
-          </div>
-          <div class="item2"></div>
-          <div class="item3">
-            <el-select
-              class="item3sel"
-              placement="top"
-              v-model="value"
-              filterable
-              placeholder="Select"
-            >
-              <el-option
-                class="ok"
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </div>
-        </div>
-        <div class="Echar2foot">
-          <div class="choose">
-            <div class="item"></div>
-            <div>Optimized</div>
-          </div>
-          <div class="choose">
-            <div class="item"></div>
-            <div>Optimized</div>
-          </div>
-          <div class="choose">
-            <div class="item"></div>
-            <div>Optimized</div>
-          </div>
-          <div class="choose">
-            <div class="item"></div>
-            <div>Optimized</div>
-          </div>
-        </div> -->
       </div>
       <div class="button">
         <el-button @click="back" class="btnback">BACK</el-button>
@@ -523,7 +484,7 @@ function chooseType(number) {
   width: 1100px;
   flex-wrap: wrap;
   overflow-y: auto;
-  min-width:100px;
+  min-width: 100px;
   max-height: 300px;
   .type {
     margin-bottom: 20px;
@@ -655,7 +616,7 @@ h2 {
 .mainEchar2 {
   width: 1200px;
   border-radius: 16px;
-  height: 1100px;
+  min-height: 800px;
   margin-bottom: 20px;
   border-radius: 15px;
   background-color: #fff;

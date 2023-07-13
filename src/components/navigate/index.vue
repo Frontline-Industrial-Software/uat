@@ -1,39 +1,57 @@
 <template>
   <div class="main">
-   <div class="steps">
-    <el-steps  :align-center="true" :active="store.active" finish-status="success">
-      <el-step  @click="navigate(text[0],0)" title="Input Data" />
-      <el-step @click="navigate(text[1],1)" title="Baseline Summary" />
-      <el-step @click="navigate(text[2],2)" title="Optimized Summary" />
-      <el-step @click="navigate(text[3],3)" title="Optimized Report" />
-    </el-steps>
-   </div>
-
+    <div class="steps">
+      <el-steps
+        :align-center="true"
+        :active="store.active"
+        finish-status="success"
+      >
+        <el-step @click="navigate(text[0], 0)" title="Input Data" />
+        <el-step @click="navigate(text[1], 1)" title="Baseline Summary" />
+        <el-step @click="navigate(text[2], 2)" title="Optimized Summary" />
+        <el-step @click="navigate(text[3], 3)" title="Optimized Report" />
+      </el-steps>
+    </div>
   </div>
 </template>
 <script setup>
 import { useRouter } from "vue-router";
-import { ref } from 'vue'
-import { useCounterStore } from '../../store'
-const store = useCounterStore()
-const text=['dashboard/inputData','dashboard/baselineSummary','dashboard/optimizedSummary','dashboard/optimizedReport']
+import { ref } from "vue";
+import { useCounterStore } from "../../store";
+const store = useCounterStore();
+const text = [
+  "dashboard/inputData",
+  "dashboard/baselineSummary",
+  "dashboard/optimizedSummary",
+  "dashboard/optimizedReport",
+];
 
 const router = useRouter();
-function navigate(pathname,number) {
-  if (store.taskData.length!=0) {
+function navigate(pathname, number) {
+  console.log(11111);
 
+  if (pathname == "dashboard/inputData") {
     router.push(`/${pathname}`);
-  store.active = number
+    store.active = number;
   }
-
+  if (store.taskData.length != 0) {
+    if (
+      pathname != "dashboard/baselineSummary" ||
+      pathname != "dashboard/inputData"
+    ) {
+      if (!store.selectedData) {
+        return;
+      }
+    }
+    router.push(`/${pathname}`);
+    store.active = number;
+  }
 }
-
 </script>
 
 <script setup></script>
 
 <style lang="scss" scoped>
-
 :deep(.el-step__head.is-success) {
   color: rgb(64, 167, 149);
   border-color: rgb(64, 167, 149);
@@ -44,13 +62,13 @@ function navigate(pathname,number) {
   align-items: center;
   margin-top: 30px;
 }
-.steps{
- width: 1200px;
- margin-top: 30px;
- margin-bottom: 20px;
+.steps {
+  width: 1200px;
+  margin-top: 30px;
+  margin-bottom: 20px;
 }
 </style>
-    
+
 <!-- <div class="contentBox">
   <div class="box" @click="() => {navigate('inputdata')}">
     <div class="circle actived">

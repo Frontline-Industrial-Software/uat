@@ -7,7 +7,7 @@
           src="../../static/logo.png"
           alt=""
         />
-        <span>v2.2.1</span>
+        <span>v2.2.2</span>
       </div>
       <div class="right">
         <v-menu>

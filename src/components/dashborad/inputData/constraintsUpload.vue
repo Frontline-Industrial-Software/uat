@@ -1,6 +1,7 @@
 <template>
   <el-upload
     class="upload-demo"
+    :disabled="!store.file.name"
     action=""
     multiple
     :before-upload="beforeUpload"
@@ -8,6 +9,7 @@
   >
     <el-button
       :icon="Upload"
+      :disabled="!store.file.name"
       color="rgb(42, 123, 108)"
       style="color: white"
       type="primary"
@@ -25,12 +27,10 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import api from "../../../api/index.js";
 
 const beforeUpload = async (files) => {
-  store.truefile = files.name;
-  store.file.size = files.size;
-  let a = await api.sendFile(files);
-  store.file.name = a.data.mapping[files.name];
-  
+  let a = await api.sendConstraintsFile(files, store.file.name);
+  console.log(a);
+  store.ConstraintsFile = a;
+  console.log(store.ConstraintsFile);
   return false;
 };
-
 </script>

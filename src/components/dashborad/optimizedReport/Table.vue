@@ -74,9 +74,9 @@ const progressBarRendererProp = computed(() => progressBarRenderer);
       <HotColumn data="Task Name" />
       <HotColumn data="Duration(Old)" />
       <HotColumn data="Duration(New)" />
-      <HotColumn data="Utils(Old)" />
-      <HotColumn data="Utils(New)" />
-      <HotColumn data="ToTal Planned Units" />
+      <HotColumn data="Units(Old)" />
+      <HotColumn data="Units(New)" />
+      <HotColumn data="Total Planned Units" />
     </template>
   </HotTable>
 </template>

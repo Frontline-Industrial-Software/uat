@@ -19,7 +19,7 @@ onBeforeRouteLeave((to, from, next) => {
   if (to.name == "InputData") {
     clear();
   }
-  next()
+  next();
 });
 
 // 去百分比
@@ -29,17 +29,37 @@ function toPercent(num, total) {
 // 组件销毁时摧毁实例
 function clear() {
   store.taskData = [];
+  Object.keys(store.dataArray).forEach(key => {
+    store.dataArray[key].all = [];
+    store.dataArray[key].data = [];
+});
   data = null;
-  console.log(store.end.data);
   store.end.data = false;
-  chart.dispose();
-  chart.clear();
-  chart = null;
 }
 const router = useRouter();
 // 获取数据
 let data = store.taskData;
+
 // 配置项
+
+function seriesData(name, basecolor, activecolor) {
+  return {
+    type: "scatter",
+    data: store.dataArray[name].data,
+    name: name,
+    symbolSize: 15,
+    itemStyle: {
+      color: (data) => {
+        if (activeIndex.value == data.seriesName + data.data[2].result.step) {
+          return activecolor;
+        }
+        return basecolor;
+      },
+      borderWidth: 1,
+      borderColor: "#0b0f07",
+    },
+  };
+}
 
 var option = computed(() => {
   const proxyArray = store.taskData.map((e) => {
@@ -49,18 +69,14 @@ var option = computed(() => {
   const proxyArray2 = store.taskData.map((e) => {
     return e[1];
   });
-  const max = parseFloat(Math.max(...proxyArray).toFixed(2));
-const min = parseFloat(Math.min(...proxyArray).toFixed(2));
-const max2 = parseFloat(Math.max(...proxyArray2).toFixed(2));
-const min2 = parseFloat(Math.min(...proxyArray2).toFixed(2));
+  const max = parseFloat((Math.max(...proxyArray) * 1.05).toFixed(2));
+  const min = parseFloat((Math.min(...proxyArray) * 0.95).toFixed(2));
+  const max2 = parseFloat((Math.max(...proxyArray2) * 1.05).toFixed(2));
+  const min2 = parseFloat((Math.min(...proxyArray2) * 0.95).toFixed(2));
   return {
-
     toolbox: {
       show: true,
       feature: {
-        dataZoom: {
-          yAxisIndex: "none",
-        },
         dataView: { show: true, readOnly: false },
         saveAsImage: { show: true },
       },
@@ -82,6 +98,8 @@ const min2 = parseFloat(Math.min(...proxyArray2).toFixed(2));
 
     grid: {
       // left: 120
+      top: 100,
+      height: "65%",
     },
     xAxis: {
       name: "Duration (days)",
@@ -94,32 +112,78 @@ const min2 = parseFloat(Math.min(...proxyArray2).toFixed(2));
         align: "center",
         padding: [30, 0, 0, 0],
         fontWeight: "lighter",
-        fontSize: 16,
+        fontSize: 20,
+        color: "black",
       },
     },
     yAxis: {
       name: "Maximum Resource (units/day)",
       max: max2,
       min: min2,
+      padding: [10],
       nameLocation: "end",
       nameTextStyle: {
         align: "center",
         padding: [0, 0, 0, 100],
         fontWeight: "lighter",
         fontSize: 16,
+        color: "black",
       },
     },
-    series: {
-      type: "scatter",
-      data: data,
-      // encode: { tooltip: [0, 1] },
-      //原点大小设置
-      symbolSize: 15,
-      itemStyle: {
-        color: (data) => getColorByValue(data),
-      },
-      datasetIndex: 1, //数据集。通常默认1.有多个数据的时候才会有用
+    legend: {
+      itemGap: 40,
+
+      data: [
+        {
+          name: "baseline",
+          itemStyle: {
+            color: "rgb(204, 204, 204)",
+          },
+        },
+        {
+          name: "Balanced",
+          itemStyle: {
+            color: "rgba(130, 181, 199, 0.9)",
+          },
+        },
+        {
+          name: "Fastest",
+          itemStyle: {
+            color: "rgba(247, 220, 91, 0.9)",
+          },
+        },
+        {
+          name: "Minimum_Resources",
+          itemStyle: {
+            color: "rgba(219, 121, 48, 0.9)",
+          },
+        },
+        {
+          name: "Levelled_Resources",
+          itemStyle: {
+            color: "rgba(170, 187, 93, 0.9)",
+          },
+        },
+      ],
+      x: "left",
+      itemWidth: 15,
+      itemHeight: 15,
     },
+    series: [
+      seriesData("baseline", "rgb(204, 204, 204)", "rgba(138, 24, 116)"),
+      seriesData("Balanced", "rgba(130, 181, 199, 0.9)", "rgba(138, 24, 116)"),
+      seriesData("Fastest", "rgba(247, 220, 91, 0.9)", "rgba(138, 24, 116)"),
+      seriesData(
+        "Minimum_Resources",
+        "rgba(219, 121, 48, 0.9)",
+        "rgba(138, 24, 116)"
+      ),
+      seriesData(
+        "Levelled_Resources",
+        "rgba(170, 187, 93, 0.9)",
+        "rgba(138, 24, 116)"
+      ),
+    ],
   };
 });
 
@@ -131,14 +195,16 @@ let selectData = {
 
 // 初始化图表实例
 let chart;
+let activeIndex = ref("baseline0");
 function initChart() {
   chart = echarts.init(document.getElementById("myEcharts"), "purple-passion");
   echarts.registerTransform(ecStat.transform.clustering);
   // 点击事件获取值
   chart.on("click", function (param) {
-    let datas = param.data[4];
-    selectData.preset = param.data[2].replace(/ /g, "_");
-    selectData.step = param.data[4].step;
+    let datas = param.data[2].result;
+    activeIndex.value = param.seriesName + datas.step;
+    selectData.preset = param.seriesName;
+    selectData.step = datas.step;
     switch (selectData.preset) {
       case "Balanced":
         radio.value = 0;
@@ -156,7 +222,10 @@ function initChart() {
       default:
         break;
     }
+    console.log(datas);
     updateData(datas);
+    // console.log(option.value);
+    chart.setOption(option.value);
   });
 }
 
@@ -177,9 +246,6 @@ let SummaryData = reactive({
   group: "",
 });
 //页面加载创建
-onMounted(() => {
-  initChart();
-});
 let radio = ref(0);
 
 let defoultData = computed(() => {
@@ -193,7 +259,7 @@ let defoultData = computed(() => {
 });
 
 function updateData(data) {
-  console.log(data);
+  console.log(data.changedTasksLen);
   SummaryData.group = data.group;
   SummaryData.baseDuration = Math.floor(data.baselineDurationDays);
   SummaryData.changedDuration = Math.floor(data.projectDurationDays);
@@ -225,39 +291,13 @@ for (var i = 0; i < CLUSTER_COUNT; i++) {
     color: COLOR_ALL[i],
   });
 }
-function getColorByValue(value) {
-  // 在这里根据具体的逻辑判断来返回相应的颜色
-  // 例如使用条件语句、switch语句、映射关系等
-  // 下面是一个示例，根据值的范围来设置颜色
-  let data = value.data[3];
-  switch (data) {
-    case "Balanced":
-      return "rgba(130, 181, 199, 0.9)";
-      break;
-    case "baseline":
-      return "#rgb(204, 204, 204)";
-      break;
-    case "Fastest":
-      return "rgba(247, 220, 91, 0.9)";
-      break;
-    case "Minimum_Resources":
-      return "rgba(219, 121, 48, 0.9)";
-      break;
-    case "Levelled_Resources":
-      return "rgba(170, 187, 93, 0.9)";
-      break;
-    default:
-      break;
-  }
-}
-
 async function nextOptimized() {
   store.selectedData = null;
   let data = await api.getOptimized({ ...selectData }, store.file.size);
-  // console.log(data);
   store.SummaryData = { ...SummaryData };
   store.selectedData = data.data;
   store.active = 2;
+  console.log(store.selectedData);
   router.push({ name: "optimizedSummary" });
 }
 watch(store.taskData, () => {
@@ -274,12 +314,14 @@ watch(
   { deep: true }
 );
 
-watch(radio, () => {
-  updateData(defoultData.value[radio.value][4]);
-});
 onMounted(() => {
+  console.log(store.dataArray);
+  if (chart) {
+    chart.clear();
+  }
   initChart();
   renderChart();
+  console.log();
   if (store.SummaryData) {
     SummaryData.group = store.SummaryData.group;
     SummaryData.baseDuration = store.SummaryData.baseDuration;
@@ -312,44 +354,7 @@ onMounted(() => {
         <div class="lefttop">
           <div>Comparison Chart</div>
         </div>
-        <div class="choosebox">
-          <div class="choose">
-            <div
-              style="background-color: rgb(204, 204, 204)"
-              class="item"
-            ></div>
-            <div>Baseline</div>
-          </div>
-          <div class="choose">
-            <div
-              style="background-color: rgba(130, 181, 199, 0.9)"
-              class="item"
-            ></div>
-            <div>Balanced</div>
-          </div>
-          <div class="choose">
-            <div
-              style="background-color: rgba(247, 220, 91, 0.9)"
-              class="item"
-            ></div>
-            <div>Fastest</div>
-          </div>
-          <div class="choose">
-            <div
-              style="background-color: rgba(219, 121, 48, 0.9)"
-              class="item"
-            ></div>
-            <div>Minimum Resources</div>
-          </div>
-          <div class="choose">
-            <div
-              style="background-color: rgba(170, 187, 93, 0.9)"
-              class="item"
-            ></div>
-            <div>Levelled Resources</div>
-          </div>
-        </div>
-        <Echarts style="width: 700px; height: 400px" id="myEcharts"></Echarts>
+        <Echarts style="width: 720px; height: 500px" id="myEcharts"></Echarts>
       </div>
       <div class="right">
         <div class="righttop">
@@ -390,17 +395,29 @@ onMounted(() => {
             individual specific use case.
           </div>
           <el-radio-group v-model="radio" class="radiobox">
-            <el-radio :label="0"
-              >Balanced <span>best combination of the others</span></el-radio
+            <el-radio @click="()=>{
+              console.log(111)
+              updateData(defoultData[0][4]);
+            }" :label="0"
+              >Balanced <span>Best combination of the others</span></el-radio
             >
-            <el-radio :label="1"
+            <el-radio
+            @click="()=>{
+              updateData(defoultData[1][4]);
+            }" :label="1"
               >Fastest <span>Shortest project duration</span></el-radio
             >
             <el-radio :label="2"
+            @click="()=>{
+              updateData(defoultData[2][4]);
+            }"
               >Minimum Resources
               <span>Least amount of required resources</span></el-radio
             >
             <el-radio :label="3"
+            @click="()=>{
+              updateData(defoultData[3][4]);
+            }"
               >Levelled Resources
               <span>Best resource distribution</span></el-radio
             >

@@ -6,12 +6,28 @@
         Detailed Report&nbsp;
         <span
           style="text-transform: capitalize; color: rgba(130, 181, 199, 0.9)"
-          >Balanced</span
+          >{{ store.SummaryData.group }}</span
         >
-        <div class="chip primary"><small>20 steps</small></div>
-        <div class="chip primary"><small>50% - 200% ratio</small></div>
+        <div class="chip primary">
+          <small>{{ store.setting.Steps }} steps</small>
+        </div>
+        <div class="chip primary">
+          <small>{{
+            `${store.setting.Ratio[0] * 100}% - ${
+              store.setting.Ratio[1] * 100
+            }% ratio`
+          }}</small>
+        </div>
       </h2>
-      <el-button @click="exportReport" class="row-btn">Export Report</el-button>
+      <el-button
+        @click="
+          () => {
+            dialog = true;
+          }
+        "
+        class="row-btn"
+        >Export Report</el-button
+      >
     </div>
     <!-- 内容区 -->
     <div class="content-box">
@@ -66,99 +82,52 @@
         <!-- 表格 -->
         <div class="table">
           <Table :tableOptions="tableOptions3"></Table>
-          <!-- <div class="pagin">
-            <span style="margin-right: 10px">Rows per page:</span>
-            <el-pagination
-              v-model:current-page="paginData.pageNum"
-              v-model:page-size="paginData.pageSize"
-              :page-sizes="[25, 50, 100]"
-              :small="small"
-              :disabled="disabled"
-              :background="background"
-              layout="sizes, prev, pager, next"
-              :total="1000"
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
-            />
-          </div> -->
         </div>
       </div>
-      <!-- Optimization Iteration Charts -->
-      <!-- <div class="box-one">
-        <div class="content-row">
-          <h2>Optimization Iteration Charts</h2>
-        </div>
-        <div
-          v-for="(item, index) in optionsData.one"
-          :key="index"
-          class="chart"
-        >
-          <div class="chart-title">
-            <h4 class="chart-text">Project Duration</h4>
-          </div>
-          <div class="legend">
-            <div class="item">
-              <div
-                style="
-                  width: 14px;
-                  height: 14px;
-                  background: rgb(230, 23, 23);
-                  margin-right: 5px;
-                  border-radius: 50%;
-                "
-              ></div>
-              <div>Step Selected</div>
-            </div>
-            <div class="item">
-              <div
-                style="
-                  width: 14px;
-                  height: 14px;
-                  background: rgb(0, 190, 174);
-                  margin-right: 5px;
-                  border-radius: 50%;
-                "
-              ></div>
-              <div>Constraints Satisfied</div>
-            </div>
-            <div class="item">
-              <div
-                style="
-                  width: 14px;
-                  height: 14px;
-                  background: rgb(204, 204, 204);
-                  margin-right: 5px;
-                  border-radius: 50%;
-                "
-              ></div>
-              <div>Constraints Violated</div>
-            </div>
-          </div>
-          <Echarts :options="item" ref="childComponent"></Echarts>
-        </div>
-      </div>
-
-      <div class="box-two">
-        <div class="content-row">
-          <h2>Resources Plots</h2>
-        </div>
-        <div
-          v-for="(item, index) in optionsData.two"
-          :key="index"
-          class="chart"
-        >
-          <div class="chart-title">
-            <h4 class="chart-text">Resources Plots</h4>
-          </div>
-          <Echarts :options="item" ref="childComponent"></Echarts>
-        </div>
-      </div> -->
     </div>
     <!-- 尾部 -->
     <div class="content-row">
       <el-button @click="back" class="back">BACK</el-button>
-      <el-button @click="exportReport" class="report">Export Report</el-button>
+      <el-button
+        @click="
+          () => {
+            dialog = true;
+          }
+        "
+        class="report"
+        >Export Report</el-button
+      >
     </div>
+    <!-- exportReport -->
+    <!-- 弹出确认框 -->
+    <v-dialog v-model="dialog" width="auto">
+      <v-card style="border-radius: 50px; width: 400px">
+        <v-card-text style="text-align: center">
+          Export Optimized File
+        </v-card-text>
+        <v-card-actions style="justify-content: center">
+          <v-btn
+          color="rgb(64, 170, 151)"
+            @click="
+              () => {
+                exportProjectReport();
+              }
+            "
+            >Original Format</v-btn
+          >
+          <v-btn
+          color="rgb(64, 170, 151)"
+         
+            @click="
+              () => {
+                exportExcel();
+              }
+            "
+            >EXCEL</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -171,34 +140,36 @@ import { data } from "@/utils/constants"; //数据要删
 import { useCounterStore } from "../../../store";
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 import { useRouter } from "vue-router";
-const router = useRouter();
-function downloadFile(url) {
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `${store.truefile.split(".")[0]}.${store.file.name.split(".")[1]}`;
-  // console.log(`${store.truefile.split(".")[0]}.${store.file.name.split(".")[1]}`);
-  link.style.display = "none";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-function exportReport(){
-  let Url = `https://api.frontline-optimizer.com/fileDownload/reports/${store.SummaryData.group}-${store.file.name.split(".")[0]}_FrontlineExport.${store.file.name.split(".")[1]}`;
-  downloadFile(Url);
+import api from "../../../api/index.js";
 
+let dialog = ref(false);
+
+const router = useRouter();
+
+function exportProjectReport() {
+  let Url = `${store.SummaryData.group}-${
+    store.file.name.split(".")[0]
+  }_FrontlineExport.${store.file.name.split(".")[1]}`;
+  api.getProjectReport(Url, store.truefile);
 }
-function back(){
-  router.push({ name: "optimizedSummary"});
+function exportExcel() {
+  let Url = `${store.SummaryData.group}-${
+    store.file.name.split(".")[0]
+  }_FrontlineExport.${store.file.name.split(".")[1]}`;
+  api.getExcelReport(Url, store.truefile);
+}
+function back() {
+  router.push({ name: "optimizedSummary" });
   store.active = 2;
 }
 onBeforeRouteLeave((to, from) => {
-  if (to.name=='InputData') {
-    clear()
+  if (to.name == "InputData") {
+    clear();
   }
-    })
-    // 组件销毁时摧毁实例
+});
+// 组件销毁时摧毁实例
 function clear() {
-  store.taskData=[]
+  store.taskData = [];
 }
 const store = useCounterStore();
 let changedTask = store.selectedData.tasks.map((e) => {
@@ -213,7 +184,7 @@ let changedTask = store.selectedData.tasks.map((e) => {
     Name: e.name,
     "Duration(Baseline)": e.remainingDuration,
     "Duration(New)": e.newDuration,
-    Ratio: e.durationRatio,
+    Ratio: e.durationRatio.toFixed(2),
   };
 });
 let allResources = store.selectedData.newResources.map((e) => {
@@ -234,20 +205,21 @@ let TaskResource = computed(() => {
   });
 
   let TaskResourcesData = TaskResources.flatMap((e) => {
-    
     let resources = Object.values(e.resources);
     let taskobj = store.selectedData.tasks.find((obj) => obj.id == e.id);
 
     return resources.map((resource) => ({
       Critical: taskobj.critical,
       "Task Code": taskobj.ID,
-      "Resource Name": store.selectedData.newResources.find((obj) => obj.id == resource.resourceId)?.name,
+      "Resource Name": store.selectedData.newResources.find(
+        (obj) => obj.id == resource.resourceId
+      )?.name,
       "Task Name": taskobj.name,
       "Duration(Old)": taskobj.plannedDuration,
       "Duration(New)": taskobj.newDuration,
-      "Utils(Old)": resource.plannedUnitsPerHour,
-      "Utils(New)": resource.newUnitsPerHour,
-      "ToTal Planned Units": resource.remainingUnits,
+      "Units(Old)": resource.plannedUnitsPerHour.toFixed(2),
+      "Units(New)":  Number(resource.newUnitsPerHour).toFixed(2),
+      "Total Planned Units": resource.remainingUnits,
     }));
   });
 
@@ -366,13 +338,13 @@ const tableOptions = reactive({
 });
 const tableOptions2 = reactive({
   data: allResources,
-  colWidths: [100, 245, 250, 250, 100, 200,100,100],
+  colWidths: [100, 245, 250, 250, 100, 200, 100, 100],
   colHeaders: ["ID", "Code", "Type", "Name", "Distribution", "Max", "Span"],
   tableName: "two",
 });
 const tableOptions3 = reactive({
   data: TaskResource.value,
-  colWidths: [100, 245, 250, 150, 100, 100,100,100,100],
+  colWidths: [100, 245, 250, 150, 110, 110, 110, 110, 150],
   colHeaders: [
     "Critical",
     "Task Code",
@@ -380,9 +352,9 @@ const tableOptions3 = reactive({
     "Task Name",
     "Duration(Old)",
     "Duration(New)",
-    "Utils(Old)",
-    "Utils(Nes)",
-    "ToTal Planned Units",
+    "Units(Old)",
+    "Units(New)",
+    "Total Planned Units",
   ],
   tableName: "three",
 });
@@ -587,6 +559,7 @@ const tableOptions3 = reactive({
           line-height: 20px;
         }
       }
+
       .svg {
         width: 100%;
         height: 400px;

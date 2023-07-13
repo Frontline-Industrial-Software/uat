@@ -30,14 +30,15 @@
                 style="color: rgb(42, 123, 108); margin-left: 10px"
                 >{{ store.truefile }}</span
               >
-             
             </div>
           </v-sheet>
         </v-col>
         <v-col>
           <v-sheet class="pa-2 ma-2">
             or
-            <span @click="uploadDemo()" style="text-decoration: underline ;cursor:pointer;"
+            <span
+              @click="uploadDemo()"
+              style="text-decoration: underline; cursor: pointer"
               >use a demo project</span
             >
           </v-sheet>
@@ -45,19 +46,26 @@
       </v-row>
       <v-divider></v-divider>
       <div :class="{ disabled: !store.file.name }">
-        <v-row no-gutters>
+        <v-row :disabled="!store.file.name" no-gutters>
           <v-col>
-            <v-sheet class="pa-2 ma-2">
+            <v-sheet  class="pa-2 ma-2">
               <h2>Constraints</h2>
-              <h3>Upload your constraints <span style="cursor:pointer;" @click="downloadTemplate">(download template)</span></h3>
+              <h3>
+                Upload your constraints
+                <span
+                  style="cursor: pointer; text-decoration: underline"
+                  @click="downloadTemplate"
+                  >(download template)</span
+                >
+              </h3>
             </v-sheet>
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
               <div class="uploadBox">
-                <Upload />
+                <ConstraintsUpload/>
                 <span style="color: rgb(42, 123, 108); margin-left: 10px"
-                  >No file chosen</span
+                  >{{store.ConstraintsFile}}</span
                 >
               </div>
             </v-sheet>
@@ -77,7 +85,7 @@
             <v-sheet class="pa-2 ma-2">
               <label>Ignore Project Scheduled Dates</label>
 
-              <v-radio-group v-model="store.setting.IgnoreProject" inline>
+              <v-radio-group :disabled="!store.file.name" v-model="store.setting.IgnoreProject" inline>
                 <v-radio label="Yes" value="true"></v-radio>
                 <v-radio label="No" value="false"></v-radio>
               </v-radio-group>
@@ -88,9 +96,9 @@
               Learning Rate
               <p>
                 <v-text-field
-                density="compact"
-                
-                v-model="store.setting.Rate"
+                :disabled="!store.file.name"
+                  density="compact"
+                  v-model="store.setting.Rate"
                   placeholder="0.025"
                   variant="outlined"
                 >
@@ -111,6 +119,7 @@
                 }%)`
               }}
               <v-range-slider
+              :disabled="!store.file.name"
                 :max="2"
                 :min="0.1"
                 :step="0.1"
@@ -128,6 +137,7 @@
             <v-sheet class="pa-2 ma-2">
               Optimization Steps ({{ store.setting.Steps }})
               <v-slider
+              :disabled="!store.file.name"
                 :step="1"
                 v-model="store.setting.Steps"
                 color="rgb(112, 191, 177)"
@@ -163,8 +173,9 @@
 
 <script setup>
 import { useCounterStore } from "../../../store";
-import { reactive, ref,onMounted } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import Upload from "./upload.vue";
+import ConstraintsUpload from "./constraintsUpload.vue";
 import api from "../../../api/index.js";
 import { useRouter } from "vue-router";
 const router = useRouter();
@@ -176,11 +187,11 @@ async function Port() {
   router.push({ name: "BaselineSummary" });
   store.active = 1;
 }
-onMounted(()=>{
-  clear()
-})
-function clear(){
-  store.taskData.data=[]
+onMounted(() => {
+  clear();
+});
+function clear() {
+  store.taskData.data = [];
 }
 async function uploadDemo() {
   fetch("demo_project.xml")
@@ -193,15 +204,11 @@ async function uploadDemo() {
       store.file.name = a.data.mapping[files.name];
     });
 }
-function downloadTemplate(){
-  const link = document.createElement("a");
-  let url='https://api.frontline-optimizer.com/fileDownload/constraints/8995bdc7b2f1fb2d50730000000.xlsx'
-  link.href = url;
-  link.download = "constraints.xlsx";
-  link.style.display = "none";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+async function downloadTemplate() {
+ await api.constraintsFileDownload(
+    `${store.file.name.split(".")[0]}.xlsx`
+  );
+
 }
 </script>
 

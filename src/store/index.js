@@ -2,8 +2,8 @@ import { defineStore, storeToRefs } from "pinia";
 import { ref, computed, reactive } from "vue";
 
 import { useRouter } from "vue-router";
-import NProgress from 'nprogress';
-import 'nprogress/nprogress.css';
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
 
 const router = useRouter();
 // 组合式写法
@@ -26,13 +26,21 @@ export const useCounterStore = defineStore(
       name: null,
       size: null,
     };
+    let ConstraintsFile = ref(null);
     // 任务数据
     let taskData = ref([]);
+    let dataArray = reactive({
+      baseline: { all: [], data: [] },
+      Balanced: { all: [], data: [] },
+      Fastest: { all: [], data: [] },
+      Minimum_Resources: { all: [], data: [] },
+      Levelled_Resources: { all: [], data: [] },
+    });
     let selectedData = ref(null);
     // 真实文件名称
     let truefile = ref(null);
     const count = ref(0);
-    let SummaryData=ref(null)
+    let SummaryData = ref(null);
     // size大小转换函数
     function formatBytes(size) {
       if (!size) return "";
@@ -47,7 +55,6 @@ export const useCounterStore = defineStore(
     }
     // 建立websocket连接
     async function connectWebsocket() {
-
       const URL = "wss://api.frontline-optimizer.com/websockets";
       const socket = new WebSocket(
         // 此处填写你要连接的ws地址
@@ -59,10 +66,13 @@ export const useCounterStore = defineStore(
       };
       socket.onopen = function () {
         console.log("成功");
-           // 显示进度条
-    NProgress.start();
+        // NProgress.configure({ minimum: 0.5 });
+        // NProgress.start();
+        NProgress.set(0.5);
         // taskData.value=[]
         /*
+
+        
          * 连接成功
          * */
         let data = {
@@ -79,7 +89,6 @@ export const useCounterStore = defineStore(
         };
 
         data = JSON.stringify(data);
-
         if (file.name) {
           socket.send(data);
         } else {
@@ -88,13 +97,57 @@ export const useCounterStore = defineStore(
 
         // 发送心跳防止ws协议自动断联
       };
-      socket.onclose = function () {
-       
-      };
+      socket.onclose = function () {};
       // 发送
+
       socket.onmessage = function (e) {
         let data = JSON.parse(JSON.parse(e?.data));
+        switch (data?.result?.group) {
+          case "baseline":
+            dataArray.baseline.all.push(data);
+            dataArray.baseline.data.push([
+              data.result.projectDurationDays,
+              data.result.maxResourceUnit,
+              data,
+            ]);
+            break;
+          case "Balanced":
+            dataArray.Balanced.all.push(data);
+            dataArray.Balanced.data.push([
+              data.result.projectDurationDays,
+              data.result.maxResourceUnit,
+              data,
+            ]);
+            break;
+          case "Fastest":
+            dataArray.Fastest.all.push(data);
+            dataArray.Fastest.data.push([
+              data.result.projectDurationDays,
+              data.result.maxResourceUnit,
+              data,
+            ]);
+            break;
+          case "Minimum_Resources":
+            dataArray.Minimum_Resources.all.push(data);
+            dataArray.Minimum_Resources.data.push([
+              data.result.projectDurationDays,
+              data.result.maxResourceUnit,
+              data,
+            ]);
+            break;
+          case "Levelled_Resources":
+            dataArray.Levelled_Resources.all.push(data);
+            dataArray.Levelled_Resources.data.push([
+              data.result.projectDurationDays,
+              data.result.maxResourceUnit,
+              data,
+            ]);
+            break;
+          default:
+            break;
+        }
         if (data.name && data.result?.group !== "baseline") {
+       
           taskData.value.push([
             data.result.projectDurationDays,
             data.result.maxResourceUnit,
@@ -119,7 +172,9 @@ export const useCounterStore = defineStore(
       active,
       selectedData,
       end,
-      SummaryData
+      SummaryData,
+      dataArray,
+      ConstraintsFile,
     };
   },
   {}

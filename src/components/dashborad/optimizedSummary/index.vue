@@ -186,12 +186,13 @@ let searchData = ref("");
 // let types = ref();
 let types = computed(() => {
   let data = store.selectedData.baselineResources.map((e) => {
-    return e.name;
+    console.log(e.id);
+    return {id:e.id, name:e.name};
   });
   if (searchData.value) {
     const regex = new RegExp(searchData.value, "i");
     return data.filter((e) => {
-      return regex.test(e);
+      return regex.test(e.name);
     });
   } else {
     return data;
@@ -212,7 +213,7 @@ let baselineResources = computed(() => {
   const baselineResources = store.selectedData.baselineResources;
   if (typeActive.value) {
     const filteredArray = baselineResources.filter(
-      (item) => item.name && item.name === typeActive.value
+      (item) => item.id && item.id === typeActive.value
     );
     return filteredArray[0].distribution;
   } else {
@@ -224,7 +225,7 @@ let newResources = computed(() => {
   const newResources = store.selectedData.newResources;
   if (typeActive.value) {
     let datas = newResources.filter(
-      (item) => item.name && item.name === typeActive.value
+      (item) => item.id && item.id === typeActive.value
     );
     // console.log(datas);
     return datas[0].distribution;
@@ -452,14 +453,15 @@ watch(typeActive, () => {
             <v-btn
               variant="text"
               :value="i"
-              :class="{ activeType: typeActive == items }"
+              :class="{ activeType: typeActive == items.id }"
               @click="
                 () => {
-                  chooseType(items);
+                  console.log(items)
+                  chooseType(items.id);
                 }
               "
             >
-              {{ items }}</v-btn
+              {{ items.name }}</v-btn
             >
           </div>
         </div>

@@ -29,10 +29,10 @@ function toPercent(num, total) {
 // 组件销毁时摧毁实例
 function clear() {
   store.taskData = [];
-  Object.keys(store.dataArray).forEach(key => {
+  Object.keys(store.dataArray).forEach((key) => {
     store.dataArray[key].all = [];
     store.dataArray[key].data = [];
-});
+  });
   data = null;
   store.end.data = false;
 }
@@ -195,7 +195,10 @@ let selectData = {
 
 // 初始化图表实例
 let chart;
-let activeIndex = ref("baseline0");
+let activeIndex = ref("Balanced1");
+watch(activeIndex,()=>{
+  chart.setOption(option.value);
+})
 function initChart() {
   chart = echarts.init(document.getElementById("myEcharts"), "purple-passion");
   echarts.registerTransform(ecStat.transform.clustering);
@@ -205,6 +208,12 @@ function initChart() {
     activeIndex.value = param.seriesName + datas.step;
     selectData.preset = param.seriesName;
     selectData.step = datas.step;
+    if (param.seriesName == "baseline") {
+      selectData.preset = "Balanced";
+    } else {
+      selectData.preset = param.seriesName;
+    }
+
     switch (selectData.preset) {
       case "Balanced":
         radio.value = 0;
@@ -222,10 +231,7 @@ function initChart() {
       default:
         break;
     }
-    console.log(datas);
     updateData(datas);
-    // console.log(option.value);
-    chart.setOption(option.value);
   });
 }
 
@@ -249,7 +255,7 @@ let SummaryData = reactive({
 let radio = ref(0);
 
 let defoultData = computed(() => {
-  return [
+  return [  
     store.taskData.find((e) => e[4].group === "Balanced"),
     store.taskData.find((e) => e[4].group === "Fastest"),
     store.taskData.find((e) => e[4].group === "Minimum_Resources"),
@@ -293,11 +299,12 @@ for (var i = 0; i < CLUSTER_COUNT; i++) {
 }
 async function nextOptimized() {
   store.selectedData = null;
+  console.log(selectData);
   let data = await api.getOptimized({ ...selectData }, store.file.size);
+  console.log(data);
   store.SummaryData = { ...SummaryData };
   store.selectedData = data.data;
   store.active = 2;
-  console.log(store.selectedData);
   router.push({ name: "optimizedSummary" });
 }
 watch(store.taskData, () => {
@@ -315,7 +322,6 @@ watch(
 );
 
 onMounted(() => {
-  console.log(store.dataArray);
   if (chart) {
     chart.clear();
   }
@@ -395,29 +401,46 @@ onMounted(() => {
             individual specific use case.
           </div>
           <el-radio-group v-model="radio" class="radiobox">
-            <el-radio @click="()=>{
-              console.log(111)
-              updateData(defoultData[0][4]);
-            }" :label="0"
+            <el-radio
+              @click="
+                () => {
+                  activeIndex='Balanced1'
+                  updateData(defoultData[0][4]);
+                }
+              "
+              :label="0"
               >Balanced <span>Best combination of the others</span></el-radio
             >
             <el-radio
-            @click="()=>{
-              updateData(defoultData[1][4]);
-            }" :label="1"
+              @click="
+                () => {
+                  activeIndex='Fastest1'
+                  updateData(defoultData[1][4]);
+                }
+              "
+              :label="1"
               >Fastest <span>Shortest project duration</span></el-radio
             >
-            <el-radio :label="2"
-            @click="()=>{
-              updateData(defoultData[2][4]);
-            }"
+            <el-radio
+              :label="2"
+              @click="
+                () => {
+                  activeIndex='Minimum_Resources1'
+                  updateData(defoultData[2][4]);
+                }
+              "
               >Minimum Resources
               <span>Least amount of required resources</span></el-radio
             >
-            <el-radio :label="3"
-            @click="()=>{
-              updateData(defoultData[3][4]);
-            }"
+            <el-radio
+              :label="3"
+              @click="
+                () => {
+                  activeIndex='Levelled_Resources1'
+                  updateData(defoultData[3][4]);
+
+                }
+              "
               >Levelled Resources
               <span>Best resource distribution</span></el-radio
             >

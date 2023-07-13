@@ -104,12 +104,14 @@ export const useCounterStore = defineStore(
         let data = JSON.parse(JSON.parse(e?.data));
         switch (data?.result?.group) {
           case "baseline":
-            dataArray.baseline.all.push(data);
-            dataArray.baseline.data.push([
-              data.result.projectDurationDays,
-              data.result.maxResourceUnit,
-              data,
-            ]);
+            if (dataArray.baseline.all.length === 0) { // 检查数组是否为空
+              dataArray.baseline.all.push(data);
+              dataArray.baseline.data.push([
+                data.result.projectDurationDays,
+                data.result.maxResourceUnit,
+                data,
+              ]);
+            }
             break;
           case "Balanced":
             dataArray.Balanced.all.push(data);
@@ -147,7 +149,6 @@ export const useCounterStore = defineStore(
             break;
         }
         if (data.name && data.result?.group !== "baseline") {
-       
           taskData.value.push([
             data.result.projectDurationDays,
             data.result.maxResourceUnit,

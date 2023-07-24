@@ -7,6 +7,7 @@ import {
   watch,
   reactive,
   computed,
+  onActivated,
 } from "vue";
 import * as echarts from "echarts";
 import { useRouter } from "vue-router";
@@ -15,13 +16,21 @@ const store = useCounterStore();
 import ecStat from "echarts-stat";
 import api from "../../../api/index.js";
 import { onBeforeRouteLeave } from "vue-router";
+import { arrowMiddleware } from "element-plus";
+import { toRaw } from '@vue/reactivity';
 onBeforeRouteLeave((to, from, next) => {
   if (to.name == "InputData") {
+    activeIndex.value = "Balanced1";
+    radio.value = 0;
     clear();
   }
   next();
 });
-
+let selectData = reactive({
+  preset: "Balanced",
+  fileName: store.file.name,
+  step: 3,
+});
 // 去百分比
 function toPercent(num, total) {
   return Math.round((num / total) * 10000) / 100.0 + "%"; // 小数点后两位百分比
@@ -33,46 +42,69 @@ function clear() {
     store.dataArray[key].all = [];
     store.dataArray[key].data = [];
   });
-  data = null;
   store.end.data = false;
 }
 const router = useRouter();
-// 获取数据
-let data = store.taskData;
 
-// 配置项
+// 数据配置项
 
 function seriesData(name, basecolor, activecolor) {
   return {
     type: "scatter",
+
+    selectedMode: "single",
+    selectedOffset: 10,
+    select: {
+      scale: 2,
+      itemStyle: {
+        color: "#40aa97",
+        borderColor: "#40aa97",
+        shadowColor: "#40aa97",
+        borderWidth: 10,
+        shadowBlur: 30,
+        opacity: 1,
+        // symbolSize: 10, // 调整被选中元素的大小
+      },
+    },
+    emphasis: {
+      scale: 2,
+      focus: "series",
+      blurScope: "coordinateSystem",
+    },
+
     data: store.dataArray[name].data,
     name: name,
-    symbolSize: 15,
+    symbolSize: 8,
+
     itemStyle: {
       color: (data) => {
-        if (activeIndex.value == data.seriesName + data.data[2].result.step) {
-          return activecolor;
-        }
         return basecolor;
       },
       borderWidth: 1,
       borderColor: "#0b0f07",
+      opacity: 0.5,
     },
   };
 }
-
+// !图表配置项
 var option = computed(() => {
-  const proxyArray = store.taskData.map((e) => {
-    return e[0];
-  });
+  // 获取 x 轴的最小值和最大值
+  const xValues = Object.values(store.dataArray).flatMap((series) =>
+    series.data.map((item) => {
+      return item.value[0];
+    })
+  );
+  const xMinValue = parseFloat((Math.min(...xValues) * 0.95).toFixed(2));
+  const xMaxValue = parseFloat((Math.max(...xValues) * 1.05).toFixed(2));
 
-  const proxyArray2 = store.taskData.map((e) => {
-    return e[1];
-  });
-  const max = parseFloat((Math.max(...proxyArray) * 1.05).toFixed(2));
-  const min = parseFloat((Math.min(...proxyArray) * 0.95).toFixed(2));
-  const max2 = parseFloat((Math.max(...proxyArray2) * 1.05).toFixed(2));
-  const min2 = parseFloat((Math.min(...proxyArray2) * 0.95).toFixed(2));
+  // 获取 y 轴的最小值和最大值
+  const yValues = Object.values(store.dataArray).flatMap((series) =>
+    series.data.map((item) => {
+      return item.value[1];
+    })
+  );
+  const yMinValue = parseFloat((Math.min(...yValues) * 0.95).toFixed(2));
+  const yMaxValue = parseFloat((Math.max(...yValues) * 1.05).toFixed(2));
   return {
     toolbox: {
       show: true,
@@ -81,20 +113,6 @@ var option = computed(() => {
         saveAsImage: { show: true },
       },
     },
-    dataset: [
-      {
-        transform: {
-          type: "ecStat:clustering",
-          // print: true,
-          config: {
-            //是直接显示在图表里面的
-            clusterCount: CLUSTER_COUNT,
-            outputType: "single",
-            outputClusterIndexDimension: DIENSIION_CLUSTER_INDEX,
-          },
-        },
-      },
-    ],
 
     grid: {
       // left: 120
@@ -106,8 +124,8 @@ var option = computed(() => {
       nameLocation: "middle",
       padding: [10],
       height: 100,
-      min: min,
-      max: max,
+      min: xMinValue,
+      max: xMaxValue,
       nameTextStyle: {
         align: "center",
         padding: [30, 0, 0, 0],
@@ -118,8 +136,8 @@ var option = computed(() => {
     },
     yAxis: {
       name: "Maximum Resource (units/day)",
-      max: max2,
-      min: min2,
+      max: yMaxValue,
+      min: yMinValue,
       padding: [10],
       nameLocation: "end",
       nameTextStyle: {
@@ -187,25 +205,34 @@ var option = computed(() => {
   };
 });
 
-let selectData = {
-  preset: "Balanced",
-  fileName: store.file.name,
-  step: 3,
-};
-
 // 初始化图表实例
-let chart;
+let chart = null;
 let activeIndex = ref("Balanced1");
-watch(activeIndex,()=>{
+watch(activeIndex, () => {
   chart.setOption(option.value);
-})
+});
+
+watch(store.dataArray, () => {
+  chart.setOption(option.value);
+});
+// 初始化图表
 function initChart() {
-  chart = echarts.init(document.getElementById("myEcharts"), "purple-passion");
+  if (chart == null) {
+    chart = echarts.init(
+      document.getElementById("myEcharts"),
+      "purple-passion"
+    );
+  }
   echarts.registerTransform(ecStat.transform.clustering);
-  // 点击事件获取值
+
+  // 图表点击事件获取值
   chart.on("click", function (param) {
-    let datas = param.data[2].result;
-    activeIndex.value = param.seriesName + datas.step;
+    chart.dispatchAction({
+      type: "select",
+      name: param.name,
+    });
+    let datas = param.data.value[2].result;
+    // activeIndex.value = param.name;
     selectData.preset = param.seriesName;
     selectData.step = datas.step;
     if (param.seriesName == "baseline") {
@@ -213,7 +240,6 @@ function initChart() {
     } else {
       selectData.preset = param.seriesName;
     }
-
     switch (selectData.preset) {
       case "Balanced":
         radio.value = 0;
@@ -240,94 +266,80 @@ function renderChart() {
   chart.setOption(option.value);
 }
 // 更新选中值
-// 数据绑定
+// 右侧被选中数据
 let SummaryData = reactive({
-  baseDuration: 12,
-  changedDuration: 12,
-  changgedTasks: 22,
-  TotalTasks: 22,
-  baseCriticalPath: 22,
-  changedCriticalPath: 20,
-  TotalResources: 1,
+  baseDuration: '-',
+  changedDuration: '-',
+  changgedTasks: '-',
+  TotalTasks: '-',
+  baseCriticalPath: '-',
+  changedCriticalPath: '-',
+  TotalResources: '-',
   group: "",
 });
-//页面加载创建
+
+// 右侧单选框
 let radio = ref(0);
-
-let defoultData = computed(() => {
-  return [  
-    store.taskData.find((e) => e[4].group === "Balanced"),
-    store.taskData.find((e) => e[4].group === "Fastest"),
-    store.taskData.find((e) => e[4].group === "Minimum_Resources"),
-    store.taskData.find((e) => e[4].group === "Levelled_Resources"),
-    store.taskData.find((e) => e[4].group === "baseline"),
-  ];
-});
-
+// 右侧数据更新
 function updateData(data) {
-  console.log(data.changedTasksLen);
   SummaryData.group = data.group;
-  SummaryData.baseDuration = Math.floor(data.baselineDurationDays);
-  SummaryData.changedDuration = Math.floor(data.projectDurationDays);
-  SummaryData.changgedTasks = Math.floor(data.changedTasksLen);
-  SummaryData.TotalTasks = Math.floor(data.baselineTasksLen);
-  SummaryData.baseCriticalPath = Math.floor(data.baselineCriticalTasksLen);
-  SummaryData.changedCriticalPath = Math.floor(data.newCriticalTasksLen);
-  SummaryData.TotalResources = Math.floor(data.totalResourceCount);
+  SummaryData.baseDuration = Math.ceil(data.baselineDurationDays);
+  SummaryData.changedDuration = Math.ceil(data.projectDurationDays);
+  SummaryData.changgedTasks = Math.ceil(data.changedTasksLen);
+  SummaryData.TotalTasks = Math.ceil(data.baselineTasksLen);
+  SummaryData.baseCriticalPath = Math.ceil(data.baselineCriticalTasksLen);
+  SummaryData.changedCriticalPath = Math.ceil(data.newCriticalTasksLen);
+  SummaryData.TotalResources = Math.ceil(data.totalResourceCount);
 }
 
-//   //数据块的种类（比如图中有6种颜色的数据块）显示在头部里面的
-var CLUSTER_COUNT = 6;
-var DIENSIION_CLUSTER_INDEX = 2; //维度？
-//区分不同数据的颜色
-var COLOR_ALL = [
-  "#37A2DA",
-  "#e06343",
-  "#37a354",
-  "#b55dba",
-  "#b5bd48",
-  "#8378EA",
-  "#96BFFF",
-];
-var pieces = [];
-for (var i = 0; i < CLUSTER_COUNT; i++) {
-  pieces.push({
-    value: i,
-    // label: 'cluster ' + i,
-    color: COLOR_ALL[i],
-  });
-}
+// 按钮点击跳转
 async function nextOptimized() {
-  store.selectedData = null;
-  console.log(selectData);
+  selectData.fileName = store.file.name;
   let data = await api.getOptimized({ ...selectData }, store.file.size);
-  console.log(data);
   store.SummaryData = { ...SummaryData };
+  store.selectedData = null;
   store.selectedData = data.data;
   store.active = 2;
+  store.selectChange = true;
   router.push({ name: "optimizedSummary" });
 }
-watch(store.taskData, () => {
-  renderChart();
-});
 
+// 获取4个默认选项的id
+let DefaultData=ref(null)
+function getDefault() {
+  let DefaultDatas=[];
+  for (const key in store.dataArray) {
+    let data=toRaw(store.dataArray[key].data)
+    data.sort((a,b)=>a.value[2].result.loss - b.value[2].result.loss)
+    DefaultDatas.push(data)
+  }
+  return DefaultDatas
+}
+
+/* 监听所有数据是否获取完成 -------------------------------------------------------------------------- */
 watch(
   store.end,
   () => {
     if (store.end.data) {
-      updateData(defoultData.value[0][4]);
+      DefaultData.value=getDefault()
+      radio.value = 0;
+      setTimeout(() => {
+        chart.dispatchAction({
+          type: "select",
+          name: DefaultData.value[1][0].name,
+        });
+        updateData(DefaultData.value[1][2].value[2].result);
+        selectData.preset = "Balanced";
+        selectData.step = DefaultData.value[1][2].value[2].result.step;
+      }, 0);
     }
   },
   { deep: true }
 );
-
-onMounted(() => {
-  if (chart) {
-    chart.clear();
-  }
+onActivated(() => {
   initChart();
+
   renderChart();
-  console.log();
   if (store.SummaryData) {
     SummaryData.group = store.SummaryData.group;
     SummaryData.baseDuration = store.SummaryData.baseDuration;
@@ -371,7 +383,7 @@ onMounted(() => {
             }}
           </div>
           <h1>
-            {{ SummaryData.changedDuration }}
+            {{ SummaryData.changedDuration }}/
             <span>{{ SummaryData.baseDuration }}</span> days
           </h1>
           <div>Changed Tasks vs Total N of Tasks</div>
@@ -404,20 +416,26 @@ onMounted(() => {
             <el-radio
               @click="
                 () => {
-                  activeIndex='Balanced1'
-                  updateData(defoultData[0][4]);
+                  chart.dispatchAction({ type: 'select', name: DefaultData[1][0].name });
+                  activeIndex =DefaultData[1][0].name;
+                  selectData.preset = DefaultData[1][2].value[2].name;
+                  selectData.step = DefaultData[1][2].value[2].result.step;
+                  updateData(DefaultData[1][2].value[2].result);
                 }
               "
               :label="0"
               >Balanced <span>Best combination of the others</span></el-radio
             >
             <el-radio
-              @click="
-                () => {
-                  activeIndex='Fastest1'
-                  updateData(defoultData[1][4]);
-                }
-              "
+            @click="
+            () => {
+              chart.dispatchAction({ type: 'select', name: DefaultData[2][0].name });
+              activeIndex =DefaultData[2][0].name;
+              selectData.preset = DefaultData[2][2].value[2].name;
+              selectData.step = DefaultData[2][2].value[2].result.step;
+              updateData(DefaultData[2][2].value[2].result);
+            }
+          "
               :label="1"
               >Fastest <span>Shortest project duration</span></el-radio
             >
@@ -425,8 +443,11 @@ onMounted(() => {
               :label="2"
               @click="
                 () => {
-                  activeIndex='Minimum_Resources1'
-                  updateData(defoultData[2][4]);
+                  chart.dispatchAction({ type: 'select', name: DefaultData[3][0].name });
+                  activeIndex =DefaultData[3][0].name;
+                  selectData.preset = DefaultData[3][2].value[2].name;
+                  selectData.step = DefaultData[3][2].value[2].result.step;
+                  updateData(DefaultData[3][2].value[2].result);
                 }
               "
               >Minimum Resources
@@ -435,19 +456,21 @@ onMounted(() => {
             <el-radio
               :label="3"
               @click="
-                () => {
-                  activeIndex='Levelled_Resources1'
-                  updateData(defoultData[3][4]);
-
-                }
-              "
+              () => {
+                chart.dispatchAction({ type: 'select', name: DefaultData[4][0].name });
+                activeIndex =DefaultData[4][0].name;
+                selectData.preset = DefaultData[4][2].value[2].name;
+                selectData.step = DefaultData[4][2].value[2].result.step;
+                updateData(DefaultData[4][2].value[2].result);
+              }
+            "
               >Levelled Resources
               <span>Best resource distribution</span></el-radio
             >
           </el-radio-group>
         </div>
         <v-btn
-          :disabled="!store.end"
+          :disabled="!store.end.data"
           @click="nextOptimized"
           class="btn"
           icon="el-icon-delete"

@@ -173,7 +173,7 @@
 
 <script setup>
 import { useCounterStore } from "../../../store";
-import { reactive, ref, onMounted } from "vue";
+import { reactive, ref, onMounted ,onActivated} from "vue";
 import Upload from "./upload.vue";
 import ConstraintsUpload from "./constraintsUpload.vue";
 import api from "../../../api/index.js";
@@ -187,7 +187,7 @@ async function Port() {
   router.push({ name: "BaselineSummary" });
   store.active = 1;
 }
-onMounted(() => {
+onActivated(() => {
   clear();
 });
 function clear() {

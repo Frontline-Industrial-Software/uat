@@ -28,9 +28,7 @@ import api from "../../../api/index.js";
 
 const beforeUpload = async (files) => {
   let a = await api.sendConstraintsFile(files, store.file.name);
-  console.log(a);
   store.ConstraintsFile = a;
-  console.log(store.ConstraintsFile);
   return false;
 };
 </script>

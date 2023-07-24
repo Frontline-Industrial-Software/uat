@@ -10,9 +10,7 @@ const io = new Server(8080, {
 });
 
 io.on("connection", (socket) => {
-  console.log('connection');
   socket.on("update item", (file,callback) => {
-    console.log(file)
     callback({
       status: "ok",
       aaa:'1212',

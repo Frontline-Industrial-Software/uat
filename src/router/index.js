@@ -10,10 +10,10 @@ import awsconfig from "../utils/aws-exports";
 import Login from "../components/login.vue";
 import Dashboard from "../components/dashborad/index.vue";
 // 子路由
-import InputData from "../components/dashborad/inputData/index.vue";
-import BaselineSummary from "../components/dashborad/baselineSummary/index.vue";
-import OptimizedReport from "../components/dashborad/optimizedReport/index.vue";
-import optimizedSummary from "../components/dashborad/optimizedSummary/index.vue";
+// import InputData from "../components/dashborad/inputData/index.vue";
+// import BaselineSummary from "../components/dashborad/baselineSummary/index.vue";
+// import OptimizedReport from "../components/dashborad/optimizedReport/index.vue";
+// import optimizedSummary from "../components/dashborad/optimizedSummary/index.vue";
 
 import NotFound from "@/components/404/404.vue";
 //2. 路由配置
@@ -37,13 +37,13 @@ const routes = [
     children: [
       {
         path: "inputData",
-        component: InputData,
+        component: () => import('@/components/dashborad/inputData/index.vue'),
         name: "InputData",
         
       },
       {
         path: "baselineSummary",
-        component: BaselineSummary,
+        component: () => import('@/components/dashborad/baselineSummary/index.vue'),
         name: "BaselineSummary",
         beforeEnter: (to, from,next) => {
           if (!from.name) {
@@ -52,9 +52,9 @@ const routes = [
           next()
         },
       },
-      {
+      { 
         path: "optimizedReport",
-        component: OptimizedReport,
+        component: () => import('@/components/dashborad/optimizedReport/optimizedReport.vue'),
         name: "OptimizedReport",
         beforeEnter: (to, from,next) => {
           if (!from.name) {
@@ -65,7 +65,7 @@ const routes = [
       },
       {
         path: "optimizedSummary",
-        component: optimizedSummary,
+        component: () => import('@/components/dashborad/optimizedSummary/index.vue'),
         name: "optimizedSummary",
         beforeEnter: (to, from,next) => {
           if (!from.name) {
@@ -95,7 +95,6 @@ router.beforeEach(async (to, from, next) => {
     try {
       const userInfo = await Auth.currentAuthenticatedUser();
       if (!to.fullPath.includes("inputdata")) {
-        console.log('返回');
       }
       next();
     } catch (error) {

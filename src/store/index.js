@@ -20,7 +20,8 @@ export const useCounterStore = defineStore(
     let end = reactive({ data: false });
     // 导航栏控制
     let active = ref(0);
-    let port = null;
+
+    let activeIndex=ref("Balanced1");
     // 后端处理项目信息
     let file = {
       name: null,
@@ -37,9 +38,9 @@ export const useCounterStore = defineStore(
       Levelled_Resources: { all: [], data: [] },
     });
     let selectedData = ref(null);
+    let selectChange=false;
     // 真实文件名称
     let truefile = ref(null);
-    const count = ref(0);
     let SummaryData = ref(null);
     // size大小转换函数
     function formatBytes(size) {
@@ -65,7 +66,6 @@ export const useCounterStore = defineStore(
         headers["Content-Type"] = "application/x-www-form-urlencoded";
       };
       socket.onopen = function () {
-        console.log("成功");
         // NProgress.configure({ minimum: 0.5 });
         // NProgress.start();
         NProgress.set(0.5);
@@ -97,66 +97,96 @@ export const useCounterStore = defineStore(
 
         // 发送心跳防止ws协议自动断联
       };
-      socket.onclose = function () {};
+      socket.onclose = function (e) {
+        end.data = true;
+        NProgress.done();
+      };
       // 发送
 
       socket.onmessage = function (e) {
         let data = JSON.parse(JSON.parse(e?.data));
         switch (data?.result?.group) {
           case "baseline":
-            if (dataArray.baseline.all.length === 0) { // 检查数组是否为空
+            if (dataArray.baseline.all.length === 0) {
               dataArray.baseline.all.push(data);
-              dataArray.baseline.data.push([
-                data.result.projectDurationDays,
-                data.result.maxResourceUnit,
-                data,
-              ]);
+              dataArray.baseline.data.push(
+                {
+                  value: [data.result.projectDurationDays, data.result.maxResourceUnit,data],
+                  name:data.name+data.result.step,
+              },)
+              // 检查数组是否为空
+              // dataArray.baseline.all.push(data);
+              // dataArray.baseline.data.push([
+              //   data.result.projectDurationDays,
+              //   data.result.maxResourceUnit,
+              //   data,
+              // ]);
             }
             break;
           case "Balanced":
             dataArray.Balanced.all.push(data);
-            dataArray.Balanced.data.push([
-              data.result.projectDurationDays,
-              data.result.maxResourceUnit,
-              data,
-            ]);
+            dataArray.Balanced.data.push(
+              {
+                value: [data.result.projectDurationDays, data.result.maxResourceUnit,data],
+                name:data.name+data.result.step,
+            },)
             break;
           case "Fastest":
+
             dataArray.Fastest.all.push(data);
-            dataArray.Fastest.data.push([
-              data.result.projectDurationDays,
-              data.result.maxResourceUnit,
-              data,
-            ]);
+            dataArray.Fastest.data.push(
+              {
+                value: [data.result.projectDurationDays, data.result.maxResourceUnit,data],
+                name:data.name+data.result.step,
+            },)
+            // dataArray.Fastest.all.push(data);
+            // dataArray.Fastest.data.push([
+            //   data.result.projectDurationDays,
+            //   data.result.maxResourceUnit,
+            //   data,
+            // ]);
             break;
           case "Minimum_Resources":
             dataArray.Minimum_Resources.all.push(data);
-            dataArray.Minimum_Resources.data.push([
-              data.result.projectDurationDays,
-              data.result.maxResourceUnit,
-              data,
-            ]);
+            dataArray.Minimum_Resources.data.push(
+              {
+                value: [data.result.projectDurationDays, data.result.maxResourceUnit,data],
+                name:data.name+data.result.step,
+            },)
+            // dataArray.Minimum_Resources.all.push(data);
+            // dataArray.Minimum_Resources.data.push([
+            //   data.result.projectDurationDays,
+            //   data.result.maxResourceUnit,
+            //   data,
+            // ]);
             break;
           case "Levelled_Resources":
             dataArray.Levelled_Resources.all.push(data);
-            dataArray.Levelled_Resources.data.push([
-              data.result.projectDurationDays,
-              data.result.maxResourceUnit,
-              data,
-            ]);
+            dataArray.Levelled_Resources.data.push(
+              {
+                value: [data.result.projectDurationDays, data.result.maxResourceUnit,data],
+                name:data.name+data.result.step,
+            },)
+            // dataArray.Levelled_Resources.all.push(data);
+            // dataArray.Levelled_Resources.data.push([
+            //   data.result.projectDurationDays,
+            //   data.result.maxResourceUnit,
+            //   data,
+            // ]);
             break;
           default:
             break;
         }
+        taskData.value.push([
+          data.result.projectDurationDays,
+          data.result.maxResourceUnit,
+          data.name,
+          data.result.group,
+          data.result,
+        ]);
+
         if (data.name && data.result?.group !== "baseline") {
-          taskData.value.push([
-            data.result.projectDurationDays,
-            data.result.maxResourceUnit,
-            data.name,
-            data.result.group,
-            data.result,
-          ]);
-        } else if (!data.name) {
+        } else if (dataArray.Levelled_Resources.all.length!=0) {
           end.data = true;
           NProgress.done();
           // taskData.value=[]
@@ -164,7 +194,6 @@ export const useCounterStore = defineStore(
       };
     }
     return {
-      count,
       setting,
       file,
       connectWebsocket,
@@ -176,6 +205,8 @@ export const useCounterStore = defineStore(
       SummaryData,
       dataArray,
       ConstraintsFile,
+      activeIndex,
+      selectChange
     };
   },
   {}

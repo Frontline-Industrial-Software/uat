@@ -28,7 +28,6 @@ const text = [
 
 const router = useRouter();
 function navigate(pathname, number) {
-  console.log(11111);
 
   if (pathname == "dashboard/inputData") {
     router.push(`/${pathname}`);

@@ -1,5 +1,13 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch, watchEffect, computed } from "vue";
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+  watch,
+  watchEffect,
+  computed,
+  onActivated,
+} from "vue";
 import * as echarts from "echarts";
 import { useRouter } from "vue-router";
 import ecStat from "echarts-stat";
@@ -9,21 +17,30 @@ const router = useRouter();
 import api from "../../../api/index.js";
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 
-onBeforeRouteLeave((to, from) => {
+onBeforeRouteLeave((to, from, next) => {
   if (to.name == "InputData") {
     clear();
   }
+  next();
 });
 // 组件销毁时摧毁实例
 function clear() {
   store.taskData = [];
+  Object.keys(store.dataArray).forEach((key) => {
+    store.dataArray[key].all = [];
+    store.dataArray[key].data = [];
+  });
+  store.end.data = false;
 }
 
-onMounted(() => {
-  initChart();
-  renderChart();
+onActivated(() => {
+  if (store.selectChange) {
+    typeActive.value = "";
+    initChart();
+    renderChart();
+    store.selectChange = false;
+  }
 });
-
 let myEcharts = echarts;
 
 let type = ref(2);
@@ -93,7 +110,7 @@ function initChart() {
       {
         x: start[0],
         y: start[1] - height / 2,
-        width: end[0] - start[0],
+        width: Math.max(end[0] - start[0], 1),
         height: height,
       },
       params.coordSys
@@ -143,6 +160,13 @@ function initChart() {
     xAxis: {
       name: "date",
       type: "time",
+      axisLabel: {
+        formatter: function (value, index) {
+          // 格式化成月/日，只在第一个刻度显示年份
+          const customFormattedTime = convertUTCToCustomFormat(value);
+          return customFormattedTime;
+        },
+      },
     },
     yAxis: {
       name: "tasks",
@@ -181,26 +205,49 @@ function initChart() {
     "purple-passion"
   );
 }
-// resourcesChart
 let searchData = ref("");
-// let types = ref();
+
+function groupBy(objectArray, property) {
+  return objectArray.reduce(function (acc, obj) {
+    let key = obj[property];
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(obj);
+    return acc;
+  }, {});
+}
+
 let types = computed(() => {
   let data = store.selectedData.baselineResources.map((e) => {
-    console.log(e.id);
-    return {id:e.id, name:e.name};
+    return { id: e.id, name: e.name, type: e.type };
   });
+  // console.log(111);
+  let newData = groupBy(data, "type");
+  // return newData
+
   if (searchData.value) {
     const regex = new RegExp(searchData.value, "i");
-    return data.filter((e) => {
-      return regex.test(e.name);
-    });
+    let filteredData = {};
+    for (let key in newData) {
+      filteredData[key] = newData[key].filter((e) => regex.test(e.name));
+    }
+    return filteredData;
   } else {
-    return data;
+    return newData;
   }
 });
-// types.value = store.selectedData.baselineResources.map((e) => {
-//   return e.name;
-// });
+
+// utc时间转化
+function convertUTCToCustomFormat(utcTimeString) {
+  const date = new Date(utcTimeString);
+  // console.log(date.toISOString());
+  // 自定义您希望的日期格式
+  const customFormattedString = `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()} `;
+  // ${date.getUTCHours()}:${date.getUTCMinutes()}:${date.getUTCSeconds()}
+  return customFormattedString;
+}
+
 const toArray = (distribution) => {
   return distribution.xy.map((obj) => {
     const [x, y] = Object.entries(obj)[0];
@@ -220,7 +267,6 @@ let baselineResources = computed(() => {
     return baselineResources[1].distribution;
   }
 });
-// let newResources = store.selectedData.newResources[type.value].distribution;
 let newResources = computed(() => {
   const newResources = store.selectedData.newResources;
   if (typeActive.value) {
@@ -245,29 +291,30 @@ let resourcesOption = computed(() => {
     dataZoom: [
       {
         type: "slider",
-        filterMode: "weakFilter",
-        start: 0, // 调整缩放范围的起始位置
-        end: 100,
+        filterMode: "none",
         xAxisIndex: [0],
       },
       {
         type: "slider",
-        filterMode: "weakFilter",
+        filterMode: "none",
         yAxisIndex: [0],
       },
       {
         type: "inside",
-        filterMode: "weakFilter",
+        filterMode: "none",
         xAxisIndex: [0],
       },
       {
         type: "inside",
-        filterMode: "weakFilter",
+        filterMode: "none",
         yAxisIndex: [0],
       },
     ],
     tooltip: {
       trigger: "axis",
+      axisPointer: {
+      type: "cross", // 设置坐标轴指示器的样式为十字准星
+    },
     },
     animation: false,
     legend: {
@@ -276,6 +323,13 @@ let resourcesOption = computed(() => {
     xAxis: {
       name: "date",
       type: "time",
+      axisLabel: {
+        formatter: function (value, index) {
+          // 格式化成月/日，只在第一个刻度显示年份
+          const customFormattedTime = convertUTCToCustomFormat(value);
+          return customFormattedTime;
+        },
+      },
     },
     yAxis: {
       name: "units / day",
@@ -302,30 +356,6 @@ function renderChart() {
 watch(type, () => {
   renderChart();
 });
-
-const value = ref("Type to search...");
-const options = [
-  {
-    value: "Option1",
-    label: "Option1",
-  },
-  {
-    value: "Option2",
-    label: "Option2",
-  },
-  {
-    value: "Option3",
-    label: "Option3",
-  },
-  {
-    value: "Option4",
-    label: "Option4",
-  },
-  {
-    value: "Option5",
-    label: "Option5",
-  },
-];
 
 async function nextReport() {
   router.push({ name: "OptimizedReport" });
@@ -432,6 +462,10 @@ watch(typeActive, () => {
             <div style="background-color: red" class="item"></div>
             <div>Critical Path</div>
           </div>
+          <div class="choose">
+            <div style="background-color: pink" class="item"></div>
+            <div>Critical Path(baseline)</div>
+          </div>
         </div>
         <div id="main"></div>
         <div
@@ -447,22 +481,26 @@ watch(typeActive, () => {
         </div>
         <span>Total utilization of multiple resources over time</span>
 
-        <el-input v-model="searchData" placeholder="Search Resources" />`
-        <div class="types">
-          <div v-for="(items, i) in types" class="type">
-            <v-btn
-              variant="text"
-              :value="i"
-              :class="{ activeType: typeActive == items.id }"
-              @click="
-                () => {
-                  console.log(items)
-                  chooseType(items.id);
-                }
-              "
-            >
-              {{ items.name }}</v-btn
-            >
+        <el-input v-model="searchData" placeholder="Search Resources" />
+        <div v-for="(item, key) in types">
+          <div>
+            {{ key }}
+          </div>
+          <div class="types">
+            <div v-for="(items, i) in item" :key="i" class="type">
+              <v-btn
+                variant="text"
+                :value="i"
+                :class="{ activeType: typeActive == items.id }"
+                @click="
+                  () => {
+                    chooseType(items.id);
+                  }
+                "
+              >
+                {{ items.name }} {{ items.type }}</v-btn
+              >
+            </div>
           </div>
         </div>
         <div
@@ -700,6 +738,8 @@ h2 {
   height: 44px;
   display: flex;
   justify-content: space-between;
+  margin-top: 20px;
+  margin-bottom: 50px;
   .btnback {
     text-align: center;
     width: 98px;

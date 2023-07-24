@@ -1,5 +1,5 @@
 <script setup>
-import { defineComponent, ref, reactive, computed } from "vue";
+import { defineComponent, ref, reactive, computed,onActivated } from "vue";
 import { registerAllModules } from "handsontable/registry";
 import "handsontable/dist/handsontable.full.css";
 import {
@@ -18,6 +18,12 @@ const drawCheckboxInRowHeadersProp = computed(() => drawCheckboxInRowHeaders);
 const changeCheckboxCellProp = computed(() => changeCheckboxCell);
 const dataProp = computed(() => props.tableOptions.data);
 const progressBarRendererProp = computed(() => progressBarRenderer);
+onActivated(()=>{
+  
+//   console.log(props.tableOptions.data);
+// console.log('chilren');
+
+})
 </script>
 
 <template>
@@ -108,9 +114,7 @@ table.htCore th {
   text-align: center;
 }
 
-/*
-  A stylesheet customizing Handsontable style
-*/
+
 
 .handsontable {
   font-size: 13px;
@@ -127,39 +131,3 @@ td .error {
   background: #ff4c42;
 }
 </style>
-
-<!-- // tasks.resources
-let TaskResources = store.selectedData.tasks.filter((e) => {
-  let length = Object.keys(e.resources).length;
-  return length !== 0; // 返回 resources 不为空的任务对象
-});
-let TaskResourcesData=[]
-TaskResources=TaskResources.map((e)=>{
-for (const key in e.resources) {
- let taskobj= store.selectedData.tasks.find((obj)=>{
-    return obj.id==e.resources[key].taskId
-  })
-  let resourceobj=store.selectedData.newResources.find((obj)=>{
-    return obj.id==e.resources[key].resourceId
-  })
-  e.resources[key].resourceId=resourceobj
-  e.resources[key].taskId=taskobj
-  // e.resources[key].resourceId
-  TaskResourcesData.push( e.resources[key])
-
-}
-})
-console.log(TaskResourcesData);
-TaskResourcesData.map((e)=>{
-return {
-    Critical:e.taskId.critical,
-    "Task Code":e.taskId.ID,
-    "Resource Name":e.resourceId.name,
-    "Task Name":e.taskId.name,
-    "Duration(Old)":e.taskId.plannnedDuration,
-    "Duration(New)":e.taskId.newDuration,
-    'Utils(Old)':e.plannedUtisPerHour,
-    'Utils(Nes)':e.newUnitsPerHour,
-    'ToTal Planned Units':e.remainingUnits
-}
-}) -->

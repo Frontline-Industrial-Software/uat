@@ -10,7 +10,7 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
-
+import 'element-plus/dist/index.css'
 const vuetify = createVuetify({ components, directives })
 const app = createApp(App)
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

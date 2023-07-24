@@ -29,7 +29,7 @@ const beforeUpload = async (files) => {
   store.file.size = files.size;
   let a = await api.sendFile(files);
   store.file.name = a.data.mapping[files.name];
-  
+  console.log( store.file.name);
   return false;
 };
 

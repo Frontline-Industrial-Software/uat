@@ -107,7 +107,7 @@
         </v-card-text>
         <v-card-actions style="justify-content: center">
           <v-btn
-          color="rgb(64, 170, 151)"
+            color="rgb(64, 170, 151)"
             @click="
               () => {
                 exportProjectReport();
@@ -116,8 +116,7 @@
             >Original Format</v-btn
           >
           <v-btn
-          color="rgb(64, 170, 151)"
-         
+            color="rgb(64, 170, 151)"
             @click="
               () => {
                 exportExcel();
@@ -131,17 +130,22 @@
   </div>
 </template>
 
-<script setup>
+<script  setup>
 import Table from "./Table.vue";
 import Echarts from "./Echarts.vue";
-import { ref, reactive, computed } from "vue";
+import { ref, reactive, computed ,onUnmounted,onActivated} from "vue";
 import { toRaw } from "@vue/reactivity";
 import { data } from "@/utils/constants"; //数据要删
 import { useCounterStore } from "../../../store";
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 import { useRouter } from "vue-router";
 import api from "../../../api/index.js";
-
+onUnmounted(()=>{
+// console.log('销毁');
+})
+onActivated(()=>{
+// console.log('缓存');
+})
 let dialog = ref(false);
 
 const router = useRouter();
@@ -167,9 +171,33 @@ onBeforeRouteLeave((to, from) => {
     clear();
   }
 });
+
+
+// 强制保留2位小数
+function returnFloat(value){
+ var value=Math.round(parseFloat(value)*100)/100;
+ var xsd=value.toString().split(".");
+ if(xsd.length==1){
+ value=value.toString()+".00";
+ return value;
+ }
+ if(xsd.length>1){
+ if(xsd[1].length<2){
+ value=value.toString()+"0";
+ }
+ return value;
+ }
+}
+
+
 // 组件销毁时摧毁实例
 function clear() {
   store.taskData = [];
+  Object.keys(store.dataArray).forEach((key) => {
+    store.dataArray[key].all = [];
+    store.dataArray[key].data = [];
+  });
+  store.end.data = false;
 }
 const store = useCounterStore();
 let changedTask = store.selectedData.tasks.map((e) => {
@@ -182,9 +210,9 @@ let changedTask = store.selectedData.tasks.map((e) => {
     Critical: e.critical,
     Code: e.ID,
     Name: e.name,
-    "Duration(Baseline)": e.remainingDuration,
-    "Duration(New)": e.newDuration,
-    Ratio: e.durationRatio.toFixed(2),
+    "Duration(Baseline)":returnFloat(e.remainingDuration) ,
+    "Duration(New)": returnFloat(e.newDuration),
+    Ratio:returnFloat(e.durationRatio),
   };
 });
 let allResources = store.selectedData.newResources.map((e) => {
@@ -193,9 +221,9 @@ let allResources = store.selectedData.newResources.map((e) => {
     Code: e.ID,
     Type: e.type,
     Name: e.name,
-    Distribution: e.distribution.min,
-    Max: e.distribution.max,
-    Span: e.distribution.span,
+    Distribution:returnFloat(e.distribution.min),
+    Max:returnFloat(e.distribution.max) ,
+    Span: returnFloat(e.distribution.span),
   };
 });
 let TaskResource = computed(() => {
@@ -215,112 +243,15 @@ let TaskResource = computed(() => {
         (obj) => obj.id == resource.resourceId
       )?.name,
       "Task Name": taskobj.name,
-      "Duration(Old)": taskobj.plannedDuration,
-      "Duration(New)": taskobj.newDuration,
-      "Units(Old)": resource.plannedUnitsPerHour.toFixed(2),
-      "Units(New)":  Number(resource.newUnitsPerHour).toFixed(2),
-      "Total Planned Units": resource.remainingUnits,
+      "Duration(Old)":returnFloat(taskobj.plannedDuration),
+      "Duration(New)":returnFloat(taskobj.newDuration) ,
+      "Units(Old)": returnFloat(resource.plannedUnitsPerHour),
+      "Units(New)":returnFloat(Number(resource.newUnitsPerHour)) ,
+      "Total Planned Units":returnFloat(resource.remainingUnits) ,
     }));
   });
 
   return TaskResourcesData;
-});
-
-const childComponent = ref(null);
-//数据块的种类（比如图中有6种颜色的数据块）显示在头部里面的
-var CLUSTER_COUNT = 6;
-var DIENSIION_CLUSTER_INDEX = 2; //维度？
-//区分不同数据的颜色
-var COLOR_ALL = ["#e61717", "#00beae", "#cccccc"];
-var pieces = [];
-for (var i = 0; i < CLUSTER_COUNT; i++) {
-  pieces.push({
-    value: i,
-    // label: 'cluster ' + i,
-    color: COLOR_ALL[i],
-  });
-}
-const optionsData = ref({
-  one: [
-    {
-      title: {
-        text: "Duration (days)",
-      },
-      xAxis: {
-        name: "asfdfsda",
-      },
-      yAxis: {},
-      series: [
-        {
-          type: "scatter",
-          data: [
-            [10, 5],
-            [0, 8],
-            [6, 10],
-            [2, 12],
-            [8, 9],
-          ],
-        },
-      ],
-    },
-    {
-      xAxis: {},
-      yAxis: {},
-      series: [
-        {
-          type: "scatter",
-          data: [
-            [10, 5],
-            [0, 8],
-            [6, 10],
-            [2, 12],
-            [8, 9],
-          ],
-        },
-      ],
-    },
-  ],
-  two: [
-    {
-      //   title: {
-      //     text: "Duration (days)",
-      //   },
-      xAxis: {
-        axisLabel: {
-          text: "Optimization steps",
-        },
-      },
-      yAxis: {},
-      series: [
-        {
-          type: "scatter",
-          data: [
-            [10, 5],
-            [0, 8],
-            [6, 10],
-            [2, 12],
-            [8, 9],
-          ],
-        },
-      ],
-    },
-    {
-      xAxis: {},
-      yAxis: {},
-      series: [
-        {
-          type: "scatter",
-          data: [
-            [10, 5],
-            [0, 8],
-            [6, 10],
-            [2, 12],
-            [8, 9],
-          ],
-        },
-      ],
-    },
-  ],
 });
 //表格
 const tableOptions = reactive({
@@ -428,6 +359,7 @@ const tableOptions3 = reactive({
       border-radius: 8px !important;
       min-width: 100px !important;
       width: auto !important;
+      box-shadow: 1px 2px 2px #cfeae5;
       font-weight: bold !important;
       text-transform: uppercase !important;
       font-size: 1rem !important;

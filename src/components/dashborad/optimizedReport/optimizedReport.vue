@@ -151,12 +151,20 @@ let dialog = ref(false);
 const router = useRouter();
 
 function exportProjectReport() {
+  // console.log(store.SummaryData.group);
+  if (store.SummaryData.group=='baseline') {
+    console.log('触发');
+    store.SummaryData.group ='Balanced'
+  }
   let Url = `${store.SummaryData.group}-${
     store.file.name.split(".")[0]
   }_FrontlineExport.${store.file.name.split(".")[1]}`;
   api.getProjectReport(Url, store.truefile);
 }
 function exportExcel() {
+  if (store.SummaryData.group=='baseline') {
+    store.SummaryData.group = 'Balanced'
+  }
   let Url = `${store.SummaryData.group}-${
     store.file.name.split(".")[0]
   }_FrontlineExport.${store.file.name.split(".")[1]}`;
@@ -175,6 +183,9 @@ onBeforeRouteLeave((to, from) => {
 
 // 强制保留2位小数
 function returnFloat(value){
+  if(!value){
+    return '0.00'
+  }
  var value=Math.round(parseFloat(value)*100)/100;
  var xsd=value.toString().split(".");
  if(xsd.length==1){
@@ -188,11 +199,30 @@ function returnFloat(value){
  return value;
  }
 }
-
+function returnFloatOneDecimal(value) {
+  if (!value) {
+    return '0.0';
+  }
+  var value = Math.round(parseFloat(value) * 10) / 10;
+  var xsd = value.toString().split(".");
+  if (xsd.length == 1) {
+    value = value.toString() + ".0";
+    return value;
+  }
+  return value;
+}
 
 // 组件销毁时摧毁实例
 function clear() {
   store.taskData = [];
+  store.SummaryData.baseDuration = "-";
+  store.SummaryData.changedDuration = "-";
+  store.SummaryData.changgedTasks = "-";
+  store.SummaryData.TotalTasks = "-";
+  store.SummaryData.baseCriticalPath = "-";
+  store.SummaryData.changedCriticalPath = "-";
+  store.SummaryData.TotalResources = "-";
+  store.SummaryData.group = "";
   Object.keys(store.dataArray).forEach((key) => {
     store.dataArray[key].all = [];
     store.dataArray[key].data = [];
@@ -210,18 +240,22 @@ let changedTask = store.selectedData.tasks.map((e) => {
     Critical: e.critical,
     Code: e.ID,
     Name: e.name,
-    "Duration(Baseline)":returnFloat(e.remainingDuration) ,
-    "Duration(New)": returnFloat(e.newDuration),
+    "Duration(Baseline)":returnFloatOneDecimal(e.remainingDuration) ,
+    "Duration(New)": returnFloatOneDecimal(e.newDuration),
     Ratio:returnFloat(e.durationRatio),
   };
 });
-let allResources = store.selectedData.newResources.map((e) => {
+let allResources = store.selectedData.newResources.filter((e) => {
+    // 在这里添加过滤条件
+    // 例如：筛选出 type 为 'someType' 的元素
+    return e.ID != '-65535';
+  }).map((e) => {
   return {
     ID: e.id,
     Code: e.ID,
     Type: e.type,
     Name: e.name,
-    Distribution:returnFloat(e.distribution.min),
+    Distribution:returnFloatOneDecimal(e.distribution.min),
     Max:returnFloat(e.distribution.max) ,
     Span: returnFloat(e.distribution.span),
   };
@@ -235,16 +269,16 @@ let TaskResource = computed(() => {
   let TaskResourcesData = TaskResources.flatMap((e) => {
     let resources = Object.values(e.resources);
     let taskobj = store.selectedData.tasks.find((obj) => obj.id == e.id);
-
     return resources.map((resource) => ({
+      
       Critical: taskobj.critical,
       "Task Code": taskobj.ID,
       "Resource Name": store.selectedData.newResources.find(
         (obj) => obj.id == resource.resourceId
       )?.name,
       "Task Name": taskobj.name,
-      "Duration(Old)":returnFloat(taskobj.plannedDuration),
-      "Duration(New)":returnFloat(taskobj.newDuration) ,
+      "Duration(Old)":returnFloatOneDecimal(taskobj.plannedDuration),
+      "Duration(New)":returnFloatOneDecimal(taskobj.newDuration) ,
       "Units(Old)": returnFloat(resource.plannedUnitsPerHour),
       "Units(New)":returnFloat(Number(resource.newUnitsPerHour)) ,
       "Total Planned Units":returnFloat(resource.remainingUnits) ,

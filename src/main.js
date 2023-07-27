@@ -11,9 +11,10 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import 'element-plus/dist/index.css'
+import i18n from './language/i18n'
 const vuetify = createVuetify({ components, directives })
 const app = createApp(App)
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
   }
-app.use(router).use(vuetify).use(createPinia()).mount('#app')
+app.use(router).use(vuetify).use(i18n).use(createPinia()).mount('#app')

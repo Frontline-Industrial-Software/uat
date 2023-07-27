@@ -192,6 +192,7 @@ onActivated(() => {
 });
 function clear() {
   store.taskData.data = [];
+  
 }
 async function uploadDemo() {
   fetch("demo_project.xml")

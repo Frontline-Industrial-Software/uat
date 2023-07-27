@@ -28,8 +28,8 @@
                       href="https://app.frontline-optimizer.com/v1.0.0/"
                       target="_blank"
                     >
-                      Back to v1.0.0 </a
-                    >
+                      Back to v1.0.0
+                    </a>
                   </v-btn>
                 </div>
                 <div>
@@ -42,7 +42,7 @@
             </v-list-item>
           </v-list>
         </v-menu>
-        <div></div>
+        <LanguageButton style="margin-left: 30px;" />
       </div>
     </div>
   </div>
@@ -50,6 +50,7 @@
 
 <script setup>
 import { useRouter } from "vue-router";
+
 const router = useRouter();
 function logout() {
   localStorage.clear();
@@ -58,8 +59,14 @@ function logout() {
 </script>
 
 <style lang="scss" scoped>
-:deep(.v-btn--variant-elevated){
-box-shadow: 0px;
+.right{
+display: flex;
+justify-content: space-around;
+align-items: center;
+
+}
+:deep(.v-btn--variant-elevated) {
+  box-shadow: 0px;
 }
 .main {
   width: 1200px;

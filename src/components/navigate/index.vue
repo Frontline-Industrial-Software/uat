@@ -6,10 +6,10 @@
         :active="store.active"
         finish-status="success"
       >
-        <el-step @click="navigate(text[0], 0)" title="Input Data" />
-        <el-step @click="navigate(text[1], 1)" title="Baseline Summary" />
-        <el-step @click="navigate(text[2], 2)" title="Optimized Summary" />
-        <el-step @click="navigate(text[3], 3)" title="Optimized Report" />
+      <el-step @click="navigate(text[0], 0)" :title="$t('navigator.input_data')" />
+      <el-step @click="navigate(text[1], 1)" :title="$t('navigator.baseline_summary')" />
+      <el-step @click="navigate(text[2], 2)" :title="$t('navigator.optimized_summary')" />
+      <el-step @click="navigate(text[3], 3)" :title="$t('navigator.optimized_report')" />
       </el-steps>
     </div>
   </div>

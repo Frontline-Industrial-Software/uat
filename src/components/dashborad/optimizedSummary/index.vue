@@ -26,6 +26,14 @@ onBeforeRouteLeave((to, from, next) => {
 // 组件销毁时摧毁实例
 function clear() {
   store.taskData = [];
+  store.SummaryData.baseDuration = "-";
+  store.SummaryData.changedDuration = "-";
+  store.SummaryData.changgedTasks = "-";
+  store.SummaryData.TotalTasks = "-";
+  store.SummaryData.baseCriticalPath = "-";
+  store.SummaryData.changedCriticalPath = "-";
+  store.SummaryData.TotalResources = "-";
+  store.SummaryData.group = "";
   Object.keys(store.dataArray).forEach((key) => {
     store.dataArray[key].all = [];
     store.dataArray[key].data = [];
@@ -61,19 +69,18 @@ function initChart() {
   // 基础任务
   let baselineTasks = store.selectedData.baselineTasks.map(
     (baselineTask, idx) => {
-      // console.log(baselineTask.id);
-
       let newBaselineTask = store.selectedData.tasks.find(
         (task) => task.id === baselineTask.id
       );
-
       changedlineTasks.push(newBaselineTask);
-
       idx = store.selectedData.baselineTasks.length - idx;
-
       return {
         name: baselineTask.name,
-        value: [idx, baselineTask.newStart, baselineTask.newFinish],
+        value: [
+          idx,
+          utcTime(baselineTask.newStart),
+          utcTime(baselineTask.newFinish),
+        ],
         itemStyle: {
           color: baselineTask.critical ? "pink" : undefined,
         },
@@ -88,13 +95,16 @@ function initChart() {
     return {
       id: changedlineTask.id,
       name: changedlineTask.name,
-      value: [idx, changedlineTask.newStart, changedlineTask.newFinish],
+      value: [
+        idx,
+        utcTime(changedlineTask.newStart),
+        utcTime(changedlineTask.newFinish),
+      ],
       itemStyle: {
         color: changedlineTask.critical ? "red" : undefined,
       },
     };
   });
-
   //表格1
   let chart = myEcharts.init(
     document.getElementById("myEcharts"),
@@ -137,6 +147,9 @@ function initChart() {
         type: "slider",
         filterMode: "weakFilter",
         xAxisIndex: [0],
+        labelFormatter: function (value) {
+          return convertUTCToCustomFormat(value);
+        },
       },
       {
         type: "slider",
@@ -222,10 +235,7 @@ let types = computed(() => {
   let data = store.selectedData.baselineResources.map((e) => {
     return { id: e.id, name: e.name, type: e.type };
   });
-  // console.log(111);
   let newData = groupBy(data, "type");
-  // return newData
-
   if (searchData.value) {
     const regex = new RegExp(searchData.value, "i");
     let filteredData = {};
@@ -239,19 +249,39 @@ let types = computed(() => {
 });
 
 // utc时间转化
+
+// iso86Time
+function utcTime(time) {
+  const utcDate = new Date(time);
+  const utcString = utcDate.toISOString();
+  return utcString;
+}
 function convertUTCToCustomFormat(utcTimeString) {
   const date = new Date(utcTimeString);
   // console.log(date.toISOString());
   // 自定义您希望的日期格式
-  const customFormattedString = `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()} `;
-  // ${date.getUTCHours()}:${date.getUTCMinutes()}:${date.getUTCSeconds()}
+  const customFormattedString = `${date.getUTCFullYear()}/${
+    date.getUTCMonth() + 1
+  }/${date.getUTCDate()} ${("0" + date.getUTCHours()).slice(-2)}:${(
+    "0" + date.getUTCMinutes()
+  ).slice(-2)}:${("0" + date.getUTCSeconds()).slice(-2)}`;
+
   return customFormattedString;
 }
+function convertUTCToCustom(utcTimeString) {
+  const date = new Date(utcTimeString);
+  // console.log(date.toISOString());
+  // 自定义您希望的日期格式
+  const customFormattedString = `${date.getUTCFullYear()}/${
+    date.getUTCMonth() + 1
+  }/${date.getUTCDate()}`;
 
+  return customFormattedString;
+}
 const toArray = (distribution) => {
   return distribution.xy.map((obj) => {
     const [x, y] = Object.entries(obj)[0];
-    return [parseInt(x), y];
+    return [utcTime(parseInt(x)), y];
   });
 };
 // let baselineResources =
@@ -264,7 +294,9 @@ let baselineResources = computed(() => {
     );
     return filteredArray[0].distribution;
   } else {
-    return baselineResources[1].distribution;
+    // console.log(baselineResources[0].id);
+    typeActive.value = baselineResources[0].id;
+    return baselineResources[0]?.distribution;
   }
 });
 let newResources = computed(() => {
@@ -276,7 +308,7 @@ let newResources = computed(() => {
     // console.log(datas);
     return datas[0].distribution;
   } else {
-    return newResources[1].distribution;
+    return newResources[0]?.distribution;
   }
 });
 
@@ -292,29 +324,31 @@ let resourcesOption = computed(() => {
       {
         type: "slider",
         filterMode: "none",
-        xAxisIndex: [0],
+        // xAxisIndex: [0],
       },
       {
         type: "slider",
         filterMode: "none",
-        yAxisIndex: [0],
+        // yAxisIndex: [0],
       },
       {
         type: "inside",
         filterMode: "none",
-        xAxisIndex: [0],
+        // xAxisIndex: [0],
       },
       {
         type: "inside",
         filterMode: "none",
-        yAxisIndex: [0],
+        // yAxisIndex: [0],
       },
     ],
     tooltip: {
       trigger: "axis",
+      // formatter: '{a0}{c0}<br/>{a0}{c1}',
+      // valueFormatter:(value)=>{console.log('form',value);},
       axisPointer: {
-      type: "cross", // 设置坐标轴指示器的样式为十字准星
-    },
+        type: "cross", // 设置坐标轴指示器的样式为十字准星
+      },
     },
     animation: false,
     legend: {
@@ -323,12 +357,15 @@ let resourcesOption = computed(() => {
     xAxis: {
       name: "date",
       type: "time",
+
       axisLabel: {
-        formatter: function (value, index) {
-          // 格式化成月/日，只在第一个刻度显示年份
-          const customFormattedTime = convertUTCToCustomFormat(value);
-          return customFormattedTime;
-        },
+        formatter: "{yyyy}-{MM}-{dd}", // 得到的 label 形如：'2020-12-02'
+        // formatter: function (value, index) {
+        //   console.log(value);
+        //   // 格式化成月/日，只在第一个刻度显示年份
+        //   const customFormattedTime = convertUTCToCustom(value);
+        //   return customFormattedTime;
+        // },
       },
     },
     yAxis: {

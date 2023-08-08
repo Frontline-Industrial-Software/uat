@@ -1,3 +1,158 @@
+<template>
+  <div class="contain">
+    <div class="box">
+      <h2>
+        {{ $t("optimizedSummary.title[0]") }}
+        <span class="sp">{{ store.SummaryData.group }}</span>
+        <div class="step">
+          <span
+            >{{ store.setting.Steps }}
+            {{ $t("optimizedSummary.title[1]") }}</span
+          >
+        </div>
+        <div class="step">
+          <span>
+            {{
+              `${store.setting.Ratio[0] * 100}% - ${
+                store.setting.Ratio[1] * 100
+              }% ${$t("optimizedSummary.title[2]")}`
+            }}
+          </span>
+        </div>
+      </h2>
+      <div class="maintop">
+        <div class="item">
+          <div class="title">{{ $t("optimizedSummary.header[0]") }}</div>
+          <div class="center">
+            <span class="changed"
+              >{{ store.SummaryData.changedDuration }}/</span
+            >
+            <span class="base">{{ store.SummaryData.baseDuration }}</span>
+          </div>
+          <div class="bottom">
+            {{
+              toPercent(
+                store.SummaryData.changedDuration,
+                store.SummaryData.baseDuration
+              )
+            }}
+          </div>
+        </div>
+        <div class="item">
+          <div class="title">{{ $t("optimizedSummary.header[1]") }}</div>
+          <div class="center">
+            <span class="changed">{{ store.SummaryData.changgedTasks }}/</span>
+            <span class="base">{{ store.SummaryData.TotalTasks }}</span>
+          </div>
+          <div class="bottom">
+            {{
+              toPercent(
+                store.SummaryData.changgedTasks,
+                store.SummaryData.TotalTasks
+              )
+            }}
+          </div>
+        </div>
+        <div class="item">
+          <div class="title">{{ $t("optimizedSummary.header[2]") }}</div>
+          <div class="center">
+            <span class="changed">{{ criticalTask.length }}/</span>
+            <span class="base">{{
+              store.selectedData.baselineTasks.length
+            }}</span>
+          </div>
+          <div class="bottom">
+            {{
+              toPercent(
+                criticalTask.length,
+                store.selectedData.baselineTasks.length
+              )
+            }}
+          </div>
+        </div>
+      </div>
+      <div class="mainEchar1">
+        <div class="Echar1top">
+          <div>{{ $t("optimizedSummary.chartName[0]") }}</div>
+        </div>
+        <span>{{ $t("optimizedSummary.chartName[1]") }}</span>
+        <div class="choosebox">
+          <div class="choose">
+            <div style="background-color: #b0e054" class="item"></div>
+            <div>Optimized</div>
+          </div>
+          <div class="choose">
+            <div style="background-color: #5474c4" class="item"></div>
+            <div>Baseline</div>
+          </div>
+          <div class="choose">
+            <div style="background-color: red" class="item"></div>
+            <div>Critical Path</div>
+          </div>
+          <div class="choose">
+            <div style="background-color: pink" class="item"></div>
+            <div>Critical Path(baseline)</div>
+          </div>
+        </div>
+        <div id="main"></div>
+        <div
+          ref="main"
+          style="width: 1150px; height: 610px"
+          id="myEcharts"
+        ></div>
+      </div>
+
+      <div class="mainEchar2">
+        <div class="Echar2top">
+          <div>{{ $t("optimizedSummary.chartName[2]") }}</div>
+        </div>
+        <span>{{ $t("optimizedSummary.chartName[3]") }}</span>
+
+        <el-input v-model="searchData" placeholder="Search Resources" />
+        <div v-for="(item, key) in types">
+          <div>
+            {{ key }}
+          </div>
+          <div class="types">
+            <div v-for="(items, i) in item" :key="i" class="type">
+              <v-btn
+                variant="text"
+                :value="i"
+                :class="{ activeType: typeActive == items.id }"
+                @click="
+                  () => {
+                    chooseType(items.id);
+                  }
+                "
+              >
+                {{ items.name }} {{ items.type }}</v-btn
+              >
+            </div>
+          </div>
+        </div>
+        <div
+          ref="main01"
+          style="width: 1150px; height: 610px"
+          id="myEcharts01"
+        ></div>
+      </div>
+      <div class="button">
+        <el-button @click="back" class="btnback">{{
+          $t("optimizedSummary.btn[0]")
+        }}</el-button>
+        <el-button @click="nextReport" class="btngo">{{
+          $t("optimizedSummary.btn[1]")
+        }}</el-button>
+      </div>
+    </div>
+  </div>
+  <Dialog
+    @closeDialog="onCloseDialog"
+    :data="tableData"
+    :dialogVisible="dialogVisible"
+  />
+</template>
+
 <script setup>
 import {
   ref,
@@ -16,31 +171,22 @@ const store = useCounterStore();
 const router = useRouter();
 import api from "../../../api/index.js";
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
+import Dialog from "../../dialog/dialog.vue";
 
+// 弹出框
+let dialogVisible = ref(false);
+
+let tableData = ref("");
+const onCloseDialog = () => {
+  dialogVisible.value = false;
+};
+/* --------------------------------------生命周期------------------------------------ */
 onBeforeRouteLeave((to, from, next) => {
   if (to.name == "InputData") {
-    clear();
+    // clear();
   }
   next();
 });
-// 组件销毁时摧毁实例
-function clear() {
-  store.taskData = [];
-  store.SummaryData.baseDuration = "-";
-  store.SummaryData.changedDuration = "-";
-  store.SummaryData.changgedTasks = "-";
-  store.SummaryData.TotalTasks = "-";
-  store.SummaryData.baseCriticalPath = "-";
-  store.SummaryData.changedCriticalPath = "-";
-  store.SummaryData.TotalResources = "-";
-  store.SummaryData.group = "";
-  Object.keys(store.dataArray).forEach((key) => {
-    store.dataArray[key].all = [];
-    store.dataArray[key].data = [];
-  });
-  store.end.data = false;
-}
-
 onActivated(() => {
   if (store.selectChange) {
     typeActive.value = "";
@@ -49,20 +195,63 @@ onActivated(() => {
     store.selectChange = false;
   }
 });
-let myEcharts = echarts;
-
-let type = ref(2);
-let resourcesChart;
+/* ------------------------------------工具函数-------------------------------------- */
 // 去百分比
 function toPercent(num, total) {
   return Math.round((num / total) * 10000) / 100.0 + "%"; // 小数点后两位百分比
 }
+
+// utc时间转化
+
+// iso86Time
+function utcTime(time) {
+  const utcDate = new Date(time);
+  const utcString = utcDate.toISOString();
+  return utcString;
+}
+function convertUTCToCustomFormat(utcTimeString) {
+  const date = new Date(utcTimeString);
+  // console.log(date.toISOString());
+  // 自定义您希望的日期格式
+  const customFormattedString = `${date.getUTCFullYear()}/${
+    date.getUTCMonth() + 1
+  }/${date.getUTCDate()} ${("0" + date.getUTCHours()).slice(-2)}:${(
+    "0" + date.getUTCMinutes()
+  ).slice(-2)}:${("0" + date.getUTCSeconds()).slice(-2)}`;
+
+  return customFormattedString;
+}
+const toArray = (distribution) => {
+  if (distribution === undefined || distribution.length === 0) {
+    return [];
+  }
+  return distribution.xy.map((obj) => {
+    const [x, y] = Object.entries(obj)[0];
+    return [utcTime(parseInt(x)), y];
+  });
+};
+/* -------------------------------------------------------------------------- */
+
+/* --------------------------------------入口函数------------------------------------ */
+let myEcharts = echarts;
+
+let type = ref(2);
+let resourcesChart;
+
 let criticalTask = computed(() => {
+  if (!store.selectedData) {
+    return
+  }
   let critical = store.selectedData.baselineTasks.filter((e) => {
     return e.critical;
   });
   return critical;
 });
+
+function baseItem(data) {
+  // style="color:#8c8c8c"
+  return `<span >${data}</span>`;
+}
 
 function initChart() {
   let changedlineTasks = [];
@@ -74,12 +263,14 @@ function initChart() {
       );
       changedlineTasks.push(newBaselineTask);
       idx = store.selectedData.baselineTasks.length - idx;
+      // console.log(baselineTask);
       return {
         name: baselineTask.name,
         value: [
           idx,
           utcTime(baselineTask.newStart),
           utcTime(baselineTask.newFinish),
+          baselineTask,
         ],
         itemStyle: {
           color: baselineTask.critical ? "pink" : undefined,
@@ -87,10 +278,11 @@ function initChart() {
       };
     }
   );
+
   // 优化任务
   changedlineTasks = changedlineTasks.map((changedlineTask, idx) => {
     // console.log(changedlineTask);
-    idx = changedlineTasks.length - idx;
+    idx = changedlineTasks.length - idx + 0.2;
 
     return {
       id: changedlineTask.id,
@@ -99,6 +291,7 @@ function initChart() {
         idx,
         utcTime(changedlineTask.newStart),
         utcTime(changedlineTask.newFinish),
+        changedlineTask,
       ],
       itemStyle: {
         color: changedlineTask.critical ? "red" : undefined,
@@ -110,6 +303,11 @@ function initChart() {
     document.getElementById("myEcharts"),
     "purple-passion"
   );
+  chart.on("click", function (param) {
+    tableData.value = param.data.value[3];
+
+    dialogVisible.value = true;
+  });
   var option;
   //表格1
   let renderItem = (params, api) => {
@@ -209,7 +407,79 @@ function initChart() {
       },
     ],
     tooltip: {
-      formatter: (p) => p.name,
+      formatter: (p) => {
+        let resData = "Resources: <br/>";
+        if (p.value[3].resources) {
+          for (const key in p.value[3].resources) {
+          let res = p.value[3].resources;
+          let name = store.selectedData.newResources.find(
+            (resource) => {
+              return resource.id == key}
+          );
+          resData += ` &nbsp&nbspResource &nbsp  ${
+            name?.name
+          } &nbsp id: ${key}  <br/>&nbsp&nbsp&nbsp&nbspunits/hour:${
+            returnFloat( res[key].plannedUnitsPerHour) 
+          }=> ${returnFloat(res[key].newUnitsPerHour)}<br/>`;
+          // console.log(res[key]);
+        }
+        }
+        
+        function marker(str){
+          let color
+          switch (str) {
+            case 'New':
+              if (!p.value[3].critical) {
+                color= '#b0e054'
+              }
+              else{
+                color= 'red'
+              }
+              break;
+              case 'Old':
+              if (!p.value[3].critical) {
+                color= '#5474c4'
+              }
+              else{
+                color= 'pink'
+              }
+
+            default:
+              break;
+          }
+
+        return `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`
+        }
+
+
+        // const marker = ``;
+        return `${p.name}<br/>
+        <div style='margin-top:20px'>
+         ${marker('New')} New: ${p.value[1]
+          .replace("T", " ")
+          .replace("Z", "")
+          .slice(0, 16)} -> ${p.value[2]
+          .replace("T", " ")
+          .replace("Z", "")
+          .slice(0, 16)}
+         (${p.value[3].newDuration})
+        <br/>
+         ${marker('Old')} Old: ${baseItem(
+          utcTime(p.value[3].plannedStart)
+            .replace("T", " ")
+            .replace("Z", "")
+            .slice(0, 16)
+        )} -> ${baseItem(
+          utcTime(p.value[3].plannedFinish)
+            .replace("T", " ")
+            .replace("Z", "")
+            .slice(0, 16)
+        )}
+       (${baseItem(p.value[3].plannedDuration)})
+         <br/>
+         ${resData}
+        </div>`;
+      },
     },
   };
   option && chart.setOption(option);
@@ -219,7 +489,24 @@ function initChart() {
   );
 }
 let searchData = ref("");
-
+// 强制保留2位小数
+function returnFloat(value) {
+  if (!value) {
+    return "0.00";
+  }
+  var value = Math.round(parseFloat(value) * 100) / 100;
+  var xsd = value.toString().split(".");
+  if (xsd.length == 1) {
+    value = value.toString() + ".00";
+    return value;
+  }
+  if (xsd.length > 1) {
+    if (xsd[1].length < 2) {
+      value = value.toString() + "0";
+    }
+    return value;
+  }
+}
 function groupBy(objectArray, property) {
   return objectArray.reduce(function (acc, obj) {
     let key = obj[property];
@@ -248,42 +535,6 @@ let types = computed(() => {
   }
 });
 
-// utc时间转化
-
-// iso86Time
-function utcTime(time) {
-  const utcDate = new Date(time);
-  const utcString = utcDate.toISOString();
-  return utcString;
-}
-function convertUTCToCustomFormat(utcTimeString) {
-  const date = new Date(utcTimeString);
-  // console.log(date.toISOString());
-  // 自定义您希望的日期格式
-  const customFormattedString = `${date.getUTCFullYear()}/${
-    date.getUTCMonth() + 1
-  }/${date.getUTCDate()} ${("0" + date.getUTCHours()).slice(-2)}:${(
-    "0" + date.getUTCMinutes()
-  ).slice(-2)}:${("0" + date.getUTCSeconds()).slice(-2)}`;
-
-  return customFormattedString;
-}
-function convertUTCToCustom(utcTimeString) {
-  const date = new Date(utcTimeString);
-  // console.log(date.toISOString());
-  // 自定义您希望的日期格式
-  const customFormattedString = `${date.getUTCFullYear()}/${
-    date.getUTCMonth() + 1
-  }/${date.getUTCDate()}`;
-
-  return customFormattedString;
-}
-const toArray = (distribution) => {
-  return distribution.xy.map((obj) => {
-    const [x, y] = Object.entries(obj)[0];
-    return [utcTime(parseInt(x)), y];
-  });
-};
 // let baselineResources =
 //   store.selectedData.baselineResources[type.value].distribution;
 let baselineResources = computed(() => {
@@ -294,7 +545,9 @@ let baselineResources = computed(() => {
     );
     return filteredArray[0].distribution;
   } else {
-    // console.log(baselineResources[0].id);
+    if (baselineResources.length == 0) {
+      return [];
+    }
     typeActive.value = baselineResources[0].id;
     return baselineResources[0]?.distribution;
   }
@@ -308,6 +561,9 @@ let newResources = computed(() => {
     // console.log(datas);
     return datas[0].distribution;
   } else {
+    if (newResources.length == 0) {
+      return [];
+    }
     return newResources[0]?.distribution;
   }
 });
@@ -411,150 +667,6 @@ watch(typeActive, () => {
 });
 </script>
 
-<template>
-  <div class="contain">
-    <div class="box">
-      <h2>
-        Overview
-        <span class="sp">{{ store.SummaryData.group }}</span>
-        <div class="step">
-          <span>{{ store.setting.Steps }} steps</span>
-        </div>
-        <div class="step">
-          <span>
-            {{
-              `${store.setting.Ratio[0] * 100}% - ${
-                store.setting.Ratio[1] * 100
-              }% ratio`
-            }}
-          </span>
-        </div>
-      </h2>
-      <div class="maintop">
-        <div class="item">
-          <div class="title">Project Duration (days)</div>
-          <div class="center">
-            <span class="changed"
-              >{{ store.SummaryData.changedDuration }}/</span
-            >
-            <span class="base">{{ store.SummaryData.baseDuration }}</span>
-          </div>
-          <div class="bottom">
-            {{
-              toPercent(
-                store.SummaryData.changedDuration,
-                store.SummaryData.baseDuration
-              )
-            }}
-          </div>
-        </div>
-        <div class="item">
-          <div class="title">Tasks</div>
-          <div class="center">
-            <span class="changed">{{ store.SummaryData.changgedTasks }}/</span>
-            <span class="base">{{ store.SummaryData.TotalTasks }}</span>
-          </div>
-          <div class="bottom">
-            {{
-              toPercent(
-                store.SummaryData.changgedTasks,
-                store.SummaryData.TotalTasks
-              )
-            }}
-          </div>
-        </div>
-        <div class="item">
-          <div class="title">Tasks on Critical Path</div>
-          <div class="center">
-            <span class="changed">{{ criticalTask.length }}/</span>
-            <span class="base">{{
-              store.selectedData.baselineTasks.length
-            }}</span>
-          </div>
-          <div class="bottom">
-            {{
-              toPercent(
-                criticalTask.length,
-                store.selectedData.baselineTasks.length
-              )
-            }}
-          </div>
-        </div>
-      </div>
-      <div class="mainEchar1">
-        <div class="Echar1top">
-          <div>Comparison Chart</div>
-        </div>
-        <span>Overview of all tasks over time</span>
-        <div class="choosebox">
-          <div class="choose">
-            <div style="background-color: #b0e054" class="item"></div>
-            <div>Optimized</div>
-          </div>
-          <div class="choose">
-            <div style="background-color: #5474c4" class="item"></div>
-            <div>Baseline</div>
-          </div>
-          <div class="choose">
-            <div style="background-color: red" class="item"></div>
-            <div>Critical Path</div>
-          </div>
-          <div class="choose">
-            <div style="background-color: pink" class="item"></div>
-            <div>Critical Path(baseline)</div>
-          </div>
-        </div>
-        <div id="main"></div>
-        <div
-          ref="main"
-          style="width: 1150px; height: 610px"
-          id="myEcharts"
-        ></div>
-      </div>
-
-      <div class="mainEchar2">
-        <div class="Echar2top">
-          <div>Labor Resources</div>
-        </div>
-        <span>Total utilization of multiple resources over time</span>
-
-        <el-input v-model="searchData" placeholder="Search Resources" />
-        <div v-for="(item, key) in types">
-          <div>
-            {{ key }}
-          </div>
-          <div class="types">
-            <div v-for="(items, i) in item" :key="i" class="type">
-              <v-btn
-                variant="text"
-                :value="i"
-                :class="{ activeType: typeActive == items.id }"
-                @click="
-                  () => {
-                    chooseType(items.id);
-                  }
-                "
-              >
-                {{ items.name }} {{ items.type }}</v-btn
-              >
-            </div>
-          </div>
-        </div>
-        <div
-          ref="main01"
-          style="width: 1150px; height: 610px"
-          id="myEcharts01"
-        ></div>
-      </div>
-      <div class="button">
-        <el-button @click="back" class="btnback">BACK</el-button>
-        <el-button @click="nextReport" class="btngo"
-          >VIEW DETALED REPORT</el-button
-        >
-      </div>
-    </div>
-  </div>
-</template>
 <style lang="scss" scoped>
 .types {
   display: flex;

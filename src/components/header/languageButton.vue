@@ -30,7 +30,7 @@ const { locale: i18nLanguage } = useI18n();
 const toggle = (languageKey) => {
   i18nLanguage.value = languageKey; // zh en
 };
-let languageOption = ["中文", "Engligh"];
+let languageOption = ["中文", "English",'日本語','Español'];
 const { t } = useI18n();
 </script>
 <style scoped>

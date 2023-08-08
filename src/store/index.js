@@ -12,12 +12,15 @@ export const useCounterStore = defineStore(
   () => {
     // 默认设置
     let setting = reactive({
-      IgnoreProject: "true",
-      Rate: 0.025,
+      IgnoreProject: "false",
+      Rate: 0.1,
       Ratio: [0.5, 2],
       Steps: 20,
     });
+    // 是否结束
     let end = reactive({ data: false });
+    // 是否上传新的文件
+    let newUpload=ref(false)
     // 导航栏控制
     let active = ref(0);
 
@@ -111,23 +114,16 @@ export const useCounterStore = defineStore(
               dataArray.baseline.all.push(data);
               dataArray.baseline.data.push(
                 {
-                  value: [data.result.projectDurationDays, data.result.maxResourceUnit,data],
+                  value: [data.result.projectDurationDaysWithCalendar, data.result.maxResourceUnitAgg,data],
                   name:data.name+data.result.step,
               },)
-              // 检查数组是否为空
-              // dataArray.baseline.all.push(data);
-              // dataArray.baseline.data.push([
-              //   data.result.projectDurationDays,
-              //   data.result.maxResourceUnit,
-              //   data,
-              // ]);
             }
             break;
           case "Balanced":
             dataArray.Balanced.all.push(data);
             dataArray.Balanced.data.push(
               {
-                value: [data.result.projectDurationDays, data.result.maxResourceUnit,data],
+                value: [data.result.projectDurationDaysWithCalendar, data.result.maxResourceUnitAgg,data],
                 name:data.name+data.result.step,
             },)
             break;
@@ -136,54 +132,38 @@ export const useCounterStore = defineStore(
             dataArray.Fastest.all.push(data);
             dataArray.Fastest.data.push(
               {
-                value: [data.result.projectDurationDays, data.result.maxResourceUnit,data],
+                value: [data.result.projectDurationDaysWithCalendar, data.result.maxResourceUnitAgg,data],
                 name:data.name+data.result.step,
             },)
-            // dataArray.Fastest.all.push(data);
-            // dataArray.Fastest.data.push([
-            //   data.result.projectDurationDays,
-            //   data.result.maxResourceUnit,
-            //   data,
-            // ]);
+
             break;
           case "Minimum_Resources":
             dataArray.Minimum_Resources.all.push(data);
             dataArray.Minimum_Resources.data.push(
               {
-                value: [data.result.projectDurationDays, data.result.maxResourceUnit,data],
+                value: [data.result.projectDurationDaysWithCalendar, data.result.maxResourceUnitAgg,data],
                 name:data.name+data.result.step,
             },)
-            // dataArray.Minimum_Resources.all.push(data);
-            // dataArray.Minimum_Resources.data.push([
-            //   data.result.projectDurationDays,
-            //   data.result.maxResourceUnit,
-            //   data,
-            // ]);
+
             break;
           case "Levelled_Resources":
             dataArray.Levelled_Resources.all.push(data);
             dataArray.Levelled_Resources.data.push(
               {
-                value: [data.result.projectDurationDays, data.result.maxResourceUnit,data],
+                value: [data.result.projectDurationDaysWithCalendar, data.result.maxResourceUnitAgg,data],
                 name:data.name+data.result.step,
             },)
-            // dataArray.Levelled_Resources.all.push(data);
-            // dataArray.Levelled_Resources.data.push([
-            //   data.result.projectDurationDays,
-            //   data.result.maxResourceUnit,
-            //   data,
-            // ]);
             break;
           default:
             break;
         }
-        taskData.value.push([
-          data.result.projectDurationDays,
-          data.result.maxResourceUnit,
-          data.name,
-          data.result.group,
-          data.result,
-        ]);
+        // taskData.value.push([
+        //   data.result.projectDurationDays,
+        //   data.result.maxResourceUnit,
+        //   data.name,
+        //   data.result.group,
+        //   data.result,
+        // ]);
 
         if (data.name && data.result?.group !== "baseline") {
         } else if (dataArray.Levelled_Resources.all.length!=0) {
@@ -206,7 +186,8 @@ export const useCounterStore = defineStore(
       dataArray,
       ConstraintsFile,
       activeIndex,
-      selectChange
+      selectChange,
+      newUpload
     };
   },
   {}

@@ -56,25 +56,23 @@ export default {
           "Content-Type": "multipart/form-data",
         },
       });
-   
-      if(response.data.code!=0){
+
+      if (response.data.code != 0) {
         ElMessage({
           showClose: true,
-          message:response.data.message,
-          type: 'error',
-        })
+          message: response.data.message,
+          type: "error",
+        });
         return null;
-      }else{
+      } else {
         ElMessage({
           showClose: true,
-          message:'Upload Success',
-          type: 'success',
-        })
+          message: "Upload Success",
+          type: "success",
+        });
       }
       return response;
     } catch (error) {
-
-      
       console.log(error);
       throw error;
     }
@@ -142,7 +140,13 @@ export default {
    * @param {string} filename 请求端口后返回的文件名
    * @param {string} steps 优化步数
    */
-
+  arrayBufferToJson(arrayBuffer) {
+    var dataView = new DataView(arrayBuffer);
+    var decoder = new TextDecoder("utf-8");
+    var jsonString = decoder.decode(dataView);
+    var jsonObject = JSON.parse(jsonString);
+    return jsonObject;
+  },
   async getOptimized(data, size) {
     const fileSizeThreshold = 1 * 1024 * 1024;
 
@@ -150,12 +154,15 @@ export default {
       params: {
         ...data,
       },
-      responseType: size > fileSizeThreshold ? "arraybuffer" : "json", // 设置响应数据类型为二进制数组
+      responseType: "arraybuffer",
+      // responseType: size > fileSizeThreshold ? "arraybuffer" : "json", // 设置响应数据类型为二进制数组
     });
     if (res.headers["content-type"] == "application/gzip") {
       const byteArray = new Uint8Array(res.data); // 切换数据编码为Uint8Array
       const pakoArr = pako.inflate(byteArray, { to: "string" }); // 调用 pako 的方法解压数据
       res.data = JSON.parse(pakoArr);
+    } else {
+      res.data = this.arrayBufferToJson(res.data);
     }
     return res;
   },

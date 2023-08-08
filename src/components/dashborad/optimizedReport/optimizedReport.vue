@@ -3,19 +3,22 @@
     <!-- 头部 -->
     <div class="content-row">
       <h2>
-        Detailed Report&nbsp;
+        {{ $t("optimizedReport.title[0]") }}&nbsp;
         <span
           style="text-transform: capitalize; color: rgba(130, 181, 199, 0.9)"
           >{{ store.SummaryData.group }}</span
         >
         <div class="chip primary">
-          <small>{{ store.setting.Steps }} steps</small>
+          <small
+            >{{ store.setting.Steps }}
+            {{ $t("optimizedReport.title[1]") }}</small
+          >
         </div>
         <div class="chip primary">
           <small>{{
             `${store.setting.Ratio[0] * 100}% - ${
               store.setting.Ratio[1] * 100
-            }% ratio`
+            }% ${$t("optimizedReport.title[2]")}`
           }}</small>
         </div>
       </h2>
@@ -26,7 +29,7 @@
           }
         "
         class="row-btn"
-        >Export Report</el-button
+        >{{ $t("optimizedReport.btn[1]") }}</el-button
       >
     </div>
     <!-- 内容区 -->
@@ -34,7 +37,7 @@
       <!-- Changed Tasks -->
       <div class="sub-content">
         <div class="content-row">
-          <h3>Changed Tasks (Overview)</h3>
+          <h3>{{ $t("optimizedReport.tableName[0]") }}</h3>
         </div>
         <div class="legend">
           <div
@@ -67,7 +70,7 @@
       <!-- All Resources -->
       <div class="sub-content">
         <div class="content-row">
-          <h3>All Resources</h3>
+          <h3>{{ $t("optimizedReport.tableName[1]") }}</h3>
         </div>
         <!-- 表格 -->
         <div class="table">
@@ -77,7 +80,7 @@
       <!-- Task-Resources -->
       <div class="sub-content">
         <div class="content-row">
-          <h3>Task-Resources</h3>
+          <h3>{{ $t("optimizedReport.tableName[2]") }}</h3>
         </div>
         <!-- 表格 -->
         <div class="table">
@@ -85,9 +88,14 @@
         </div>
       </div>
     </div>
+    <div class="content-box">
+      <div class="md" ref="mDom"></div>
+    </div>
     <!-- 尾部 -->
     <div class="content-row">
-      <el-button @click="back" class="back">BACK</el-button>
+      <el-button @click="back" class="back">{{
+        $t("optimizedReport.btn[0]")
+      }}</el-button>
       <el-button
         @click="
           () => {
@@ -95,7 +103,7 @@
           }
         "
         class="report"
-        >Export Report</el-button
+        >{{ $t("optimizedReport.btn[1]") }}</el-button
       >
     </div>
     <!-- exportReport -->
@@ -130,31 +138,75 @@
   </div>
 </template>
 
-<script  setup>
+<script setup>
 import Table from "./Table.vue";
 import Echarts from "./Echarts.vue";
-import { ref, reactive, computed ,onUnmounted,onActivated} from "vue";
+import {
+  ref,
+  reactive,
+  computed,
+  onUnmounted,
+  onActivated,
+  onMounted,
+} from "vue";
 import { toRaw } from "@vue/reactivity";
 import { data } from "@/utils/constants"; //数据要删
 import { useCounterStore } from "../../../store";
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 import { useRouter } from "vue-router";
 import api from "../../../api/index.js";
-onUnmounted(()=>{
-// console.log('销毁');
-})
-onActivated(()=>{
-// console.log('缓存');
-})
+
+/* -------------------------------------------------------------------------- */
+import Vditor from "vditor";
+let mDom = ref();
+function generateMarkdown(tasks) {
+  let str = "";
+  for (const key in tasks) {
+    const task = tasks[key];
+    str += `- Task named "${task["Task Name"]}" with task code "${task["Task Code"]}" is associated with the resource named "<span style="color: red;">${task["Resource Name"]}</span>", with a total planned allocation of "${task["Total Planned Units"]}" units. Before optimization, the task had a duration of "${task["Duration(Old)"]}" hours with an allocation rate of "${task["Units(Old)"]}" unit per hour. After optimization, the task's duration was reduced to "${task["Duration(New)"]}" hours, and the allocation rate increased to "${task["Units(New)"]}" units per hour.This task is marked as critical. \n\n`;
+  }
+  return str;
+}
+
+
+
+function initMd(dom) {
+
+  Vditor.preview(dom, generateMarkdown(TaskResource.value));
+  // let instance;
+
+  // instance = new Vditor(dom, {
+  //   cache: {
+  //     enable: false,
+  //   },
+  //   toolbarConfig: {
+  //     hide: true,
+  //   },
+  //   after: () => {
+  //     // 获取实例的值
+  //     // console.log(TaskResource.value);
+  //     instance.setValue();
+  //   },
+  // });
+}
+
+/* -------------------------------------------------------------------------- */
+onUnmounted(() => {
+  // console.log('销毁');
+});
+onMounted(() => {
+  initMd(mDom.value);
+  // console.log('缓存');
+});
 let dialog = ref(false);
 
 const router = useRouter();
 
 function exportProjectReport() {
   // console.log(store.SummaryData.group);
-  if (store.SummaryData.group=='baseline') {
-    console.log('触发');
-    store.SummaryData.group ='Balanced'
+  if (store.SummaryData.group == "baseline") {
+    console.log("触发");
+    store.SummaryData.group = "Balanced";
   }
   let Url = `${store.SummaryData.group}-${
     store.file.name.split(".")[0]
@@ -162,8 +214,8 @@ function exportProjectReport() {
   api.getProjectReport(Url, store.truefile);
 }
 function exportExcel() {
-  if (store.SummaryData.group=='baseline') {
-    store.SummaryData.group = 'Balanced'
+  if (store.SummaryData.group == "baseline") {
+    store.SummaryData.group = "Balanced";
   }
   let Url = `${store.SummaryData.group}-${
     store.file.name.split(".")[0]
@@ -176,32 +228,32 @@ function back() {
 }
 onBeforeRouteLeave((to, from) => {
   if (to.name == "InputData") {
-    clear();
+    // clear();
   }
 });
 
-
 // 强制保留2位小数
-function returnFloat(value){
-  if(!value){
-    return '0.00'
+function returnFloat(value) {
+  if (!value) {
+    return "0.00";
   }
- var value=Math.round(parseFloat(value)*100)/100;
- var xsd=value.toString().split(".");
- if(xsd.length==1){
- value=value.toString()+".00";
- return value;
- }
- if(xsd.length>1){
- if(xsd[1].length<2){
- value=value.toString()+"0";
- }
- return value;
- }
+  var value = Math.round(parseFloat(value) * 100) / 100;
+  var xsd = value.toString().split(".");
+  if (xsd.length == 1) {
+    value = value.toString() + ".00";
+    return value;
+  }
+  if (xsd.length > 1) {
+    if (xsd[1].length < 2) {
+      value = value.toString() + "0";
+    }
+    return value;
+  }
 }
+// 保留一位小数
 function returnFloatOneDecimal(value) {
   if (!value) {
-    return '0.0';
+    return "0.0";
   }
   var value = Math.round(parseFloat(value) * 10) / 10;
   var xsd = value.toString().split(".");
@@ -214,15 +266,6 @@ function returnFloatOneDecimal(value) {
 
 // 组件销毁时摧毁实例
 function clear() {
-  store.taskData = [];
-  store.SummaryData.baseDuration = "-";
-  store.SummaryData.changedDuration = "-";
-  store.SummaryData.changgedTasks = "-";
-  store.SummaryData.TotalTasks = "-";
-  store.SummaryData.baseCriticalPath = "-";
-  store.SummaryData.changedCriticalPath = "-";
-  store.SummaryData.TotalResources = "-";
-  store.SummaryData.group = "";
   Object.keys(store.dataArray).forEach((key) => {
     store.dataArray[key].all = [];
     store.dataArray[key].data = [];
@@ -230,36 +273,40 @@ function clear() {
   store.end.data = false;
 }
 const store = useCounterStore();
-let changedTask = store.selectedData.tasks.map((e) => {
-  if (!e.critical) {
-    e.critical = false;
-  } else {
-    e.critical = true;
-  }
-  return {
-    Critical: e.critical,
-    Code: e.ID,
-    Name: e.name,
-    "Duration(Baseline)":returnFloatOneDecimal(e.remainingDuration) ,
-    "Duration(New)": returnFloatOneDecimal(e.newDuration),
-    Ratio:returnFloat(e.durationRatio),
-  };
-});
-let allResources = store.selectedData.newResources.filter((e) => {
+let changedTask = store.selectedData.tasks
+  .filter((e) => e.durationRatio !== 1)
+  .map((e) => {
+    if (!e.critical) {
+      e.critical = false;
+    } else {
+      e.critical = true;
+    }
+    return {
+      Critical: e.critical,
+      Code: e.ID,
+      Name: e.name,
+      "Duration(Baseline)": returnFloatOneDecimal(e.remainingDuration),
+      "Duration(New)": returnFloatOneDecimal(e.newDuration),
+      Ratio: returnFloat(e.durationRatio),
+    };
+  });
+let allResources = store.selectedData.newResources
+  .filter((e) => {
     // 在这里添加过滤条件
     // 例如：筛选出 type 为 'someType' 的元素
-    return e.ID != '-65535';
-  }).map((e) => {
-  return {
-    ID: e.id,
-    Code: e.ID,
-    Type: e.type,
-    Name: e.name,
-    Distribution:returnFloatOneDecimal(e.distribution.min),
-    Max:returnFloat(e.distribution.max) ,
-    Span: returnFloat(e.distribution.span),
-  };
-});
+    return e.ID != "-65535";
+  })
+  .map((e) => {
+    return {
+      ID: e.id,
+      Code: e.ID,
+      Type: e.type,
+      Name: e.name,
+      Distribution: returnFloatOneDecimal(e.distribution.min),
+      Max: returnFloat(e.distribution.max),
+      Span: returnFloat(e.distribution.span),
+    };
+  });
 let TaskResource = computed(() => {
   let TaskResources = store.selectedData.tasks.filter((e) => {
     let length = Object.keys(e.resources).length;
@@ -270,18 +317,17 @@ let TaskResource = computed(() => {
     let resources = Object.values(e.resources);
     let taskobj = store.selectedData.tasks.find((obj) => obj.id == e.id);
     return resources.map((resource) => ({
-      
       Critical: taskobj.critical,
       "Task Code": taskobj.ID,
       "Resource Name": store.selectedData.newResources.find(
         (obj) => obj.id == resource.resourceId
       )?.name,
       "Task Name": taskobj.name,
-      "Duration(Old)":returnFloatOneDecimal(taskobj.plannedDuration),
-      "Duration(New)":returnFloatOneDecimal(taskobj.newDuration) ,
+      "Duration(Old)": returnFloatOneDecimal(taskobj.plannedDuration),
+      "Duration(New)": returnFloatOneDecimal(taskobj.newDuration),
       "Units(Old)": returnFloat(resource.plannedUnitsPerHour),
-      "Units(New)":returnFloat(Number(resource.newUnitsPerHour)) ,
-      "Total Planned Units":returnFloat(resource.remainingUnits) ,
+      "Units(New)": returnFloat(Number(resource.newUnitsPerHour)),
+      "Total Planned Units": returnFloat(resource.remainingUnits),
     }));
   });
 
@@ -533,5 +579,10 @@ const tableOptions3 = reactive({
       }
     }
   }
+}
+.md {
+  max-height: 500px !important;
+  overflow-y: scroll;
+  margin-bottom: 40px;
 }
 </style>

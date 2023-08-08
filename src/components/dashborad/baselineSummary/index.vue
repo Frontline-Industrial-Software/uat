@@ -8,7 +8,7 @@ import {
   reactive,
   computed,
   onActivated,
-  watchEffect 
+  watchEffect,
 } from "vue";
 import * as echarts from "echarts";
 import { useRouter } from "vue-router";
@@ -19,41 +19,97 @@ import api from "../../../api/index.js";
 import { onBeforeRouteLeave } from "vue-router";
 import { arrowMiddleware } from "element-plus";
 import { toRaw } from "@vue/reactivity";
-onBeforeRouteLeave((to, from, next) => {
-  if (to.name == "InputData") {
-    activeIndex.value = "Balanced1";
-    radio.value = 0;
-    clear();
-  }
-  next();
-});
+/* -----------------------------------变量--------------------------------------- */
+let activeIndex = ref("Balanced1");
+
 let selectData = reactive({
   preset: "Balanced",
   fileName: store.file.name,
   step: 3,
 });
+// 更新选中值
+// 右侧被选中数据
+let SummaryData = reactive({
+  baseDuration: "-",
+  changedDuration: "-",
+  changgedTasks: "-",
+  TotalTasks: "-",
+  baseCriticalPath: "-",
+  changedCriticalPath: "-",
+  TotalResources: "-",
+  group: "",
+});
+
+// 右侧单选框
+let radio = ref(0);
+/* ----------------------------------生命周期---------------------------------------- */
+onBeforeRouteLeave((to, from, next) => {
+  // if (to.name == "InputData") {
+  //   activeIndex = ref("");
+  //   activeIndex.value = "Balanced1";
+  //   radio.value = 0;
+  // }
+  next();
+});
+onActivated(() => {
+  initChart();
+  renderChart();
+});
+/* -------------------------------------工具函数------------------------------------- */
+
 // 去百分比
 function toPercent(num, total) {
   return Math.round((num / total) * 10000) / 100.0 + "%"; // 小数点后两位百分比
 }
 // 组件销毁时摧毁实例
-function clear() {
-  store.taskData = [];
-  store.SummaryData.baseDuration = "-";
-  store.SummaryData.changedDuration = "-";
-  store.SummaryData.changgedTasks = "-";
-  store.SummaryData.TotalTasks = "-";
-  store.SummaryData.baseCriticalPath = "-";
-  store.SummaryData.changedCriticalPath = "-";
-  store.SummaryData.TotalResources = "-";
-  store.SummaryData.group = "";
-  Object.keys(store.dataArray).forEach((key) => {
-    store.dataArray[key].all = [];
-    store.dataArray[key].data = [];
-  });
-  store.end.data = false;
-}
 const router = useRouter();
+
+/* ---------------------------------------监听----------------------------------- */
+
+watch(activeIndex, () => {
+  chart.setOption(option.value);
+});
+
+watch(store.dataArray, () => {
+  chart.setOption(option.value);
+});
+/* 监听所有数据是否获取完成 -------------------------------------------------------------------------- */
+watch(
+  store.end,
+  async () => {
+    if (store.end.data) {
+   
+      DefaultData.value = getDefault();
+      // console.log(DefaultData.value);
+      radio.value = 0;
+      setTimeout(() => {
+        chart.dispatchAction({
+          type: "select",
+          name: DefaultData.value[1][0].name,
+        });
+        updateData(DefaultData.value[1][0].value[2].result);
+        selectData.preset = "Balanced";
+        selectData.step = DefaultData.value[1][0].value[2].result.step;
+      }, 0);
+    } else {
+      activeIndex = ref("");
+      activeIndex.value = "Balanced1";
+      radio.value = 0;
+      SummaryData.baseDuration = "-";
+      SummaryData.changedDuration = "-";
+      SummaryData.changgedTasks = "-";
+      SummaryData.TotalTasks = "-";
+      SummaryData.baseCriticalPath = "-";
+      SummaryData.changedCriticalPath = "-";
+      SummaryData.TotalResources = "-";
+      SummaryData.group = "";
+    }
+  },
+  { deep: true }
+);
+/* ---------------------------------图表----------------------------------------- */
+// 初始化图表实例
+let chart = null;
 
 // 数据配置项
 
@@ -72,6 +128,15 @@ function seriesData(name, basecolor, activecolor) {
 
     selectedMode: "single",
     selectedOffset: 10,
+    symbol: (data) => {
+      // constraintLoss>0
+      let path = `path://M18.018,15.344c-0.285,0-0.555-0.162-0.684-0.441l-6.595-12.076l-6.594,12.076c-0.128,0.279-0.398,0.441-0.684,0.441c-0.491,0-0.706-0.638-0.249-0.929l6.997-12.808l-6.997-12.809c-0.457-0.291-0.242-0.929,0.249-0.929c0.286,0,0.556,0.162,0.684,0.441l6.595,12.076l6.594-12.076c0.127-0.279,0.398-0.441,0.684-0.441c0.49,0,0.705,0.638,0.249,0.929l-6.998,12.808l6.998,12.809c0.456,0.291,0.241,0.929-0.249,0.929H18.018z`;
+      if (data[2].result.constraintLoss > 0) {
+        // console.log(data[2].result);
+        return path;
+      }
+      return "circle";
+    },
     select: {
       scale: 2,
       itemStyle: {
@@ -223,16 +288,6 @@ var option = computed(() => {
   };
 });
 
-// 初始化图表实例
-let chart = null;
-let activeIndex = ref("Balanced1");
-watch(activeIndex, () => {
-  chart.setOption(option.value);
-});
-
-watch(store.dataArray, () => {
-  chart.setOption(option.value);
-});
 // 初始化图表
 function initChart() {
   if (chart == null) {
@@ -283,21 +338,8 @@ function initChart() {
 function renderChart() {
   chart.setOption(option.value);
 }
-// 更新选中值
-// 右侧被选中数据
-let SummaryData = reactive({
-  baseDuration: "-",
-  changedDuration: "-",
-  changgedTasks: "-",
-  TotalTasks: "-",
-  baseCriticalPath: "-",
-  changedCriticalPath: "-",
-  TotalResources: "-",
-  group: "",
-});
+/* -------------------------------------------------------------------------- */
 
-// 右侧单选框
-let radio = ref(0);
 // 右侧数据更新
 function updateData(data) {
   SummaryData.group = data.group;
@@ -316,7 +358,9 @@ async function nextOptimized() {
   let data = await api.getOptimized({ ...selectData }, store.file.size);
   store.SummaryData = { ...SummaryData };
   store.selectedData = null;
+
   store.selectedData = data.data;
+  // console.log(store.selectedData);
   store.active = 2;
   store.selectChange = true;
   router.push({ name: "optimizedSummary" });
@@ -334,79 +378,46 @@ function getDefault() {
   return DefaultDatas;
 }
 
-/* 监听所有数据是否获取完成 -------------------------------------------------------------------------- */
-watch(
-  store.end,
-  () => {
-    if (store.end.data) {
-      DefaultData.value = getDefault();
-      radio.value = 0;
-      setTimeout(() => {
-        chart.dispatchAction({
-          type: "select",
-          name: DefaultData.value[1][0].name,
-        });
-        updateData(DefaultData.value[1][2].value[2].result);
-        selectData.preset = "Balanced";
-        selectData.step = DefaultData.value[1][2].value[2].result.step;
-      }, 0);
-    }
-  },
-  { deep: true }
-);
-// const stopWatching = watch(
-//   () => store.dataArray.Fastest,
-//   (newValue, oldValue) => {
-//     console.log();
-//     stopWatching();
-//   },
-//   { deep: true }
-// );
-// watchEffect(() => {
-//   console.log('Balanced 属性的初始值:', store.dataArray.Fastest);
-// });
-onActivated(() => {
-  initChart();
-
-  renderChart();
-  if (store.SummaryData) {
-    SummaryData.group = store.SummaryData.group;
-    SummaryData.baseDuration = store.SummaryData.baseDuration;
-    SummaryData.changedDuration = store.SummaryData.changedDuration;
-    SummaryData.changgedTasks = store.SummaryData.changgedTasks;
-    SummaryData.TotalTasks = store.SummaryData.TotalTasks;
-    SummaryData.baseCriticalPath = store.SummaryData.baseCriticalPath;
-    SummaryData.changedCriticalPath = store.SummaryData.changedCriticalPath;
-    SummaryData.TotalResources = store.SummaryData.TotalResources;
-  }
-});
+// 侧边烂点击事件
+function sideClcik(num) {
+  chart.dispatchAction({
+    type: "select",
+    name: DefaultData.value[num][0].name,
+  });
+  activeIndex = DefaultData.value[num][0].name;
+  selectData.preset = DefaultData.value[num][0].value[2].name;
+  selectData.step = DefaultData.value[num][0].value[2].result.step;
+  updateData(DefaultData.value[num][0].value[2].result);
+}
 </script>
 <template>
   <div class="contain">
     <h2>
-      Baseline Summary
+      {{ $t("baselineSummary.title[0]") }}
       <div class="step">
-        <span>{{ store.setting.Steps }} steps</span>
+        <span
+          >{{ store.setting.Steps }} {{ $t("baselineSummary.title[1]") }}</span
+        >
       </div>
       <div class="step">
         <span>{{
           `${store.setting.Ratio[0] * 100}% - ${
             store.setting.Ratio[1] * 100
-          }% ratio`
+          }% ${$t("baselineSummary.title[2]")}`
         }}</span>
       </div>
     </h2>
     <div class="main">
       <div class="left">
         <div class="lefttop">
-          <div>Comparison Chart</div>
+          <div>{{ $t("baselineSummary.chartName[0]") }}</div>
         </div>
         <Echarts style="width: 720px; height: 500px" id="myEcharts"></Echarts>
       </div>
       <div class="right">
         <div class="righttop">
           <div>
-            Project Duration
+            {{ $t("baselineSummary.Tsidebar[0]") }}
             {{
               toPercent(SummaryData.changedDuration, SummaryData.baseDuration)
             }}
@@ -415,13 +426,13 @@ onActivated(() => {
             {{ SummaryData.changedDuration }}/
             <span>{{ SummaryData.baseDuration }}</span> days
           </h1>
-          <div>Changed Tasks vs Total N of Tasks</div>
+          <div>{{ $t("baselineSummary.Tsidebar[1]") }}</div>
           <h1>
             {{ SummaryData.changgedTasks }}/
             <span>{{ SummaryData.TotalTasks }}</span>
           </h1>
           <div>
-            Tasks on Critical Path
+            {{ $t("baselineSummary.Tsidebar[2]") }}
 
             {{
               toPercent(SummaryData.baseCriticalPath, SummaryData.TotalTasks)
@@ -431,82 +442,36 @@ onActivated(() => {
             {{ SummaryData.baseCriticalPath }}/
             <span>{{ SummaryData.TotalTasks }}</span>
           </h1>
-          <div>Total Resources</div>
+          <div>{{ $t("baselineSummary.Tsidebar[3]") }}</div>
           <h1>{{ SummaryData.TotalResources }}</h1>
         </div>
         <div class="rightbutton">
-          <h1>Optimization Presets</h1>
+          <h1>{{ $t("baselineSummary.Bsidebar[0]") }}</h1>
           <div>
-            These available presets are pre-configured settings that are
-            designed to deliver the best performance or quality for each
-            individual specific use case.
+            {{ $t("baselineSummary.Bsidebar[1]") }}
           </div>
           <el-radio-group v-model="radio" class="radiobox">
             <el-radio
               @click="
                 () => {
-                  chart.dispatchAction({
-                    type: 'select',
-                    name: DefaultData[1][0].name,
-                  });
-                  activeIndex = DefaultData[1][0].name;
-                  selectData.preset = DefaultData[1][2].value[2].name;
-                  selectData.step = DefaultData[1][2].value[2].result.step;
-                  updateData(DefaultData[1][2].value[2].result);
+                  sideClcik(1);
                 }
               "
               :label="0"
-              >Balanced <span>Best combination of the others</span></el-radio
+              >{{ $t("types.typeShow[1]") }}
+              <span>{{ $t("types.msg[0]") }} </span></el-radio
             >
-            <el-radio
-              @click="
-                () => {
-                  chart.dispatchAction({
-                    type: 'select',
-                    name: DefaultData[2][0].name,
-                  });
-                  activeIndex = DefaultData[2][0].name;
-                  selectData.preset = DefaultData[2][2].value[2].name;
-                  selectData.step = DefaultData[2][2].value[2].result.step;
-                  updateData(DefaultData[2][2].value[2].result);
-                }
-              "
-              :label="1"
-              >Fastest <span>Shortest project duration</span></el-radio
+            <el-radio @click="sideClcik(2)" :label="1"
+              >{{ $t("types.typeShow[2]") }}
+              <span>{{ $t("types.msg[1]") }}</span></el-radio
             >
-            <el-radio
-              :label="2"
-              @click="
-                () => {
-                  chart.dispatchAction({
-                    type: 'select',
-                    name: DefaultData[3][0].name,
-                  });
-                  activeIndex = DefaultData[3][0].name;
-                  selectData.preset = DefaultData[3][2].value[2].name;
-                  selectData.step = DefaultData[3][2].value[2].result.step;
-                  updateData(DefaultData[3][2].value[2].result);
-                }
-              "
-              >Minimum Resources
-              <span>Least amount of required resources</span></el-radio
+            <el-radio :label="2" @click="sideClcik(3)"
+              >{{ $t("types.typeShow[3]") }}
+              <span>{{ $t("types.msg[2]") }}</span></el-radio
             >
-            <el-radio
-              :label="3"
-              @click="
-                () => {
-                  chart.dispatchAction({
-                    type: 'select',
-                    name: DefaultData[4][0].name,
-                  });
-                  activeIndex = DefaultData[4][0].name;
-                  selectData.preset = DefaultData[4][2].value[2].name;
-                  selectData.step = DefaultData[4][2].value[2].result.step;
-                  updateData(DefaultData[4][2].value[2].result);
-                }
-              "
-              >Levelled Resources
-              <span>Best resource distribution</span></el-radio
+            <el-radio :label="3" @click="sideClcik(4)"
+              >{{ $t("types.typeShow[4]") }}
+              <span>{{ $t("types.msg[3]") }}</span></el-radio
             >
           </el-radio-group>
         </div>
@@ -515,7 +480,7 @@ onActivated(() => {
           @click="nextOptimized"
           class="btn"
           icon="el-icon-delete"
-          >NEXT</v-btn
+          >{{ $t("next") }}</v-btn
         >
       </div>
     </div>

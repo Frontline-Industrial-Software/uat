@@ -6,10 +6,22 @@
         :active="store.active"
         finish-status="success"
       >
-      <el-step @click="navigate(text[0], 0)" :title="$t('navigator.input_data')" />
-      <el-step @click="navigate(text[1], 1)" :title="$t('navigator.baseline_summary')" />
-      <el-step @click="navigate(text[2], 2)" :title="$t('navigator.optimized_summary')" />
-      <el-step @click="navigate(text[3], 3)" :title="$t('navigator.optimized_report')" />
+        <el-step
+          @click="navigate(text[0], 0)"
+          :title="$t('navigator.input_data')"
+        />
+        <el-step
+          @click="navigate(text[1], 1)"
+          :title="$t('navigator.baseline_summary')"
+        />
+        <el-step
+          @click="navigate(text[2], 2)"
+          :title="$t('navigator.optimized_summary')"
+        />
+        <el-step
+          @click="navigate(text[3], 3)"
+          :title="$t('navigator.optimized_report')"
+        />
       </el-steps>
     </div>
   </div>
@@ -28,23 +40,47 @@ const text = [
 
 const router = useRouter();
 function navigate(pathname, number) {
-
-  if (pathname == "dashboard/inputData") {
-    router.push(`/${pathname}`);
-    store.active = number;
-  }
-  if (store.taskData.length != 0) {
-    if (
-      pathname != "dashboard/baselineSummary" ||
-      pathname != "dashboard/inputData"
-    ) {
-      if (!store.selectedData) {
-        return;
+  // console.log(pathname);
+  switch (pathname) {
+    case "dashboard/inputData":
+      router.push(`/${pathname}`);
+      store.active = number;
+      break;
+    case "dashboard/baselineSummary":
+      if (store.dataArray['baseline'].all.length != 0) {
+        router.push(`/${pathname}`);
+        store.active = number;
       }
-    }
-    router.push(`/${pathname}`);
-    store.active = number;
+
+      break;
+    case "dashboard/optimizedSummary":
+      if (store.selectedData) {
+        router.push(`/${pathname}`);
+        store.active = number;
+      }
+
+      break;
+    case "dashboard/optimizedReport":
+      if (store.selectedData) {
+        router.push(`/${pathname}`);
+        store.active = number;
+      }
+      break;
+    default:
+      break;
   }
+  // if (store.taskData.length != 0) {
+  //   if (
+  //     pathname != "dashboard/baselineSummary" ||
+  //     pathname != "dashboard/inputData"
+  //   ) {
+  //     if (!store.selectedData) {
+  //       return;
+  //     }
+  //   }
+  //   router.push(`/${pathname}`);
+  //   store.active = number;
+  // }
 }
 </script>
 
@@ -67,36 +103,3 @@ function navigate(pathname, number) {
   margin-bottom: 20px;
 }
 </style>
-
-<!-- <div class="contentBox">
-  <div class="box" @click="() => {navigate('inputdata')}">
-    <div class="circle actived">
-      <span >1</span>
-      
-    </div>
-    <span class="text">Input Data</span>
-    
-  </div>
-<div class="box" :class="{}" @click="() => {navigate('baselineSummary')}">
-  <div class="circle waiting">
-    <span >2</span>
-  </div>
-  <span class="text">Baseline Summary</span>
-  <v-divider length="30px" class="invide" inset></v-divider>
-</div>
-
-<div class="box" @click="() => {navigate('optimizedSummary')}">
-  <div class="circle waiting">
-    <span>3</span>
-  </div>
-  <span class="text">Optimized Summary</span>
- 
-</div>
-
-<div class="box" @click="() => {navigate('optimizedReport')}">
-  <div class="circle waiting">
-    <span>4</span>
-  </div>
-  <span class="text">Optimized Report</span>
-</div>
-</div> -->

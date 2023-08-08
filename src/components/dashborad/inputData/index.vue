@@ -4,7 +4,7 @@
       <v-row no-gutters>
         <v-col>
           <v-sheet class="pa-2 ma-2">
-            <h2>Upload schedule and enter optimization settings</h2>
+            <h2>{{ $t("inputData.title") }}</h2>
           </v-sheet>
         </v-col>
       </v-row>
@@ -12,8 +12,8 @@
       <v-row no-gutters>
         <v-col>
           <v-sheet class="pa-2 ma-2">
-            <h2>Schedule</h2>
-            <h3>Upload your schedule (.xer or .xml)</h3>
+            <h2>{{$t("inputData.oneData[0]")}}</h2>
+            <h3>{{$t("inputData.oneData[1]")}}</h3>
           </v-sheet>
         </v-col>
         <v-col>
@@ -23,7 +23,7 @@
               <span
                 v-if="!store.file.name"
                 style="color: rgb(42, 123, 108); margin-left: 10px"
-                >No file chosen</span
+                >{{$t("inputData.oneData[3]")}}</span
               >
               <span
                 v-else
@@ -35,11 +35,11 @@
         </v-col>
         <v-col>
           <v-sheet class="pa-2 ma-2">
-            or
+            {{$t("inputData.oneData[4]")}}
             <span
               @click="uploadDemo()"
               style="text-decoration: underline; cursor: pointer"
-              >use a demo project</span
+              >{{$t("inputData.oneData[5]")}}</span
             >
           </v-sheet>
         </v-col>
@@ -48,14 +48,14 @@
       <div :class="{ disabled: !store.file.name }">
         <v-row :disabled="!store.file.name" no-gutters>
           <v-col>
-            <v-sheet  class="pa-2 ma-2">
-              <h2>Constraints</h2>
+            <v-sheet class="pa-2 ma-2">
+              <h2>{{$t("inputData.twoData[0]")}}</h2>
               <h3>
-                Upload your constraints
+                {{$t("inputData.twoData[1]")}}
                 <span
                   style="cursor: pointer; text-decoration: underline"
                   @click="downloadTemplate"
-                  >(download template)</span
+                  >{{$t("inputData.twoData[2]")}}</span
                 >
               </h3>
             </v-sheet>
@@ -63,10 +63,10 @@
           <v-col>
             <v-sheet class="pa-2 ma-2">
               <div class="uploadBox">
-                <ConstraintsUpload/>
-                <span style="color: rgb(42, 123, 108); margin-left: 10px"
-                  >{{store.ConstraintsFile}}</span
-                >
+                <ConstraintsUpload />
+                <span style="color: rgb(42, 123, 108); margin-left: 10px">{{
+                  store.ConstraintsFile
+                }}</span>
               </div>
             </v-sheet>
           </v-col>
@@ -77,26 +77,30 @@
         <v-row no-gutters>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              <h2>Optimization Settings</h2>
-              <h3>Customize your optimization results</h3>
+              <h2>{{$t("inputData.threeData[0]")}}</h2>
+              <h3>{{$t("inputData.threeData[1]")}}</h3>
             </v-sheet>
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              <label>Ignore Project Scheduled Dates</label>
+              <label>{{$t("inputData.threeData[2]")}}</label>
 
-              <v-radio-group :disabled="!store.file.name" v-model="store.setting.IgnoreProject" inline>
-                <v-radio label="Yes" value="true"></v-radio>
-                <v-radio label="No" value="false"></v-radio>
+              <v-radio-group
+                :disabled="!store.file.name"
+                v-model="store.setting.IgnoreProject"
+                inline
+              >
+                <v-radio :label="$t('inputData.threeData[3]')" value="true"></v-radio>
+                <v-radio :label="$t('inputData.threeData[4]')" value="false"></v-radio>
               </v-radio-group>
             </v-sheet>
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              Learning Rate
+              {{$t('inputData.threeData[5]')}}
               <p>
                 <v-text-field
-                :disabled="!store.file.name"
+                  :disabled="!store.file.name"
                   density="compact"
                   v-model="store.setting.Rate"
                   placeholder="0.025"
@@ -114,12 +118,12 @@
           <v-col>
             <v-sheet class="pa-2 ma-2">
               {{
-                `Optimization Ratio(${store.setting.Ratio[0] * 100}% -${
+                `${$t('inputData.fourData[0]')}(${store.setting.Ratio[0] * 100}% -${
                   store.setting.Ratio[1] * 100
                 }%)`
               }}
               <v-range-slider
-              :disabled="!store.file.name"
+                :disabled="!store.file.name"
                 :max="2"
                 :min="0.1"
                 :step="0.1"
@@ -135,9 +139,9 @@
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              Optimization Steps ({{ store.setting.Steps }})
+              {{$t('inputData.fiveData[0]')}} ({{ store.setting.Steps }})
               <v-slider
-              :disabled="!store.file.name"
+                :disabled="!store.file.name"
                 :step="1"
                 v-model="store.setting.Steps"
                 color="rgb(112, 191, 177)"
@@ -160,7 +164,7 @@
                   @click="Port"
                   color="rgb(64, 170, 151)"
                   style="color: white"
-                  >Next</v-btn
+                  >{{$t('next')}}</v-btn
                 >
               </div>
             </v-sheet>
@@ -173,7 +177,7 @@
 
 <script setup>
 import { useCounterStore } from "../../../store";
-import { reactive, ref, onMounted ,onActivated} from "vue";
+import { reactive, ref, onMounted, onActivated } from "vue";
 import Upload from "./upload.vue";
 import ConstraintsUpload from "./constraintsUpload.vue";
 import api from "../../../api/index.js";
@@ -181,19 +185,18 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const store = useCounterStore();
 async function Port() {
-  // let port =await api.getPort()
-  // console.log(port.data.port.port);
+   Object.keys(store.dataArray).forEach((key) => {
+    store.dataArray[key].all = [];
+    store.dataArray[key].data = [];
+  });
+  // clear()
+  store.selectedData=null;
   await store.connectWebsocket();
   router.push({ name: "BaselineSummary" });
   store.active = 1;
+  store.end.data=false
 }
-onActivated(() => {
-  clear();
-});
-function clear() {
-  store.taskData.data = [];
-  
-}
+
 async function uploadDemo() {
   fetch("demo_project.xml")
     .then((r) => r.blob())
@@ -206,10 +209,7 @@ async function uploadDemo() {
     });
 }
 async function downloadTemplate() {
- await api.constraintsFileDownload(
-    `${store.file.name.split(".")[0]}.xlsx`
-  );
-
+  await api.constraintsFileDownload(`${store.file.name.split(".")[0]}.xlsx`);
 }
 </script>
 

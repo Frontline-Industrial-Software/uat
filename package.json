@@ -27,6 +27,7 @@
     "socket.io": "^4.7.1",
     "socket.io-client": "^4.7.1",
     "unplugin-icons": "^0.16.3",
+    "vditor": "^3.9.4",
     "vite-plugin-vuetify": "^1.0.2",
     "vue": "^3.2.47",
     "vue-i18n": "^9.3.0-beta.24",

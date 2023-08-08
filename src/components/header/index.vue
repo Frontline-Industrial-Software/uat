@@ -21,13 +21,14 @@
               <div>
                 <div>
                   <v-btn elevation="0">
-                    <v-icon start icon="mdi-laptop"> </v-icon>
+                    
 
                     <a
                       style="text-decoration: none; color: black"
                       href="https://app.frontline-optimizer.com/v1.0.0/"
                       target="_blank"
                     >
+                    <v-icon start icon="mdi-laptop"> </v-icon>
                       Back to v1.0.0
                     </a>
                   </v-btn>

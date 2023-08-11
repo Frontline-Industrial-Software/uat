@@ -78,7 +78,7 @@ export default {
     chartName: [
       "Comparison Chart",
       "Overview of all tasks over time",
-      "Labor Resources",
+      "Resources",
       "Total utilization of multiple resources over time",
     ],
     btn: ["back", "VIEW DETAILED REPORT"],

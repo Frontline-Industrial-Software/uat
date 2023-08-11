@@ -41,19 +41,6 @@ function sanitizeFileName(fileName) {
   return fileName.replace(/[^\w\d]/g, "_");
 }
 
-function clear(){
-console.log('清除')
-if (store.SummaryData) {
-    store.SummaryData.baseDuration = "-";
-    store.SummaryData.changedDuration = "-";
-    store.SummaryData.changgedTasks = "-";
-    store.SummaryData.TotalTasks = "-";
-    store.SummaryData.baseCriticalPath = "-";
-    store.SummaryData.changedCriticalPath = "-";
-    store.SummaryData.TotalResources = "-";
-    store.SummaryData.group = "";
-  }
-}
 
 
 const beforeUpload = async (file) => {

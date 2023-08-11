@@ -78,7 +78,6 @@ watch(
   store.end,
   async () => {
     if (store.end.data) {
-   
       DefaultData.value = getDefault();
       // console.log(DefaultData.value);
       radio.value = 0;
@@ -343,7 +342,7 @@ function renderChart() {
 // 右侧数据更新
 function updateData(data) {
   SummaryData.group = data.group;
-  SummaryData.baseDuration = Math.ceil(data.baselineDurationDays);
+  SummaryData.baseDuration = Math.ceil(data.baselineDurationDaysWithCalendar);
   SummaryData.changedDuration = Math.ceil(data.projectDurationDays);
   SummaryData.changgedTasks = Math.ceil(data.changedTasksLen);
   SummaryData.TotalTasks = Math.ceil(data.baselineTasksLen);
@@ -391,7 +390,7 @@ function sideClcik(num) {
 }
 </script>
 <template>
-  <div class="contain">
+  <div >
     <h2>
       {{ $t("baselineSummary.title[0]") }}
       <div class="step">
@@ -487,10 +486,6 @@ function sideClcik(num) {
   </div>
 </template>
 <style lang="scss" scoped>
-.contain {
-  background-color: rgb(240, 241, 243);
-  height: 80vh;
-}
 h2 {
   width: 100%;
   height: 30px;

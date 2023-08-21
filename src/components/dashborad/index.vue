@@ -27,6 +27,9 @@ import Navigate from "../navigate/index.vue";
   justify-content: center;
   align-items: center;
 }
+.subject > * {
+  flex-shrink: 0;
+}
 .content {
   background: rgb(240, 241, 243);
   margin: 0px;

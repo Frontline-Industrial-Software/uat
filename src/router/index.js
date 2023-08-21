@@ -77,6 +77,7 @@ const routes = [
     ],
   },
 ];
+
 Amplify.configure(awsconfig);
 // 3. 创建路由实例
 const router = createRouter({
@@ -86,7 +87,12 @@ const router = createRouter({
   // history: createWebHistory(),
   routes, //使用上方定义的路由配置
 });
-
+//设置跳转购物车页时给页面的body属性
+// router.afterEach((to, from, next) => {
+//   if (to.path == "/shoppingManagement") {
+//     document.querySelector("body").setAttribute("style", "overflow: auto !important;")
+//   }
+// });
 // 创建 beforeEach 导航守卫
 router.beforeEach(async (to, from, next) => {
   // console.log(to);

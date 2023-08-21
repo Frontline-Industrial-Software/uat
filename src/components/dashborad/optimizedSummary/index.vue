@@ -110,9 +110,7 @@
 
         <el-input v-model="searchData" placeholder="Search Resources" />
         <div v-for="(item, key) in types">
-          <div>
-            {{ key }}
-          </div>
+          <div class="resources-title">{{ key }} Resources</div>
           <div class="types">
             <div v-for="(items, i) in item" :key="i" class="type">
               <v-btn
@@ -222,12 +220,15 @@ function convertUTCToCustomFormat(utcTimeString) {
   return customFormattedString;
 }
 const toArray = (distribution) => {
-  if (distribution === undefined || distribution.length === 0) {
+  if (distribution[0] === undefined || distribution[0].length === 0) {
     return [];
   }
-  return distribution.xy.map((obj) => {
+  return distribution[0].xy.map((obj) => {
     const [x, y] = Object.entries(obj)[0];
-    return [utcTime(parseInt(x)), y];
+    return{
+      value:[utcTime(parseInt(x)), y],
+      name:utcTime(parseInt(x))+ y
+    }
   });
 };
 /* -------------------------------------------------------------------------- */
@@ -240,7 +241,7 @@ let resourcesChart;
 
 let criticalTask = computed(() => {
   if (!store.selectedData) {
-    return
+    return;
   }
   let critical = store.selectedData.baselineTasks.filter((e) => {
     return e.critical;
@@ -275,10 +276,21 @@ function initChart() {
         itemStyle: {
           color: baselineTask.critical ? "pink" : undefined,
         },
+        // emphasis: {
+        //   itemStyle: {
+        //     borderType: [5, 10],
+        //     borderDashOffset: 5,
+        //     opacity: "0",
+        //     color: "#2436df",
+        //   },
+        // },
+        // emphasis: {
+        //   itemStyle: { color: "#ffbb96", borderWidth: "5px" },
+        // },
       };
     }
   );
-
+  // console.log(baselineTasks);
   // 优化任务
   changedlineTasks = changedlineTasks.map((changedlineTask, idx) => {
     // console.log(changedlineTask);
@@ -324,13 +336,18 @@ function initChart() {
       params.coordSys
     );
 
-    return (
-      shape && {
+    return  {
         type: "rect",
         shape,
         style: api.style(),
+        focus: "self",
+        blurScope: "coordinateSystem",
+        emphasis: {
+          
+          
+        },
       }
-    );
+  
   };
   option = {
     toolbox: {
@@ -340,6 +357,10 @@ function initChart() {
         saveAsImage: { show: true },
       },
     },
+
+    // 选中状态
+    // select: {scale: 2},
+
     dataZoom: [
       {
         type: "slider",
@@ -348,6 +369,9 @@ function initChart() {
         labelFormatter: function (value) {
           return convertUTCToCustomFormat(value);
         },
+        moveHandleSize: 15,
+        height: 15,
+        moveHandleStyle: {},
       },
       {
         type: "slider",
@@ -382,6 +406,8 @@ function initChart() {
     yAxis: {
       name: "tasks",
     },
+    selectedMode: "single",
+
     series: [
       {
         name: "baseline",
@@ -411,51 +437,47 @@ function initChart() {
         let resData = "Resources: <br/>";
         if (p.value[3].resources) {
           for (const key in p.value[3].resources) {
-          let res = p.value[3].resources;
-          let name = store.selectedData.newResources.find(
-            (resource) => {
-              return resource.id == key}
-          );
-          resData += ` &nbsp&nbspResource &nbsp  ${
-            name?.name
-          } &nbsp id: ${key}  <br/>&nbsp&nbsp&nbsp&nbspunits/hour:${
-            returnFloat( res[key].plannedUnitsPerHour) 
-          }=> ${returnFloat(res[key].newUnitsPerHour)}<br/>`;
-          // console.log(res[key]);
+            let res = p.value[3].resources;
+            let name = store.selectedData.newResources.find((resource) => {
+              return resource.id == key;
+            });
+            resData += ` &nbsp&nbspResource &nbsp  ${
+              name?.name
+            } &nbsp id: ${key}  <br/>&nbsp&nbsp&nbsp&nbspunits/hour:${returnFloat(
+              res[key].plannedUnitsPerHour
+            )}=> ${returnFloat(res[key].newUnitsPerHour)}<br/>`;
+            // console.log(res[key]);
+          }
         }
-        }
-        
-        function marker(str){
-          let color
+
+        function marker(str) {
+          let color;
           switch (str) {
-            case 'New':
+            case "New":
               if (!p.value[3].critical) {
-                color= '#b0e054'
-              }
-              else{
-                color= 'red'
+                color = "#b0e054";
+              } else {
+                color = "red";
               }
               break;
-              case 'Old':
+            case "Old":
               if (!p.value[3].critical) {
-                color= '#5474c4'
-              }
-              else{
-                color= 'pink'
+                color = "#5474c4";
+              } else {
+                color = "pink";
               }
 
             default:
               break;
           }
 
-        return `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`
+          return `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`;
         }
-
 
         // const marker = ``;
         return `${p.name}<br/>
         <div style='margin-top:20px'>
-         ${marker('New')} New: ${p.value[1]
+         ${marker("New")} New: ${p.value[1]
           .replace("T", " ")
           .replace("Z", "")
           .slice(0, 16)} -> ${p.value[2]
@@ -464,7 +486,7 @@ function initChart() {
           .slice(0, 16)}
          (${p.value[3].newDuration})
         <br/>
-         ${marker('Old')} Old: ${baseItem(
+         ${marker("Old")} Old: ${baseItem(
           utcTime(p.value[3].plannedStart)
             .replace("T", " ")
             .replace("Z", "")
@@ -483,10 +505,24 @@ function initChart() {
     },
   };
   option && chart.setOption(option);
+
+  chart.on("mousemove", function (param) {
+    chart.dispatchAction({
+      type: "highlight",
+      dataIndex: param.dataIndex,
+    });
+  });
   resourcesChart = myEcharts.init(
     document.getElementById("myEcharts01"),
     "purple-passion"
   );
+  resourcesChart.on("mousemove", function (param) {
+    // console.log(param.name);
+      resourcesChart.dispatchAction({
+      type: "highlight",
+      name: param.name,
+    });
+  });
 }
 let searchData = ref("");
 // 强制保留2位小数
@@ -539,32 +575,38 @@ let types = computed(() => {
 //   store.selectedData.baselineResources[type.value].distribution;
 let baselineResources = computed(() => {
   const baselineResources = store.selectedData.baselineResources;
+  // 废弃，改为数据作为名字
+  let idname=baselineResources[0].name + baselineResources[0].id 
   if (typeActive.value) {
     const filteredArray = baselineResources.filter(
       (item) => item.id && item.id === typeActive.value
     );
-    return filteredArray[0].distribution;
+    
+    return [filteredArray[0].distribution,idname];
   } else {
     if (baselineResources.length == 0) {
       return [];
     }
     typeActive.value = baselineResources[0].id;
-    return baselineResources[0]?.distribution;
+    return [baselineResources[0]?.distribution,idname];
   }
 });
 let newResources = computed(() => {
   const newResources = store.selectedData.newResources;
+  let idname=newResources[0].name + newResources[0].id 
+
   if (typeActive.value) {
     let datas = newResources.filter(
       (item) => item.id && item.id === typeActive.value
     );
     // console.log(datas);
-    return datas[0].distribution;
+    return [datas[0].distribution,idname];
   } else {
     if (newResources.length == 0) {
       return [];
     }
-    return newResources[0]?.distribution;
+
+    return [newResources[0]?.distribution,idname];
   }
 });
 
@@ -627,18 +669,41 @@ let resourcesOption = computed(() => {
     yAxis: {
       name: "units / day",
     },
+
     series: [
       {
         name: "baseline",
         type: "bar",
         data: toArray(baselineResources.value),
         large: true,
+        selectedMode: "single",
+        select: {
+          itemStyle: {
+            color: "black",
+            borderWidth: "5px",
+          },
+        },
+        emphasis: {
+          focus: "self",
+          blurScope: "coordinateSystem",
+        },
       },
       {
         name: "new",
         type: "bar",
         data: toArray(newResources.value),
         large: true,
+        // selectedMode: "single",
+        // select: {
+        //   itemStyle: {
+        //     color: "black",
+        //     borderWidth: "5px",
+        //   },
+        // },
+        emphasis: {
+          focus: "series",
+          blurScope: "coordinateSystem",
+        },
       },
     ],
   };
@@ -912,5 +977,12 @@ h2 {
     line-height: 44px;
     font-size: 1rem;
   }
+}
+.resources-title {
+  padding: 10px;
+  font-weight: 600;
+}
+.type {
+  padding-left: 5px;
 }
 </style>

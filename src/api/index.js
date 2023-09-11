@@ -39,6 +39,17 @@ instance.interceptors.response.use(
 );
 export default {
   // !inputDATA
+  // 验证是否为付费用户
+  async checkUser(userName){
+    const response = await instance.get(
+      `auth/`,{ params:{
+      user:`${userName}`
+      }}
+    );
+    return response.data
+  },
+
+
   /**
    * @function 上传初始工程文件
    * @param {*} file 文件内容

@@ -13,10 +13,11 @@ export const useCounterStore = defineStore(
     // 默认设置
     let setting = reactive({
       IgnoreProject: "false",
-      Rate: 0.1,
+      Rate: 0.025,
       Ratio: [0.5, 2],
       Steps: 20,
     });
+    let email=ref('')
     // 是否结束
     let end = reactive({ data: false });
     // 是否上传新的文件
@@ -187,7 +188,8 @@ export const useCounterStore = defineStore(
       ConstraintsFile,
       activeIndex,
       selectChange,
-      newUpload
+      newUpload,
+      email
     };
   },
   {}

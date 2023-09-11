@@ -1,10 +1,12 @@
 <template>
   <el-upload
+  :disabled="!checkData?.auth"
     class="upload-demo"
     action=""
     multiple
     :before-upload="beforeUpload"
     :limit="3"
+    @click="check"
   >
     <el-button
       :icon="Upload"
@@ -18,9 +20,10 @@
 </template>
 <script setup>
 import { Delete, Edit, Search, Share, Upload } from "@element-plus/icons-vue";
+import { Amplify, Auth } from "aws-amplify";
 import { useCounterStore } from "../../../store";
 const store = useCounterStore();
-import { ref } from "vue";
+import { ref,computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import api from "../../../api/index.js";
 function sanitizeFileName(fileName) {
@@ -40,10 +43,35 @@ function sanitizeFileName(fileName) {
   // 如果没有小数点，则直接替换所有符号为下划线
   return fileName.replace(/[^\w\d]/g, "_");
 }
+// let checkData=computed(async ()=>{
 
+//   console.log(bol.auth);
+// return bol.auth
+// })
+let checkData=ref()
+setTimeout(async () => {
+  const userInfo = await Auth.currentAuthenticatedUser();
+  let bol=await api.checkUser(userInfo.attributes.email)
+  checkData.value=bol
+}, 0);
+
+// let checkData=ref(bol)
+// console.log(checkData.value);
+async function check(){
+  // const userInfo = await Auth.currentAuthenticatedUser();
+  // if (userInfo.attributes.email) {
+  //  let bol=await api.checkUser(userInfo.attributes.email)
+
+   if (checkData.value.auth) {
+   }else{
+    ElMessage.error(`${checkData.value.message} only use demo`)
+  }
+  // }
+}
 
 
 const beforeUpload = async (file) => {
+
   const originalFileName = file.name; // 保存原始文件名
   const sanitizedFileName = sanitizeFileName(originalFileName); // 使用 sanitizeFileName 处理文件名
   const modifiedFile = new File([file], sanitizedFileName, { type: file.type }); // 创建新的文件对象，修改文件名

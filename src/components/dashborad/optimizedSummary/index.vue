@@ -227,7 +227,7 @@ const toArray = (distribution) => {
     const [x, y] = Object.entries(obj)[0];
     return{
       value:[utcTime(parseInt(x)), y],
-      name:utcTime(parseInt(x))+ y
+      name:utcTime(parseInt(x))+ y+distribution[1]
     }
   });
 };
@@ -441,6 +441,10 @@ function initChart() {
             let name = store.selectedData.newResources.find((resource) => {
               return resource.id == key;
             });
+            if (!name) {
+              name=""
+            }
+            console.log(name);
             resData += ` &nbsp&nbspResource &nbsp  ${
               name?.name
             } &nbsp id: ${key}  <br/>&nbsp&nbsp&nbsp&nbspunits/hour:${returnFloat(
@@ -523,6 +527,15 @@ function initChart() {
       name: param.name,
     });
   });
+  resourcesChart.on('click', function (params) {
+    console.log(params.name);
+  // 取消所有系列中的选中状态
+  // 选中当前点击的元素
+  resourcesChart.dispatchAction({
+    type: 'select',
+    name: params.name,
+  });
+});
 }
 let searchData = ref("");
 // 强制保留2位小数
@@ -576,7 +589,7 @@ let types = computed(() => {
 let baselineResources = computed(() => {
   const baselineResources = store.selectedData.baselineResources;
   // 废弃，改为数据作为名字
-  let idname=baselineResources[0].name + baselineResources[0].id 
+  let idname="base"
   if (typeActive.value) {
     const filteredArray = baselineResources.filter(
       (item) => item.id && item.id === typeActive.value
@@ -593,7 +606,7 @@ let baselineResources = computed(() => {
 });
 let newResources = computed(() => {
   const newResources = store.selectedData.newResources;
-  let idname=newResources[0].name + newResources[0].id 
+  let idname="new"
 
   if (typeActive.value) {
     let datas = newResources.filter(
@@ -679,7 +692,7 @@ let resourcesOption = computed(() => {
         selectedMode: "single",
         select: {
           itemStyle: {
-            color: "black",
+            color: "red",
             borderWidth: "5px",
           },
         },
@@ -693,13 +706,13 @@ let resourcesOption = computed(() => {
         type: "bar",
         data: toArray(newResources.value),
         large: true,
-        // selectedMode: "single",
-        // select: {
-        //   itemStyle: {
-        //     color: "black",
-        //     borderWidth: "5px",
-        //   },
-        // },
+        selectedMode: "single",
+        select: {
+          itemStyle: {
+            color: "red",
+            borderWidth: "5px",
+          },
+        },
         emphasis: {
           focus: "series",
           blurScope: "coordinateSystem",

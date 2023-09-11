@@ -12,8 +12,8 @@
       <v-row no-gutters>
         <v-col>
           <v-sheet class="pa-2 ma-2">
-            <h2>{{$t("inputData.oneData[0]")}}</h2>
-            <h3>{{$t("inputData.oneData[1]")}}</h3>
+            <h2>{{ $t("inputData.oneData[0]") }}</h2>
+            <h3>{{ $t("inputData.oneData[1]") }}</h3>
           </v-sheet>
         </v-col>
         <v-col>
@@ -23,7 +23,7 @@
               <span
                 v-if="!store.file.name"
                 style="color: rgb(42, 123, 108); margin-left: 10px"
-                >{{$t("inputData.oneData[3]")}}</span
+                >{{ $t("inputData.oneData[3]") }}</span
               >
               <span
                 v-else
@@ -35,11 +35,11 @@
         </v-col>
         <v-col>
           <v-sheet class="pa-2 ma-2">
-            {{$t("inputData.oneData[4]")}}
+            {{ $t("inputData.oneData[4]") }}
             <span
               @click="uploadDemo()"
               style="text-decoration: underline; cursor: pointer"
-              >{{$t("inputData.oneData[5]")}}</span
+              >{{ $t("inputData.oneData[5]") }}</span
             >
           </v-sheet>
         </v-col>
@@ -49,13 +49,13 @@
         <v-row :disabled="!store.file.name" no-gutters>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              <h2>{{$t("inputData.twoData[0]")}}</h2>
+              <h2>{{ $t("inputData.twoData[0]") }}</h2>
               <h3>
-                {{$t("inputData.twoData[1]")}}
+                {{ $t("inputData.twoData[1]") }}
                 <span
                   style="cursor: pointer; text-decoration: underline"
                   @click="downloadTemplate"
-                  >{{$t("inputData.twoData[2]")}}</span
+                  >{{ $t("inputData.twoData[2]") }}</span
                 >
               </h3>
             </v-sheet>
@@ -68,6 +68,15 @@
                   store.ConstraintsFile
                 }}</span>
               </div>
+              <!-- <div
+                @click="
+                  () => {
+                    openSheet();
+                  }
+                "
+              >
+                Online editing
+              </div> -->
             </v-sheet>
           </v-col>
           <v-col>
@@ -77,27 +86,33 @@
         <v-row no-gutters>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              <h2>{{$t("inputData.threeData[0]")}}</h2>
-              <h3>{{$t("inputData.threeData[1]")}}</h3>
+              <h2>{{ $t("inputData.threeData[0]") }}</h2>
+              <h3>{{ $t("inputData.threeData[1]") }}</h3>
             </v-sheet>
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              <label>{{$t("inputData.threeData[2]")}}</label>
+              <label>{{ $t("inputData.threeData[2]") }}</label>
 
               <v-radio-group
                 :disabled="!store.file.name"
                 v-model="store.setting.IgnoreProject"
                 inline
               >
-                <v-radio :label="$t('inputData.threeData[3]')" value="true"></v-radio>
-                <v-radio :label="$t('inputData.threeData[4]')" value="false"></v-radio>
+                <v-radio
+                  :label="$t('inputData.threeData[3]')"
+                  value="true"
+                ></v-radio>
+                <v-radio
+                  :label="$t('inputData.threeData[4]')"
+                  value="false"
+                ></v-radio>
               </v-radio-group>
             </v-sheet>
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              {{$t('inputData.threeData[5]')}}
+              {{ $t("inputData.threeData[5]") }}
               <p>
                 <v-text-field
                   :disabled="!store.file.name"
@@ -118,9 +133,9 @@
           <v-col>
             <v-sheet class="pa-2 ma-2">
               {{
-                `${$t('inputData.fourData[0]')}(${store.setting.Ratio[0] * 100}% -${
-                  store.setting.Ratio[1] * 100
-                }%)`
+                `${$t("inputData.fourData[0]")}(${Math.floor(
+                  store.setting.Ratio[0] * 100
+                )}% -${Math.floor(store.setting.Ratio[1] * 100)}%)`
               }}
               <v-range-slider
                 :disabled="!store.file.name"
@@ -139,7 +154,7 @@
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              {{$t('inputData.fiveData[0]')}} ({{ store.setting.Steps }})
+              {{ $t("inputData.fiveData[0]") }} ({{ store.setting.Steps }})
               <v-slider
                 :disabled="!store.file.name"
                 :step="1"
@@ -164,7 +179,7 @@
                   @click="Port"
                   color="rgb(64, 170, 151)"
                   style="color: white"
-                  >{{$t('next')}}</v-btn
+                  >{{ $t("next") }}</v-btn
                 >
               </div>
             </v-sheet>
@@ -173,28 +188,40 @@
       </div>
     </v-container>
   </div>
+  <!-- <luckysheet :open="dialogTableVisible" @close="closeSheet" /> -->
 </template>
 
 <script setup>
 import { useCounterStore } from "../../../store";
 import { reactive, ref, onMounted, onActivated } from "vue";
 import Upload from "./upload.vue";
+// import luckysheet from "./luckysheet.vue";
 import ConstraintsUpload from "./constraintsUpload.vue";
 import api from "../../../api/index.js";
 import { useRouter } from "vue-router";
+let dialogTableVisible=ref(false)
 const router = useRouter();
 const store = useCounterStore();
+function openSheet() {
+  console.log("open",dialogTableVisible.value);
+  // dialogTableVisible.value=false;
+  dialogTableVisible.value = true
+}
+function closeSheet() {
+  
+  dialogTableVisible.value = false;
+}
 async function Port() {
-   Object.keys(store.dataArray).forEach((key) => {
+  Object.keys(store.dataArray).forEach((key) => {
     store.dataArray[key].all = [];
     store.dataArray[key].data = [];
   });
   // clear()
-  store.selectedData=null;
+  store.selectedData = null;
   await store.connectWebsocket();
   router.push({ name: "BaselineSummary" });
   store.active = 1;
-  store.end.data=false
+  store.end.data = false;
 }
 
 async function uploadDemo() {

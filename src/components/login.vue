@@ -5,6 +5,8 @@ import { Authenticator, useAuthenticator } from "@aws-amplify/ui-vue";
 import "@aws-amplify/ui-vue/styles.css";
 import { Amplify } from "aws-amplify";
 import awsconfig from "../utils/aws-exports";
+import { useCounterStore } from "../store";
+const store = useCounterStore();
 let auth = ref(null);
 const router = useRouter();
 auth.value = useAuthenticator();

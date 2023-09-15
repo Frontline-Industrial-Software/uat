@@ -2,7 +2,7 @@
   <el-dialog
     @close="
       () => {
-        emit('close');
+        emit('close')
       }
     "
     :fullscreen="true"
@@ -25,9 +25,9 @@
           </option>
         </select>
 
-        <a href="javascript:void(0)" @click="downloadExcel"
-          >Download source xlsx file</a
-        >
+        <a href="javascript:void(0)" @click="downloadExcel">
+          Download source xlsx file
+        </a>
       </div>
       <div id="luckysheet"></div>
       <div v-show="isMaskShow" id="tip">Downloading</div>
@@ -36,110 +36,110 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { exportExcel } from "@/utils/exportSheet";
-import { isFunction } from "@/utils/is";
-import LuckyExcel from "luckyexcel";
+import { ref, onMounted } from 'vue'
+import { exportExcel } from '@/utils/exportSheet'
+import { isFunction } from '@/utils/is'
+import LuckyExcel from 'luckyexcel'
 const props = defineProps({
   open,
-});
-const emit = defineEmits(["close"]);
+})
+const emit = defineEmits(['close'])
 
 function closeSheet() {
   // 在子组件中调用 emit 方法来触发 close 事件
-  emit("close");
+  emit('close')
 }
-const isMaskShow = ref(false);
-const selected = ref("");
-const jsonData = ref({});
+const isMaskShow = ref(false)
+const selected = ref('')
+const jsonData = ref({})
 const options = ref([
   {
-    text: "Money Manager.xlsx",
-    value: "https://minio.cnbabylon.com/public/luckysheet/money-manager-2.xlsx",
+    text: 'Money Manager.xlsx',
+    value: 'https://minio.cnbabylon.com/public/luckysheet/money-manager-2.xlsx',
   },
   {
-    text: "Activity costs tracker.xlsx",
+    text: 'Activity costs tracker.xlsx',
     value:
-      "https://minio.cnbabylon.com/public/luckysheet/Activity%20costs%20tracker.xlsx",
+      'https://minio.cnbabylon.com/public/luckysheet/Activity%20costs%20tracker.xlsx',
   },
   {
-    text: "House cleaning checklist.xlsx",
+    text: 'House cleaning checklist.xlsx',
     value:
-      "https://minio.cnbabylon.com/public/luckysheet/House%20cleaning%20checklist.xlsx",
+      'https://minio.cnbabylon.com/public/luckysheet/House%20cleaning%20checklist.xlsx',
   },
   {
-    text: "Student assignment planner.xlsx",
+    text: 'Student assignment planner.xlsx',
     value:
-      "https://minio.cnbabylon.com/public/luckysheet/Student%20assignment%20planner.xlsx",
+      'https://minio.cnbabylon.com/public/luckysheet/Student%20assignment%20planner.xlsx',
   },
   {
-    text: "Credit card tracker.xlsx",
+    text: 'Credit card tracker.xlsx',
     value:
-      "https://minio.cnbabylon.com/public/luckysheet/Credit%20card%20tracker.xlsx",
+      'https://minio.cnbabylon.com/public/luckysheet/Credit%20card%20tracker.xlsx',
   },
   {
-    text: "Blue timesheet.xlsx",
+    text: 'Blue timesheet.xlsx',
     value:
-      "https://minio.cnbabylon.com/public/luckysheet/Blue%20timesheet.xlsx",
+      'https://minio.cnbabylon.com/public/luckysheet/Blue%20timesheet.xlsx',
   },
   {
-    text: "Student calendar (Mon).xlsx",
+    text: 'Student calendar (Mon).xlsx',
     value:
-      "https://minio.cnbabylon.com/public/luckysheet/Student%20calendar%20%28Mon%29.xlsx",
+      'https://minio.cnbabylon.com/public/luckysheet/Student%20calendar%20%28Mon%29.xlsx',
   },
   {
-    text: "Blue mileage and expense report.xlsx",
+    text: 'Blue mileage and expense report.xlsx',
     value:
-      "https://minio.cnbabylon.com/public/luckysheet/Blue%20mileage%20and%20expense%20report.xlsx",
+      'https://minio.cnbabylon.com/public/luckysheet/Blue%20mileage%20and%20expense%20report.xlsx',
   },
-]);
+])
 
 const loadExcel = (evt) => {
-  const files = evt.target.files;
+  const files = evt.target.files
   if (files == null || files.length == 0) {
-    alert("No files wait for import");
-    return;
+    alert('No files wait for import')
+    return
   }
 
-  let name = files[0].name;
-  let suffixArr = name.split("."),
-    suffix = suffixArr[suffixArr.length - 1];
-  if (suffix != "xlsx") {
-    alert("Currently only supports the import of xlsx files");
-    return;
+  let name = files[0].name
+  let suffixArr = name.split('.'),
+    suffix = suffixArr[suffixArr.length - 1]
+  if (suffix != 'xlsx') {
+    alert('Currently only supports the import of xlsx files')
+    return
   }
   LuckyExcel.transformExcelToLucky(
     files[0],
     function (exportJson, luckysheetfile) {
       if (exportJson.sheets == null || exportJson.sheets.length == 0) {
         alert(
-          "Failed to read the content of the excel file, currently does not support xls files!"
-        );
-        return;
+          'Failed to read the content of the excel file, currently does not support xls files!',
+        )
+        return
       }
-      console.log("exportJson", exportJson);
-      jsonData.value = exportJson;
+      console.log('exportJson', exportJson)
+      jsonData.value = exportJson
 
-      isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy();
+      isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy()
 
       window.luckysheet.create({
-        container: "luckysheet", //luckysheet is the container id
+        container: 'luckysheet', //luckysheet is the container id
         showinfobar: false,
         data: exportJson.sheets,
         title: exportJson.info.name,
         userInfo: exportJson.info.name.creator,
-      });
-    }
-  );
-};
+      })
+    },
+  )
+}
 const selectExcel = (evt) => {
-  const value = selected.value;
-  const name = evt.target.options[evt.target.selectedIndex].innerText;
+  const value = selected.value
+  const name = evt.target.options[evt.target.selectedIndex].innerText
 
-  if (value == "") {
-    return;
+  if (value == '') {
+    return
   }
-  isMaskShow.value = true;
+  isMaskShow.value = true
 
   LuckyExcel.transformExcelToLuckyByUrl(
     value,
@@ -147,27 +147,27 @@ const selectExcel = (evt) => {
     (exportJson, luckysheetfile) => {
       if (exportJson.sheets == null || exportJson.sheets.length == 0) {
         alert(
-          "Failed to read the content of the excel file, currently does not support xls files!"
-        );
-        return;
+          'Failed to read the content of the excel file, currently does not support xls files!',
+        )
+        return
       }
-      console.log("exportJson", exportJson);
-      jsonData.value = exportJson;
+      console.log('exportJson', exportJson)
+      jsonData.value = exportJson
 
-      isMaskShow.value = false;
+      isMaskShow.value = false
 
-      isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy();
+      isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy()
 
       window.luckysheet.create({
-        container: "luckysheet", //luckysheet is the container id
+        container: 'luckysheet', //luckysheet is the container id
         showinfobar: false,
         data: exportJson.sheets,
         title: exportJson.info.name,
         userInfo: exportJson.info.name.creator,
-      });
-    }
-  );
-};
+      })
+    },
+  )
+}
 const downloadExcel = () => {
   // const value = selected.value;;
   //
@@ -184,8 +184,8 @@ const downloadExcel = () => {
   //     document.body.appendChild(elemIF);
   // }
   // elemIF.src = value;
-  exportExcel(luckysheet.getAllSheets(), "下载");
-};
+  exportExcel(luckysheet.getAllSheets(), '下载')
+}
 
 // !!! create luckysheet after mounted
 // onMounted(() => {
@@ -196,11 +196,11 @@ const downloadExcel = () => {
 </script>
 
 <style scoped>
-.el-dialog__header{
-height: 300px!important;
+.el-dialog__header {
+  height: 300px !important;
 }
-.content{
-margin-top: 100rpx;
+.content {
+  margin-top: 100rpx;
 }
 #luckysheet {
   margin: 0px;

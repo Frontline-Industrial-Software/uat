@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   },
   "dependencies": {
     "@aws-amplify/ui-vue": "^3.1.19",
@@ -43,6 +47,9 @@
     "@iconify-json/ep": "^1.1.11",
     "@rollup/plugin-commonjs": "^25.0.2",
     "@vitejs/plugin-vue": "^4.1.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
+    "prettier": "3.0.3",
     "unplugin-auto-import": "^0.16.4",
     "unplugin-vue-components": "^0.25.1",
     "vite": "^4.3.9"

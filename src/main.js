@@ -13,6 +13,8 @@ import * as directives from 'vuetify/directives'
 import 'element-plus/dist/index.css'
 import i18n from './language/i18n'
 import "vditor/dist/index.css";
+import LogRocket from 'logrocket';
+LogRocket.init('juicz6/dev');
 const vuetify = createVuetify({ components, directives })
 const app = createApp(App)
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

@@ -202,8 +202,10 @@ function toPercent(num, total) {
 
 // iso86Time
 function utcTime(time) {
+  // console.log(utcString);
   const utcDate = new Date(time)
   const utcString = utcDate.toISOString()
+  // console.log(utcString);
   // console.log(utcString);
   return utcString
 }
@@ -263,10 +265,11 @@ function initChart() {
       let newBaselineTask = store.selectedData.tasks.find(
         (task) => task.id === baselineTask.id,
       )
+      newBaselineTask.old = baselineTask
       changedlineTasks.push(newBaselineTask)
-      // console.log(newBaselineTask);
+      // baselineTask.new=newBaselineTask
+      // baselineTask.old={...baselineTask}
       idx = store.selectedData.baselineTasks.length - idx
-      // console.log(baselineTask);
       return {
         name: baselineTask.name,
         value: [
@@ -274,7 +277,16 @@ function initChart() {
           utcTime(baselineTask.newStart),
           utcTime(baselineTask.newFinish),
           baselineTask,
-          // newBaselineTask
+          {
+            baseNew: {
+              start: baselineTask.newStart,
+              finish: baselineTask.newFinish,
+            },
+            changeNew: {
+              start: newBaselineTask.newStart,
+              finish: newBaselineTask.newFinish,
+            },
+          },
         ],
         itemStyle: {
           color: baselineTask.critical ? 'pink' : undefined,
@@ -296,6 +308,16 @@ function initChart() {
         utcTime(changedlineTask.newStart),
         utcTime(changedlineTask.newFinish),
         changedlineTask,
+        {
+          baseNew: {
+            start: changedlineTask.old.newStart,
+            finish: changedlineTask.old.newFinish,
+          },
+          changeNew: {
+            start: changedlineTask.newStart,
+            finish: changedlineTask.newFinish,
+          },
+        },
       ],
       itemStyle: {
         color: changedlineTask.critical ? 'red' : undefined,
@@ -446,7 +468,7 @@ function initChart() {
       },
 
       formatter: (p) => {
-        // console.log(p);
+        // console.log(p.value)
         let resData = 'Resources: <br/>'
         if (p.value[3].resources) {
           for (const key in p.value[3].resources) {
@@ -492,22 +514,26 @@ function initChart() {
         }
         return `${p.name}<br/>
         <div style='margin-top:20px'>
-         ${marker('New')} New: ${p.value[1]
-           .replace('T', ' ')
-           .replace('Z', '')
-           .slice(0, 16)} -> ${p.value[2]
-           .replace('T', ' ')
-           .replace('Z', '')
-           .slice(0, 16)}
-         (${p.value[3].newDuration})
-        <br/>
-         ${marker('Old')} Old: ${baseItem(
-           utcTime(p.value[3].plannedStart)
+         ${marker('New')} New: ${baseItem(
+           utcTime(p.value[4].changeNew.start)
              .replace('T', ' ')
              .replace('Z', '')
              .slice(0, 16),
          )} -> ${baseItem(
-           utcTime(p.value[3].plannedFinish)
+           utcTime(p.value[4].changeNew.finish)
+             .replace('T', ' ')
+             .replace('Z', '')
+             .slice(0, 16),
+         )}
+         (${p.value[3].newDuration})
+        <br/>
+         ${marker('Old')} Old: ${baseItem(
+           utcTime(p.value[4].baseNew.start)
+             .replace('T', ' ')
+             .replace('Z', '')
+             .slice(0, 16),
+         )} -> ${baseItem(
+           utcTime(p.value[4].baseNew.finish)
              .replace('T', ' ')
              .replace('Z', '')
              .slice(0, 16),

@@ -265,8 +265,10 @@ function initChart() {
       let newBaselineTask = store.selectedData.tasks.find(
         (task) => task.id === baselineTask.id,
       )
+
       newBaselineTask.old = baselineTask
       changedlineTasks.push(newBaselineTask)
+      // console.log(baselineTask,newBaselineTask);
       // baselineTask.new=newBaselineTask
       // baselineTask.old={...baselineTask}
       idx = store.selectedData.baselineTasks.length - idx
@@ -281,10 +283,12 @@ function initChart() {
             baseNew: {
               start: baselineTask.newStart,
               finish: baselineTask.newFinish,
+              duration: baselineTask.newDuration,
             },
             changeNew: {
               start: newBaselineTask.newStart,
               finish: newBaselineTask.newFinish,
+              duration: newBaselineTask.newDuration,
             },
           },
         ],
@@ -312,10 +316,12 @@ function initChart() {
           baseNew: {
             start: changedlineTask.old.newStart,
             finish: changedlineTask.old.newFinish,
+            duration: changedlineTask.old.newDuration,
           },
           changeNew: {
             start: changedlineTask.newStart,
             finish: changedlineTask.newFinish,
+            duration: changedlineTask.newDuration,
           },
         },
       ],
@@ -525,7 +531,7 @@ function initChart() {
              .replace('Z', '')
              .slice(0, 16),
          )}
-         (${p.value[3].newDuration})
+         (${p.value[4].changeNew.duration})
         <br/>
          ${marker('Old')} Old: ${baseItem(
            utcTime(p.value[4].baseNew.start)
@@ -538,7 +544,7 @@ function initChart() {
              .replace('Z', '')
              .slice(0, 16),
          )}
-       (${baseItem(p.value[3].plannedDuration)})
+       (${p.value[4].baseNew.duration})
          <br/>
          ${resData}
         </div>`

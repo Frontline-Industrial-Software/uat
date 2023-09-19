@@ -204,6 +204,7 @@ function toPercent(num, total) {
 function utcTime(time) {
   const utcDate = new Date(time)
   const utcString = utcDate.toISOString()
+  // console.log(utcString);
   return utcString
 }
 function convertUTCToCustomFormat(utcTimeString) {
@@ -254,6 +255,7 @@ function baseItem(data) {
 }
 
 function initChart() {
+  // console.log(store.selectedData);
   let changedlineTasks = []
   // 基础任务
   let baselineTasks = store.selectedData.baselineTasks.map(
@@ -262,6 +264,7 @@ function initChart() {
         (task) => task.id === baselineTask.id,
       )
       changedlineTasks.push(newBaselineTask)
+      // console.log(newBaselineTask);
       idx = store.selectedData.baselineTasks.length - idx
       // console.log(baselineTask);
       return {
@@ -271,21 +274,11 @@ function initChart() {
           utcTime(baselineTask.newStart),
           utcTime(baselineTask.newFinish),
           baselineTask,
+          // newBaselineTask
         ],
         itemStyle: {
           color: baselineTask.critical ? 'pink' : undefined,
         },
-        // emphasis: {
-        //   itemStyle: {
-        //     borderType: [5, 10],
-        //     borderDashOffset: 5,
-        //     opacity: "0",
-        //     color: "#2436df",
-        //   },
-        // },
-        // emphasis: {
-        //   itemStyle: { color: "#ffbb96", borderWidth: "5px" },
-        // },
       }
     },
   )
@@ -345,6 +338,7 @@ function initChart() {
     }
   }
   option = {
+    // useUTC:true,
     toolbox: {
       show: true,
       feature: {
@@ -367,11 +361,13 @@ function initChart() {
         moveHandleSize: 15,
         height: 15,
         moveHandleStyle: {},
+        // minSpan:5,
       },
       {
         type: 'slider',
         filterMode: 'weakFilter',
         yAxisIndex: [0],
+        // minSpan:5,
       },
       {
         type: 'inside',
@@ -390,14 +386,30 @@ function initChart() {
     xAxis: {
       name: 'date',
       type: 'time',
+      boundaryGap: [0, 0], // 设置boundaryGap为['data', 'data']
+      // splitNumber:10,
+      // minInterval: 10,
+      // maxInterval: 3600 * 1000,
+      axisTick: {
+        show: true, // 显示刻度
+        alignWithLabel: true, // 与标签对齐
+      },
+      minInterval: 24 * 3600, // 设置最小刻度间隔为1小时 (3600秒 * 1000毫秒)
+      // maxInterval: 24 * 3600 * 1000 * 360 , // 设置最大刻度间隔为1天 (24小时 * 3600秒 * 1000毫秒)
+
       axisLabel: {
+        // width: '80',
+        // overflow: 'breakAll',
+        showMaxLabel: 'true',
+        showMinLabel: 'true',
         formatter: function (value, index) {
-          // 格式化成月/日，只在第一个刻度显示年份
+          // 格式化成您需要的日期格式
           const customFormattedTime = convertUTCToCustomFormat(value)
           return customFormattedTime
         },
       },
     },
+
     yAxis: {
       name: 'tasks',
     },
@@ -428,7 +440,13 @@ function initChart() {
       },
     ],
     tooltip: {
+      axisPointer: {
+        //坐标轴指示器，坐标轴触发有效，
+        // type: 'cross', //默认为line，line直线，cross十字准星，shadow阴影
+      },
+
       formatter: (p) => {
+        // console.log(p);
         let resData = 'Resources: <br/>'
         if (p.value[3].resources) {
           for (const key in p.value[3].resources) {
@@ -439,7 +457,7 @@ function initChart() {
             if (!name) {
               name = ''
             }
-            console.log(name)
+            // console.log(name)
             resData += ` &nbsp&nbspResource &nbsp  ${
               name?.name
             } &nbsp id: ${key}  <br/>&nbsp&nbsp&nbsp&nbspunits/hour:${returnFloat(
@@ -448,7 +466,7 @@ function initChart() {
             // console.log(res[key]);
           }
         }
-
+        // console.log( p.value[3].plannedStart,utcTime(p.value[3].plannedStart));
         function marker(str) {
           let color
           switch (str) {
@@ -472,8 +490,6 @@ function initChart() {
 
           return `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`
         }
-
-        // const marker = ``;
         return `${p.name}<br/>
         <div style='margin-top:20px'>
          ${marker('New')} New: ${p.value[1]
@@ -523,7 +539,7 @@ function initChart() {
     })
   })
   resourcesChart.on('click', function (params) {
-    console.log(params.name)
+    // console.log(params.name)
     // 取消所有系列中的选中状态
     // 选中当前点击的元素
     resourcesChart.dispatchAction({
@@ -630,6 +646,7 @@ let resourcesOption = computed(() => {
       {
         type: 'slider',
         filterMode: 'none',
+        // minSpan: 10,
         // xAxisIndex: [0],
       },
       {
@@ -640,6 +657,7 @@ let resourcesOption = computed(() => {
       {
         type: 'inside',
         filterMode: 'none',
+        // minSpan: 10,
         // xAxisIndex: [0],
       },
       {

@@ -3,41 +3,44 @@
     <!-- 头部 -->
     <div class="content-row">
       <h2>
-        {{ $t("optimizedReport.title[0]") }}&nbsp;
+        {{ $t('optimizedReport.title[0]') }}&nbsp;
         <span
           style="text-transform: capitalize; color: rgba(130, 181, 199, 0.9)"
-          >{{ store.SummaryData.group }}</span
         >
+          {{ store.SummaryData.group }}
+        </span>
         <div class="chip primary">
-          <small
-            >{{ store.setting.Steps }}
-            {{ $t("optimizedReport.title[1]") }}</small
-          >
+          <small>
+            {{ store.setting.Steps }} {{ $t('optimizedReport.title[1]') }}
+          </small>
         </div>
         <div class="chip primary">
-          <small>{{
-            `${store.setting.Ratio[0] * 100}% - ${
-              store.setting.Ratio[1] * 100
-            }% ${$t("optimizedReport.title[2]")}`
-          }}</small>
+          <small>
+            {{
+              `${store.setting.Ratio[0] * 100}% - ${
+                store.setting.Ratio[1] * 100
+              }% ${$t('optimizedReport.title[2]')}`
+            }}
+          </small>
         </div>
       </h2>
       <el-button
         @click="
           () => {
-            dialog = true;
+            dialog = true
           }
         "
         class="row-btn"
-        >{{ $t("optimizedReport.btn[1]") }}</el-button
       >
+        {{ $t('optimizedReport.btn[1]') }}
+      </el-button>
     </div>
     <!-- 内容区 -->
     <div class="content-box">
       <!-- Changed Tasks -->
       <div class="sub-content">
         <div class="content-row">
-          <h3>{{ $t("optimizedReport.tableName[0]") }}</h3>
+          <h3>{{ $t('optimizedReport.tableName[0]') }}</h3>
         </div>
         <div class="legend">
           <div
@@ -70,7 +73,7 @@
       <!-- All Resources -->
       <div class="sub-content">
         <div class="content-row">
-          <h3>{{ $t("optimizedReport.tableName[1]") }}</h3>
+          <h3>{{ $t('optimizedReport.tableName[1]') }}</h3>
         </div>
         <!-- 表格 -->
         <div class="table">
@@ -80,7 +83,7 @@
       <!-- Task-Resources -->
       <div class="sub-content">
         <div class="content-row">
-          <h3>{{ $t("optimizedReport.tableName[2]") }}</h3>
+          <h3>{{ $t('optimizedReport.tableName[2]') }}</h3>
         </div>
         <!-- 表格 -->
         <div class="table">
@@ -89,22 +92,23 @@
       </div>
     </div>
     <div class="content-box">
-      <div class="md" ref="mDom"></div>
+      <!-- <div class="md" ref="mDom"></div> -->
     </div>
     <!-- 尾部 -->
     <div class="content-row">
-      <el-button @click="back" class="back">{{
-        $t("optimizedReport.btn[0]")
-      }}</el-button>
+      <el-button @click="back" class="back">
+        {{ $t('optimizedReport.btn[0]') }}
+      </el-button>
       <el-button
         @click="
           () => {
-            dialog = true;
+            dialog = true
           }
         "
         class="report"
-        >{{ $t("optimizedReport.btn[1]") }}</el-button
       >
+        {{ $t('optimizedReport.btn[1]') }}
+      </el-button>
     </div>
     <!-- exportReport -->
     <!-- 弹出确认框 -->
@@ -118,20 +122,22 @@
             color="rgb(64, 170, 151)"
             @click="
               () => {
-                exportProjectReport();
+                exportProjectReport()
               }
             "
-            >Original Format</v-btn
           >
+            Original Format
+          </v-btn>
           <v-btn
             color="rgb(64, 170, 151)"
             @click="
               () => {
-                exportExcel();
+                exportExcel()
               }
             "
-            >EXCEL</v-btn
           >
+            EXCEL
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -139,8 +145,8 @@
 </template>
 
 <script setup>
-import Table from "./Table.vue";
-import Echarts from "./Echarts.vue";
+import Table from './Table.vue'
+import Echarts from './Echarts.vue'
 import {
   ref,
   reactive,
@@ -148,31 +154,28 @@ import {
   onUnmounted,
   onActivated,
   onMounted,
-} from "vue";
-import { toRaw } from "@vue/reactivity";
-import { data } from "@/utils/constants"; //数据要删
-import { useCounterStore } from "../../../store";
-import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
-import { useRouter } from "vue-router";
-import api from "../../../api/index.js";
+} from 'vue'
+import { toRaw } from '@vue/reactivity'
+import { data } from '@/utils/constants' //数据要删
+import { useCounterStore } from '../../../store'
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
+import { useRouter } from 'vue-router'
+import api from '../../../api/index.js'
 
 /* -------------------------------------------------------------------------- */
-import Vditor from "vditor";
-let mDom = ref();
+import Vditor from 'vditor'
+// let mDom = ref();
 function generateMarkdown(tasks) {
-  let str = "";
+  let str = ''
   for (const key in tasks) {
-    const task = tasks[key];
-    str += `- Task named "${task["Task Name"]}" with task code "${task["Task Code"]}" is associated with the resource named "<span style="color: red;">${task["Resource Name"]}</span>", with a total planned allocation of "${task["Total Planned Units"]}" units. Before optimization, the task had a duration of "${task["Duration(Old)"]}" hours with an allocation rate of "${task["Units(Old)"]}" unit per hour. After optimization, the task's duration was reduced to "${task["Duration(New)"]}" hours, and the allocation rate increased to "${task["Units(New)"]}" units per hour.This task is marked as critical. \n\n`;
+    const task = tasks[key]
+    str += `- Task named "${task['Task Name']}" with task code "${task['Task Code']}" is associated with the resource named "<span style="color: red;">${task['Resource Name']}</span>", with a total planned allocation of "${task['Total Planned Units']}" units. Before optimization, the task had a duration of "${task['Duration(Old)']}" hours with an allocation rate of "${task['Units(Old)']}" unit per hour. After optimization, the task's duration was reduced to "${task['Duration(New)']}" hours, and the allocation rate increased to "${task['Units(New)']}" units per hour.This task is marked as critical. \n\n`
   }
-  return str;
+  return str
 }
 
-
-
 function initMd(dom) {
-
-  Vditor.preview(dom, generateMarkdown(TaskResource.value));
+  Vditor.preview(dom, generateMarkdown(TaskResource.value))
   // let instance;
 
   // instance = new Vditor(dom, {
@@ -193,110 +196,111 @@ function initMd(dom) {
 /* -------------------------------------------------------------------------- */
 onUnmounted(() => {
   // console.log('销毁');
-});
+})
 onMounted(() => {
-  initMd(mDom.value);
+  // initMd(mDom.value);
   // console.log('缓存');
-});
-let dialog = ref(false);
+})
+let dialog = ref(false)
 
-const router = useRouter();
+const router = useRouter()
 
 function exportProjectReport() {
   // console.log(store.SummaryData.group);
-  if (store.SummaryData.group == "baseline") {
-    console.log("触发");
-    store.SummaryData.group = "Balanced";
+  if (store.SummaryData.group == 'baseline') {
+    console.log('触发')
+    store.SummaryData.group = 'Balanced'
   }
   let Url = `${store.SummaryData.group}-${
-    store.file.name.split(".")[0]
-  }_FrontlineExport.${store.file.name.split(".")[1]}`;
-  api.getProjectReport(Url, store.truefile);
+    store.file.name.split('.')[0]
+  }_FrontlineExport.${store.file.name.split('.')[1]}`
+  api.getProjectReport(Url, store.truefile)
 }
 function exportExcel() {
-  if (store.SummaryData.group == "baseline") {
-    store.SummaryData.group = "Balanced";
+  if (store.SummaryData.group == 'baseline') {
+    store.SummaryData.group = 'Balanced'
   }
   let Url = `${store.SummaryData.group}-${
-    store.file.name.split(".")[0]
-  }_FrontlineExport.${store.file.name.split(".")[1]}`;
-  api.getExcelReport(Url, store.truefile);
+    store.file.name.split('.')[0]
+  }_FrontlineExport.${store.file.name.split('.')[1]}`
+  api.getExcelReport(Url, store.truefile)
 }
 function back() {
-  router.push({ name: "optimizedSummary" });
-  store.active = 2;
+  router.push({ name: 'optimizedSummary' })
+  store.active = 2
 }
 onBeforeRouteLeave((to, from) => {
-  if (to.name == "InputData") {
+  if (to.name == 'InputData') {
     // clear();
   }
-});
+})
 
 // 强制保留2位小数
 function returnFloat(value) {
   if (!value) {
-    return "0.00";
+    return '0.00'
   }
-  var value = Math.round(parseFloat(value) * 100) / 100;
-  var xsd = value.toString().split(".");
+  var value = Math.round(parseFloat(value) * 100) / 100
+  var xsd = value.toString().split('.')
   if (xsd.length == 1) {
-    value = value.toString() + ".00";
-    return value;
+    value = value.toString() + '.00'
+    return value
   }
   if (xsd.length > 1) {
     if (xsd[1].length < 2) {
-      value = value.toString() + "0";
+      value = value.toString() + '0'
     }
-    return value;
+    return value
   }
 }
 // 保留一位小数
 function returnFloatOneDecimal(value) {
   if (!value) {
-    return "0.0";
+    return '0.0'
   }
-  var value = Math.round(parseFloat(value) * 10) / 10;
-  var xsd = value.toString().split(".");
+  var value = Math.round(parseFloat(value) * 10) / 10
+  var xsd = value.toString().split('.')
   if (xsd.length == 1) {
-    value = value.toString() + ".0";
-    return value;
+    value = value.toString() + '.0'
+    return value
   }
-  return value;
+  return value
 }
 
 // 组件销毁时摧毁实例
 function clear() {
   Object.keys(store.dataArray).forEach((key) => {
-    store.dataArray[key].all = [];
-    store.dataArray[key].data = [];
-  });
-  store.end.data = false;
+    store.dataArray[key].all = []
+    store.dataArray[key].data = []
+  })
+  store.end.data = false
 }
-const store = useCounterStore();
+const store = useCounterStore()
 let changedTask = store.selectedData.tasks
   .filter((e) => e.durationRatio !== 1)
   .map((e) => {
     if (!e.critical) {
-      e.critical = false;
+      e.critical = false
     } else {
-      e.critical = true;
+      e.critical = true
     }
     return {
       Critical: e.critical,
       Code: e.ID,
       Name: e.name,
-      "Duration(Baseline)": returnFloatOneDecimal(e.remainingDuration),
-      "Duration(New)": returnFloatOneDecimal(e.newDuration),
+      'Duration(Baseline)': returnFloatOneDecimal(e.remainingDuration),
+      'Duration(New)': returnFloatOneDecimal(e.newDuration),
       Ratio: returnFloat(e.durationRatio),
-    };
-  });
+    }
+  })
 let allResources = store.selectedData.newResources
   .filter((e) => {
     // 在这里添加过滤条件
     // 例如：筛选出 type 为 'someType' 的元素
-    return e.ID != "-65535";
+    return e.ID != '-65535'
   })
   .map((e) => {
+    // console.log(e);
     return {
       ID: e.id,
       Code: e.ID,
@@ -305,70 +309,73 @@ let allResources = store.selectedData.newResources
       Distribution: returnFloatOneDecimal(e.distribution.min),
       Max: returnFloat(e.distribution.max),
       Span: returnFloat(e.distribution.span),
-    };
-  });
+    }
+  })
 let TaskResource = computed(() => {
   let TaskResources = store.selectedData.tasks.filter((e) => {
-    let length = Object.keys(e.resources).length;
-    return length !== 0; // 返回 resources 不为空的任务对象
-  });
+    let length = Object.keys(e.resources).length
+    return length !== 0 // 返回 resources 不为空的任务对象
+  })
 
   let TaskResourcesData = TaskResources.flatMap((e) => {
-    let resources = Object.values(e.resources);
-    let taskobj = store.selectedData.tasks.find((obj) => obj.id == e.id);
+    // console.log(e);
+    let resources = Object.values(e.resources)
+    let taskobj = store.selectedData.tasks.find((obj) => obj.id == e.id)
     return resources.map((resource) => ({
       Critical: taskobj.critical,
-      "Task Code": taskobj.ID,
-      "Resource Name": store.selectedData.newResources.find(
-        (obj) => obj.id == resource.resourceId
+      'Task Code': taskobj.ID,
+      'Resource Name': store.selectedData.newResources.find(
+        (obj) => obj.id == resource.resourceId,
       )?.name,
-      "Task Name": taskobj.name,
-      "Duration(Old)": returnFloatOneDecimal(taskobj.plannedDuration),
-      "Duration(New)": returnFloatOneDecimal(taskobj.newDuration),
-      "Units(Old)": returnFloat(resource.plannedUnitsPerHour),
-      "Units(New)": returnFloat(Number(resource.newUnitsPerHour)),
-      "Total Planned Units": returnFloat(resource.remainingUnits),
-    }));
-  });
+      'Task Name': taskobj.name,
+      'Duration(Old)': returnFloatOneDecimal(taskobj.plannedDuration),
+      'Duration(New)': returnFloatOneDecimal(taskobj.newDuration),
+      'Units(Old)': returnFloat(resource.plannedUnitsPerHour),
+      'Units(New)': returnFloat(Number(resource.newUnitsPerHour)),
+      'Total Planned Units': returnFloat(
+        resource.plannedUnitsPerHour + Number(resource.newUnitsPerHour),
+      ),
+    }))
+  })
 
-  return TaskResourcesData;
-});
+  return TaskResourcesData
+})
 //表格
 const tableOptions = reactive({
   data: changedTask,
   colWidths: [100, 245, 250, 150, 170, 170],
   colHeaders: [
-    "Critical",
-    "Code",
-    "Name",
-    "Duration(Baseline)",
-    "Duration(New)",
-    "Ratio",
+    'Critical',
+    'Code',
+    'Name',
+    'Duration(Baseline)',
+    'Duration(New)',
+    'Ratio',
   ],
-  tableName: "one",
-});
+  tableName: 'one',
+})
 const tableOptions2 = reactive({
   data: allResources,
   colWidths: [100, 245, 250, 250, 100, 200, 100, 100],
-  colHeaders: ["ID", "Code", "Type", "Name", "Distribution", "Max", "Span"],
-  tableName: "two",
-});
+  colHeaders: ['ID', 'Code', 'Type', 'Name', 'Distribution', 'Max', 'Span'],
+  tableName: 'two',
+})
 const tableOptions3 = reactive({
   data: TaskResource.value,
   colWidths: [100, 245, 250, 150, 110, 110, 110, 110, 150],
   colHeaders: [
-    "Critical",
-    "Task Code",
-    "Resource Name",
-    "Task Name",
-    "Duration(Old)",
-    "Duration(New)",
-    "Units(Old)",
-    "Units(New)",
-    "Total Planned Units",
+    'Critical',
+    'Task Code',
+    'Resource Name',
+    'Task Name',
+    'Duration(Old)',
+    'Duration(New)',
+    'Units(Old)',
+    'Units(New)',
+    'Total Planned Units',
   ],
-  tableName: "three",
-});
+  tableName: 'three',
+})
 </script>
 
 <style lang="scss" scoped>
@@ -388,7 +395,7 @@ const tableOptions3 = reactive({
     h2 {
       font-size: 24px;
       font-weight: 700;
-      font-family: "Inter", sans-serif;
+      font-family: 'Inter', sans-serif;
       line-height: 30px;
       letter-spacing: -0.5px;
       display: flex;
@@ -421,13 +428,14 @@ const tableOptions3 = reactive({
       font-weight: bold !important;
       text-transform: uppercase !important;
       font-size: 1rem !important;
-      font-family: "Inter", sans-serif !important;
+      font-family: 'Inter', sans-serif !important;
       line-height: 1.75;
       letter-spacing: 0.02857em;
       padding: 10px 20px !important;
       &:hover {
         background: #eaf5f3 !important;
-        box-shadow: 1px 2px 2px rgba(207, 234, 229, 0.25),
+        box-shadow:
+          1px 2px 2px rgba(207, 234, 229, 0.25),
           inset 1px 1px 5px #c2dad6 !important;
       }
     }
@@ -443,7 +451,7 @@ const tableOptions3 = reactive({
       font-weight: bold !important;
       text-transform: uppercase !important;
       font-size: 1rem !important;
-      font-family: "Inter", sans-serif !important;
+      font-family: 'Inter', sans-serif !important;
       line-height: 1.75;
       letter-spacing: 0.02857em;
       padding: 10px 20px !important;
@@ -464,13 +472,15 @@ const tableOptions3 = reactive({
       font-weight: bold !important;
       text-transform: uppercase !important;
       font-size: 1rem !important;
-      font-family: "Inter", sans-serif !important;
+      font-family: 'Inter', sans-serif !important;
       line-height: 1.75;
       letter-spacing: 0.02857em;
       padding: 10px 20px !important;
       &:hover {
         background: #258372 !important;
-        box-shadow: 1px 2px 2px #cfeae5, inset 2px 3px 5px rgba(0, 0, 0, 0.25) !important;
+        box-shadow:
+          1px 2px 2px #cfeae5,
+          inset 2px 3px 5px rgba(0, 0, 0, 0.25) !important;
       }
     }
   }
@@ -523,7 +533,7 @@ const tableOptions3 = reactive({
       h2 {
         font-size: 24px;
         font-weight: 700;
-        font-family: "Inter", sans-serif;
+        font-family: 'Inter', sans-serif;
         line-height: 30px;
         letter-spacing: -0.5px;
         display: flex;
@@ -541,13 +551,14 @@ const tableOptions3 = reactive({
       font-weight: bold !important;
       text-transform: uppercase !important;
       font-size: 1rem !important;
-      font-family: "Inter", sans-serif !important;
+      font-family: 'Inter', sans-serif !important;
       line-height: 1.75;
       letter-spacing: 0.02857em;
       padding: 10px 20px !important;
       &:hover {
         background: #eaf5f3 !important;
-        box-shadow: 1px 2px 2px rgba(207, 234, 229, 0.25),
+        box-shadow:
+          1px 2px 2px rgba(207, 234, 229, 0.25),
           inset 1px 1px 5px #c2dad6 !important;
       }
     }
@@ -567,7 +578,7 @@ const tableOptions3 = reactive({
           width: 100%;
           text-align: left;
           font-size: 18px;
-          font-family: "Lato", sans-serif;
+          font-family: 'Lato', sans-serif;
           line-height: 20px;
         }
       }

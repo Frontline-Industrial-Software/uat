@@ -134,9 +134,7 @@
         ></div>
       </div>
       <div class="button">
-        <el-button @click="back" class="btnback">
-          {{ $t('optimizedSummary.btn[0]') }}
-        </el-button>
+        <el-button @click="back" class="btnback">BACK</el-button>
         <el-button @click="nextReport" class="btngo">
           {{ $t('optimizedSummary.btn[1]') }}
         </el-button>

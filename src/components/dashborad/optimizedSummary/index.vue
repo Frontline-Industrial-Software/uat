@@ -1010,8 +1010,7 @@ h2 {
   height: 44px;
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
-  margin-bottom: 50px;
+
   .btnback {
     text-align: center;
     width: 98px;

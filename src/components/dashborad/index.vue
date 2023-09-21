@@ -8,17 +8,14 @@
           <component :is="Component" />
         </keep-alive>
       </router-view>
-      
     </div>
-    
   </div>
 </template>
 
 <script setup>
-import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
-import Header from "../header/index.vue";
-import Navigate from "../navigate/index.vue";
-
+import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router'
+import Header from '../header/index.vue'
+import Navigate from '../navigate/index.vue'
 </script>
 
 <style lang="scss" scoped>
@@ -26,6 +23,7 @@ import Navigate from "../navigate/index.vue";
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 50px;
 }
 .subject > * {
   flex-shrink: 0;

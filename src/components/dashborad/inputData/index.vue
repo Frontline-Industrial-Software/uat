@@ -69,15 +69,15 @@
                   {{ store.ConstraintsFile }}
                 </span>
               </div>
-              <!-- <div
+              <div
                 @click="
                   () => {
-                    openSheet();
+                    openSheet()
                   }
                 "
               >
                 Online editing
-              </div> -->
+              </div>
             </v-sheet>
           </v-col>
           <v-col>
@@ -189,14 +189,14 @@
       </div>
     </v-container>
   </div>
-  <!-- <luckysheet :open="dialogTableVisible" @close="closeSheet" /> -->
+  <Luckysheet :open="dialogTableVisible" @close="closeSheet" />
 </template>
 
 <script setup>
 import { useCounterStore } from '../../../store'
 import { reactive, ref, onMounted, onActivated } from 'vue'
 import Upload from './upload.vue'
-// import luckysheet from "./luckysheet.vue";
+import Luckysheet from './luckysheet.vue'
 import ConstraintsUpload from './constraintsUpload.vue'
 import api from '../../../api/index.js'
 import { useRouter } from 'vue-router'

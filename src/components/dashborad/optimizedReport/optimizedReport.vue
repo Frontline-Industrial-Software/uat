@@ -92,6 +92,10 @@
       </div>
     </div>
     <div class="content-box">
+      <h2>Online Excel</h2>
+      <div class="sheet">
+        <Lucksheettable :url="excelUrl"></Lucksheettable>
+      </div>
       <!-- <div class="md" ref="mDom"></div> -->
     </div>
     <!-- 尾部 -->
@@ -161,9 +165,19 @@ import { useCounterStore } from '../../../store'
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
 import { useRouter } from 'vue-router'
 import api from '../../../api/index.js'
+import Lucksheettable from './Lucksheettable.vue'
 
 /* -------------------------------------------------------------------------- */
 import Vditor from 'vditor'
+const store = useCounterStore()
+function openSheet() {
+  // console.log('open', dialogTableVisible.value)
+  // dialogTableVisible.value=false;
+  dialogTableVisible.value = true
+}
+function closeSheet() {
+  dialogTableVisible.value = false
+}
 // let mDom = ref();
 function generateMarkdown(tasks) {
   let str = ''
@@ -198,6 +212,7 @@ onUnmounted(() => {
   // console.log('销毁');
 })
 onMounted(() => {
+  getexcelUrl()
   // initMd(mDom.value);
   // console.log('缓存');
 })
@@ -216,6 +231,19 @@ function exportProjectReport() {
   }_FrontlineExport.${store.file.name.split('.')[1]}`
   api.getProjectReport(Url, store.truefile)
 }
+let excelUrl = ref('')
+async function getexcelUrl() {
+  if (store.SummaryData.group == 'baseline') {
+    store.SummaryData.group = 'Balanced'
+  }
+  let Url = `${store.SummaryData.group}-${
+    store.file.name.split('.')[0]
+  }_FrontlineExport.${store.file.name.split('.')[1]}`
+  excelUrl.value = await api.getUrl(Url, store.truefile)
+  console.log(excelUrl.value)
+}
+
+// console.log(excelUrl.value);
 function exportExcel() {
   if (store.SummaryData.group == 'baseline') {
     store.SummaryData.group = 'Balanced'
@@ -275,7 +303,7 @@ function clear() {
   })
   store.end.data = false
 }
-const store = useCounterStore()
+
 let changedTask = store.selectedData.tasks
   .filter((e) => e.durationRatio !== 1)
   .map((e) => {
@@ -306,8 +334,8 @@ let allResources = store.selectedData.newResources
       Code: e.ID,
       Type: e.type,
       Name: e.name,
-      Distribution: returnFloatOneDecimal(e.distribution.min),
-      Max: returnFloat(e.distribution.max),
+      'Distribution(Min)': returnFloatOneDecimal(e.distribution.min),
+      'Distribution(Max)': returnFloat(e.distribution.max),
       Span: returnFloat(e.distribution.span),
     }
   })
@@ -318,9 +346,9 @@ let TaskResource = computed(() => {
   })
 
   let TaskResourcesData = TaskResources.flatMap((e) => {
-    // console.log(e);
     let resources = Object.values(e.resources)
     let taskobj = store.selectedData.tasks.find((obj) => obj.id == e.id)
+    console.log(resources, taskobj)
     return resources.map((resource) => ({
       Critical: taskobj.critical,
       'Task Code': taskobj.ID,
@@ -330,10 +358,10 @@ let TaskResource = computed(() => {
       'Task Name': taskobj.name,
       'Duration(Old)': returnFloatOneDecimal(taskobj.plannedDuration),
       'Duration(New)': returnFloatOneDecimal(taskobj.newDuration),
-      'Units(Old)': returnFloat(resource.plannedUnitsPerHour),
-      'Units(New)': returnFloat(Number(resource.newUnitsPerHour)),
+      'UnitsPerHour(Old)': returnFloat(resource.plannedUnitsPerHour),
+      'UnitsPerHour(New)': returnFloat(Number(resource.newUnitsPerHour)),
       'Total Planned Units': returnFloat(
-        resource.plannedUnitsPerHour + Number(resource.newUnitsPerHour),
+        taskobj.plannedDuration * resource.plannedUnitsPerHour,
       ),
     }))
   })
@@ -356,13 +384,21 @@ const tableOptions = reactive({
 })
 const tableOptions2 = reactive({
   data: allResources,
-  colWidths: [100, 245, 250, 250, 100, 200, 100, 100],
-  colHeaders: ['ID', 'Code', 'Type', 'Name', 'Distribution', 'Max', 'Span'],
+  colWidths: [100, 245, 250, 250, 250, 250, 250, 100],
+  colHeaders: [
+    'ID',
+    'Code',
+    'Type',
+    'Name',
+    'Distribution(Min)',
+    'Distribution(Max)',
+    'Span',
+  ],
   tableName: 'two',
 })
 const tableOptions3 = reactive({
   data: TaskResource.value,
-  colWidths: [100, 245, 250, 150, 110, 110, 110, 110, 150],
+  colWidths: [100, 245, 250, 150, 150, 150, 150, 150, 150],
   colHeaders: [
     'Critical',
     'Task Code',
@@ -370,8 +406,8 @@ const tableOptions3 = reactive({
     'Task Name',
     'Duration(Old)',
     'Duration(New)',
-    'Units(Old)',
-    'Units(New)',
+    'UnitsPerHour(Old)',
+    'UnitsPerHour(New)',
     'Total Planned Units',
   ],
   tableName: 'three',
@@ -379,8 +415,11 @@ const tableOptions3 = reactive({
 </script>
 
 <style lang="scss" scoped>
+.sheet {
+  height: 1050px;
+}
 .optimize-content {
-  margin: 20px auto;
+  margin-top: 20px;
   width: 1200px;
   max-width: 100%;
   border-radius: 6px;
@@ -391,7 +430,6 @@ const tableOptions3 = reactive({
     justify-content: space-between;
     -webkit-box-align: center;
     align-items: center;
-    margin-bottom: 20px;
     h2 {
       font-size: 24px;
       font-weight: 700;
@@ -488,7 +526,8 @@ const tableOptions3 = reactive({
     width: 100%;
     .sub-content {
       background: #ffffff;
-      margin-bottom: 40px;
+      margin-top: 20px;
+      margin-bottom: 20px;
       padding: 20px;
       border-radius: 16px;
       .table {

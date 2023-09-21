@@ -1,28 +1,26 @@
 <script setup>
-import { defineComponent, ref, reactive, computed,onActivated } from "vue";
-import { registerAllModules } from "handsontable/registry";
-import "handsontable/dist/handsontable.full.css";
+import { defineComponent, ref, reactive, computed, onActivated } from 'vue'
+import { registerAllModules } from 'handsontable/registry'
+import 'handsontable/dist/handsontable.full.css'
 import {
   alignHeaders,
   drawCheckboxInRowHeaders,
   addClassesToRows,
   changeCheckboxCell,
-} from "@/utils/hooks-callback";
-import { progressBarRenderer } from "@/utils/constants";
-import { HotTable, HotColumn } from "@handsontable/vue3";
-registerAllModules();
-const props = defineProps(["tableOptions"]);
-const alignHeadersProp = computed(() => alignHeaders);
-const addClassesToRowsProp = computed(() => addClassesToRows);
-const drawCheckboxInRowHeadersProp = computed(() => drawCheckboxInRowHeaders);
-const changeCheckboxCellProp = computed(() => changeCheckboxCell);
-const dataProp = computed(() => props.tableOptions.data);
-const progressBarRendererProp = computed(() => progressBarRenderer);
-onActivated(()=>{
-  
-//   console.log(props.tableOptions.data);
-// console.log('chilren');
-
+} from '@/utils/hooks-callback'
+import { progressBarRenderer } from '@/utils/constants'
+import { HotTable, HotColumn } from '@handsontable/vue3'
+registerAllModules()
+const props = defineProps(['tableOptions'])
+const alignHeadersProp = computed(() => alignHeaders)
+const addClassesToRowsProp = computed(() => addClassesToRows)
+const drawCheckboxInRowHeadersProp = computed(() => drawCheckboxInRowHeaders)
+const changeCheckboxCellProp = computed(() => changeCheckboxCell)
+const dataProp = computed(() => props.tableOptions.data)
+const progressBarRendererProp = computed(() => progressBarRenderer)
+onActivated(() => {
+  //   console.log(props.tableOptions.data);
+  // console.log('chilren');
 })
 </script>
 
@@ -42,13 +40,13 @@ onActivated(()=>{
     :afterGetRowHeader="drawCheckboxInRowHeadersProp"
     :afterOnCellMouseDown="changeCheckboxCellProp"
     :manualRowMove="true"
-    :readOnly='true'
+    :readOnly="true"
     licenseKey="non-commercial-and-evaluation"
   >
     <template v-if="tableOptions.tableName == 'one'">
       <HotColumn
         data="Critical"
-        :renderer=progressBarRendererProp
+        :renderer="progressBarRendererProp"
         style="display: flex; justify-content: center"
       ></HotColumn>
       <HotColumn data="Code" />
@@ -65,14 +63,14 @@ onActivated(()=>{
       <HotColumn data="Code" />
       <HotColumn data="Type" />
       <HotColumn data="Name" />
-      <HotColumn data="Distribution" />
-      <HotColumn data="Max" />
+      <HotColumn data="Distribution(Min)" />
+      <HotColumn data="Distribution(Max)" />
       <HotColumn data="Span" />
     </template>
-    <template v-if="tableOptions.tableName=='three'">
+    <template v-if="tableOptions.tableName == 'three'">
       <HotColumn
         data="Critical"
-        :renderer=progressBarRendererProp
+        :renderer="progressBarRendererProp"
         style="display: flex; justify-content: center"
       ></HotColumn>
       <HotColumn data="Task Code" />
@@ -80,8 +78,8 @@ onActivated(()=>{
       <HotColumn data="Task Name" />
       <HotColumn data="Duration(Old)" />
       <HotColumn data="Duration(New)" />
-      <HotColumn data="Units(Old)" />
-      <HotColumn data="Units(New)" />
+      <HotColumn data="UnitsPerHour(Old)" />
+      <HotColumn data="UnitsPerHour(New)" />
       <HotColumn data="Total Planned Units" />
     </template>
   </HotTable>
@@ -114,12 +112,10 @@ table.htCore th {
   text-align: center;
 }
 
-
-
 .handsontable {
   font-size: 13px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Helvetica Neue', Arial, sans-serif;
   font-weight: 400;
 }
 

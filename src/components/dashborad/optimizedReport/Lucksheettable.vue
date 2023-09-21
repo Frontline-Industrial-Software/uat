@@ -1,38 +1,8 @@
 <template>
-  <el-dialog
-    @close="
-      () => {
-        emit('close')
-      }
-    "
-    :fullscreen="true"
-    v-model="props.open"
-  >
-    <div class="content">
-      <div style="position: absolute; top: 0">
-        <input id="uploadBtn" type="file" @change="loadExcel" />
-
-        <span>Or Load remote xlsx file:</span>
-
-        <select v-model="selected" @change="selectExcel">
-          <option disabled value="">Choose</option>
-          <option
-            v-for="option in options"
-            :key="option.text"
-            :value="option.value"
-          >
-            {{ option.text }}
-          </option>
-        </select>
-
-        <a href="javascript:void(0)" @click="downloadExcel">
-          Download source xlsx file
-        </a>
-      </div>
-      <div id="luckysheet"></div>
-      <div v-show="isMaskShow" id="tip">Downloading</div>
-    </div>
-  </el-dialog>
+  <div class="content">
+    <div id="luckysheet"></div>
+    <div v-show="isMaskShow" id="tip">Downloading</div>
+  </div>
 </template>
 
 <script setup>
@@ -41,14 +11,43 @@ import { exportExcel } from '@/utils/exportSheet'
 import { isFunction } from '@/utils/is'
 import LuckyExcel from 'luckyexcel'
 const props = defineProps({
-  open,
+  url: Object,
 })
-const emit = defineEmits(['close'])
+// console.log(props.url);
+// const emit = defineEmits(['close'])
+onMounted(async () => {
+  setTimeout(() => {
+    const value = props.url
+    const name = 'test'
+    isMaskShow.value = true
+    LuckyExcel.transformExcelToLuckyByUrl(
+      value,
+      name,
+      (exportJson, luckysheetfile) => {
+        if (exportJson.sheets == null || exportJson.sheets.length == 0) {
+          alert(
+            'Failed to read the content of the excel file, currently does not support xls files!',
+          )
+          return
+        }
+        // console.log('exportJson', exportJson)
+        jsonData.value = exportJson
 
-function closeSheet() {
-  // 在子组件中调用 emit 方法来触发 close 事件
-  emit('close')
-}
+        isMaskShow.value = false
+
+        isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy()
+
+        window.luckysheet.create({
+          container: 'luckysheet', //luckysheet is the container id
+          showinfobar: false,
+          data: exportJson.sheets,
+          title: exportJson.info.name,
+          userInfo: exportJson.info.name.creator,
+        })
+      },
+    )
+  }, 1000)
+})
 const isMaskShow = ref(false)
 const selected = ref('')
 const jsonData = ref({})
@@ -95,6 +94,7 @@ const options = ref([
 ])
 
 const loadExcel = (evt) => {
+  console.log(evt)
   const files = evt.target.files
   if (files == null || files.length == 0) {
     alert('No files wait for import')
@@ -135,29 +135,21 @@ const loadExcel = (evt) => {
 const selectExcel = (evt) => {
   const value = selected.value
   const name = evt.target.options[evt.target.selectedIndex].innerText
-
+  console.log(value, name)
   if (value == '') {
     return
   }
   isMaskShow.value = true
-
-  LuckyExcel.transformExcelToLuckyByUrl(
+  LuckyExcel.transformExcelToLucky(
     value,
-    name,
-    (exportJson, luckysheetfile) => {
+    function (exportJson, luckysheetfile) {
       if (exportJson.sheets == null || exportJson.sheets.length == 0) {
         alert(
           'Failed to read the content of the excel file, currently does not support xls files!',
         )
         return
       }
-      console.log('exportJson', exportJson)
-      jsonData.value = exportJson
-
-      isMaskShow.value = false
-
-      isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy()
-
+      window.luckysheet.destroy()
       window.luckysheet.create({
         container: 'luckysheet', //luckysheet is the container id
         showinfobar: false,
@@ -167,6 +159,32 @@ const selectExcel = (evt) => {
       })
     },
   )
+  // LuckyExcel.transformExcelToLuckyByUrl(
+  //   value,
+  //   name,
+  //   (exportJson, luckysheetfile) => {
+  //     if (exportJson.sheets == null || exportJson.sheets.length == 0) {
+  //       alert(
+  //         'Failed to read the content of the excel file, currently does not support xls files!',
+  //       )
+  //       return
+  //     }
+  //     // console.log('exportJson', exportJson)
+  //     jsonData.value = exportJson
+
+  //     isMaskShow.value = false
+
+  //     isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy()
+
+  //     window.luckysheet.create({
+  //       container: 'luckysheet', //luckysheet is the container id
+  //       showinfobar: false,
+  //       data: exportJson.sheets,
+  //       title: exportJson.info.name,
+  //       userInfo: exportJson.info.name.creator,
+  //     })
+  //   },
+  // )
 }
 const downloadExcel = () => {
   // const value = selected.value;;
@@ -200,16 +218,10 @@ const downloadExcel = () => {
   height: 300px !important;
 }
 .content {
-  margin-top: 100px;
+  margin-top: 20px;
 }
 #luckysheet {
-  margin: 0px;
-  padding: 0px;
-  position: absolute;
-  width: 100%;
-  left: 0px;
-  top: 30px;
-  bottom: 0px;
+  height: 1000px;
 }
 
 #uploadBtn {
@@ -217,8 +229,6 @@ const downloadExcel = () => {
 }
 
 #tip {
-  position: absolute;
-  z-index: 1000000;
   left: 0px;
   top: 0px;
   bottom: 0px;

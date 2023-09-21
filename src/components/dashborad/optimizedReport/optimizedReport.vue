@@ -348,7 +348,7 @@ let TaskResource = computed(() => {
   let TaskResourcesData = TaskResources.flatMap((e) => {
     let resources = Object.values(e.resources)
     let taskobj = store.selectedData.tasks.find((obj) => obj.id == e.id)
-    console.log(resources, taskobj)
+    // console.log(resources, taskobj)
     return resources.map((resource) => ({
       Critical: taskobj.critical,
       'Task Code': taskobj.ID,
@@ -416,7 +416,7 @@ const tableOptions3 = reactive({
 
 <style lang="scss" scoped>
 .sheet {
-  height: 1050px;
+  height: 96vh;
 }
 .optimize-content {
   margin-top: 20px;

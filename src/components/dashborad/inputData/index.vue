@@ -189,7 +189,12 @@
       </div>
     </v-container>
   </div>
-  <Luckysheet :open="dialogTableVisible" @close="closeSheet" />
+  <Luckysheet
+    ref="sheet"
+    :open="dialogTableVisible"
+    :url="TemplateUrl"
+    @close="closeSheet"
+  />
 </template>
 
 <script setup>
@@ -203,10 +208,14 @@ import { useRouter } from 'vue-router'
 let dialogTableVisible = ref(false)
 const router = useRouter()
 const store = useCounterStore()
-function openSheet() {
-  // console.log('open', dialogTableVisible.value)
-  // dialogTableVisible.value=false;
+const sheet = ref(null)
+async function openSheet() {
+  if (!store.file.name) {
+    return
+  }
   dialogTableVisible.value = true
+  await getTemplateUrl()
+  sheet.value.start()
 }
 function closeSheet() {
   dialogTableVisible.value = false
@@ -235,7 +244,17 @@ async function uploadDemo() {
       store.file.name = a.data.mapping[files.name]
     })
 }
+let TemplateUrl = ref('')
+async function getTemplateUrl() {
+  TemplateUrl.value = await api.constraintsFileUrl(
+    `${store.file.name.split('.')[0]}.xlsx`,
+  )
+  console.log(TemplateUrl.value)
+}
 async function downloadTemplate() {
+  if (!store.file.name) {
+    return
+  }
   await api.constraintsFileDownload(`${store.file.name.split('.')[0]}.xlsx`)
 }
 </script>

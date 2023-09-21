@@ -74,6 +74,25 @@ export default {
         })
         return null
       } else {
+        let str
+        if (
+          response.data.milestoneTasksInfo &&
+          response.data.milestoneTasksInfo.length != 0
+        ) {
+          str = `❗The definition of ${response.data.milestoneTasksInfo.length} milestone
+          tasks could potentially block project duration optimization:`
+          response.data.milestoneTasksInfo.map((e, index) => {
+            str += `${index + 1}.  ID:${e.ID},Name:${e.Name},constraintDate:${
+              e.constraintDate
+            }`
+          })
+          ElMessage({
+            showClose: true,
+            message: str,
+            type: 'warning',
+          })
+        }
+
         ElMessage({
           showClose: true,
           message: 'Upload Success',
@@ -91,6 +110,40 @@ export default {
    * @param {*} constraintsFilename 约束条件
    * @return void
    */
+  async constraintsFileUrl(constraintsFilename) {
+    const response = await instance.get(
+      `fileDownload/constraints/${constraintsFilename}`,
+      { responseType: 'arraybuffer' },
+    )
+    const compressedData = new Uint8Array(response.data)
+    const pakoArr = pako.ungzip(compressedData)
+    const blob = new Blob([pakoArr], {
+      type: 'application/vnd.ms-excel',
+    })
+
+    // 创建下载链接对象
+    const downloadLink = document.createElement('a')
+    downloadLink.href = URL.createObjectURL(blob)
+    downloadLink.style.display = 'none'
+    downloadLink.download = `constraints_FrontlineExport.xlsx`
+
+    // 返回下载链接对象
+    return downloadLink
+
+    // link.href = URL.createObjectURL(
+    //   new Blob([pakoArr], {
+    //     type: 'application/vnd.ms-excel',
+    //   }),
+    // )
+
+    // link.style.display = 'none'
+    // link.download = 'constraints.xlsx'
+    // document.body.appendChild(link)
+    // link.click()
+    // document.body.removeChild(link)
+    // return response;
+  },
+
   async constraintsFileDownload(constraintsFilename) {
     const response = await instance.get(
       `fileDownload/constraints/${constraintsFilename}`,
@@ -118,7 +171,7 @@ export default {
    * @param {*} file
    */
   async sendConstraintsFile(constraintsFile, name) {
-    // console.log(name);
+    console.log(constraintsFile)
     const formData = new FormData()
     formData.append('file', constraintsFile)
     formData.append('newName', name)

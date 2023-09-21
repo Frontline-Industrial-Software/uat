@@ -18,6 +18,7 @@ const props = defineProps({
 onMounted(async () => {
   setTimeout(() => {
     const value = props.url
+
     const name = 'test'
     isMaskShow.value = true
     LuckyExcel.transformExcelToLuckyByUrl(
@@ -51,50 +52,8 @@ onMounted(async () => {
 const isMaskShow = ref(false)
 const selected = ref('')
 const jsonData = ref({})
-const options = ref([
-  {
-    text: 'Money Manager.xlsx',
-    value: 'https://minio.cnbabylon.com/public/luckysheet/money-manager-2.xlsx',
-  },
-  {
-    text: 'Activity costs tracker.xlsx',
-    value:
-      'https://minio.cnbabylon.com/public/luckysheet/Activity%20costs%20tracker.xlsx',
-  },
-  {
-    text: 'House cleaning checklist.xlsx',
-    value:
-      'https://minio.cnbabylon.com/public/luckysheet/House%20cleaning%20checklist.xlsx',
-  },
-  {
-    text: 'Student assignment planner.xlsx',
-    value:
-      'https://minio.cnbabylon.com/public/luckysheet/Student%20assignment%20planner.xlsx',
-  },
-  {
-    text: 'Credit card tracker.xlsx',
-    value:
-      'https://minio.cnbabylon.com/public/luckysheet/Credit%20card%20tracker.xlsx',
-  },
-  {
-    text: 'Blue timesheet.xlsx',
-    value:
-      'https://minio.cnbabylon.com/public/luckysheet/Blue%20timesheet.xlsx',
-  },
-  {
-    text: 'Student calendar (Mon).xlsx',
-    value:
-      'https://minio.cnbabylon.com/public/luckysheet/Student%20calendar%20%28Mon%29.xlsx',
-  },
-  {
-    text: 'Blue mileage and expense report.xlsx',
-    value:
-      'https://minio.cnbabylon.com/public/luckysheet/Blue%20mileage%20and%20expense%20report.xlsx',
-  },
-])
 
 const loadExcel = (evt) => {
-  console.log(evt)
   const files = evt.target.files
   if (files == null || files.length == 0) {
     alert('No files wait for import')
@@ -108,6 +67,7 @@ const loadExcel = (evt) => {
     alert('Currently only supports the import of xlsx files')
     return
   }
+  luckyExcelInstance.loading(false)
   LuckyExcel.transformExcelToLucky(
     files[0],
     function (exportJson, luckysheetfile) {
@@ -135,7 +95,7 @@ const loadExcel = (evt) => {
 const selectExcel = (evt) => {
   const value = selected.value
   const name = evt.target.options[evt.target.selectedIndex].innerText
-  console.log(value, name)
+  // console.log(value, name)
   if (value == '') {
     return
   }
@@ -221,7 +181,7 @@ const downloadExcel = () => {
   margin-top: 20px;
 }
 #luckysheet {
-  height: 1000px;
+  height: 95vh;
 }
 
 #uploadBtn {
@@ -229,10 +189,6 @@ const downloadExcel = () => {
 }
 
 #tip {
-  left: 0px;
-  top: 0px;
-  bottom: 0px;
-  right: 0px;
   background: rgba(255, 255, 255, 0.8);
   text-align: center;
   font-size: 40px;

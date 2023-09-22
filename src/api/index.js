@@ -80,8 +80,12 @@ export default {
           response.data.milestoneTasksInfo.length != 0
         ) {
           str = `
-          <p style="color:black">The definition of ${response.data.milestoneTasksInfo.length} milestone
-          tasks could potentially block project duration optimization:</p>
+          <p style="color:black">The definition of ${
+            response.data.milestoneTasksInfo.length
+          } milestone
+         ${
+           response.data.milestoneTasksInfo.length == 1 ? 'task' : 'tasks'
+         }  could potentially block project duration optimization:</p>
          `
           response.data.milestoneTasksInfo.map((e, index) => {
             str += `<p style="line-height:30px;color:black">${
@@ -94,9 +98,8 @@ export default {
             showClose: true,
             message: str,
             type: 'warning',
-            duration: 20000,
+            duration: 0,
             dangerouslyUseHTMLString: true,
-            offset: '30',
             customClass: 'warn',
             center: true,
           })

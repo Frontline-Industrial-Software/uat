@@ -10,7 +10,12 @@ html {
   overflow: auto !important;
 }
 .warn {
-  width: 60vw !important;
+  min-width: 45vw !important;
+  border: 1px solid white !important;
+  box-shadow: 10px 10px 5px #888888;
+  border-radius: 10px !important;
+  /* background-color: rgb(64, 170, 151) !important; */
+  /* color:white !important; */
 }
 .el-overlay {
   z-index: 1000 !important;

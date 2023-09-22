@@ -9,39 +9,39 @@ import {
   computed,
   onActivated,
   watchEffect,
-} from "vue";
-import * as echarts from "echarts";
-import { useRouter } from "vue-router";
-import { useCounterStore } from "../../../store";
-const store = useCounterStore();
-import ecStat from "echarts-stat";
-import api from "../../../api/index.js";
-import { onBeforeRouteLeave } from "vue-router";
-import { arrowMiddleware } from "element-plus";
-import { toRaw } from "@vue/reactivity";
+} from 'vue'
+import * as echarts from 'echarts'
+import { useRouter } from 'vue-router'
+import { useCounterStore } from '../../../store'
+const store = useCounterStore()
+import ecStat from 'echarts-stat'
+import api from '../../../api/index.js'
+import { onBeforeRouteLeave } from 'vue-router'
+import { arrowMiddleware } from 'element-plus'
+import { toRaw } from '@vue/reactivity'
 /* -----------------------------------变量--------------------------------------- */
-let activeIndex = ref("Balanced1");
+let activeIndex = ref('Balanced1')
 
 let selectData = reactive({
-  preset: "Balanced",
+  preset: 'Balanced',
   fileName: store.file.name,
   step: 3,
-});
+})
 // 更新选中值
 // 右侧被选中数据
 let SummaryData = reactive({
-  baseDuration: "-",
-  changedDuration: "-",
-  changgedTasks: "-",
-  TotalTasks: "-",
-  baseCriticalPath: "-",
-  changedCriticalPath: "-",
-  TotalResources: "-",
-  group: "",
-});
+  baseDuration: '-',
+  changedDuration: '-',
+  changgedTasks: '-',
+  TotalTasks: '-',
+  baseCriticalPath: '-',
+  changedCriticalPath: '-',
+  TotalResources: '-',
+  group: '',
+})
 
 // 右侧单选框
-let radio = ref(0);
+let radio = ref(0)
 /* ----------------------------------生命周期---------------------------------------- */
 onBeforeRouteLeave((to, from, next) => {
   // if (to.name == "InputData") {
@@ -49,99 +49,100 @@ onBeforeRouteLeave((to, from, next) => {
   //   activeIndex.value = "Balanced1";
   //   radio.value = 0;
   // }
-  next();
-});
+  next()
+})
 onActivated(() => {
-  initChart();
-  renderChart();
-});
+  initChart()
+  renderChart()
+})
 /* -------------------------------------工具函数------------------------------------- */
 
 // 去百分比
 function toPercent(num, total) {
-  return Math.round((num / total) * 10000) / 100.0 + "%"; // 小数点后两位百分比
+  return Math.round((num / total) * 10000) / 100.0 + '%' // 小数点后两位百分比
 }
 // 组件销毁时摧毁实例
-const router = useRouter();
+const router = useRouter()
 
 /* ---------------------------------------监听----------------------------------- */
 
 watch(activeIndex, () => {
-  chart.setOption(option.value);
-});
+  chart.setOption(option.value)
+})
 
 watch(store.dataArray, () => {
-  chart.setOption(option.value);
-});
+  chart.setOption(option.value)
+})
 /* 监听所有数据是否获取完成 -------------------------------------------------------------------------- */
 watch(
   store.end,
   async () => {
     if (store.end.data) {
-      DefaultData.value = getDefault();
+      DefaultData.value = getDefault()
       // console.log(DefaultData.value);
-      radio.value = 0;
+      radio.value = 0
       setTimeout(() => {
+        // console.log(DefaultData.value);
         chart.dispatchAction({
-          type: "select",
+          type: 'select',
           name: DefaultData.value[1][0].name,
-        });
-        updateData(DefaultData.value[1][0].value[2].result);
-        selectData.preset = "Balanced";
-        selectData.step = DefaultData.value[1][0].value[2].result.step;
-      }, 0);
+        })
+        updateData(DefaultData.value[1][0].value[2].result)
+        selectData.preset = 'Balanced'
+        selectData.step = DefaultData.value[1][0].value[2].result.step
+      }, 0)
     } else {
-      activeIndex = ref("");
-      activeIndex.value = "Balanced1";
-      radio.value = 0;
-      SummaryData.baseDuration = "-";
-      SummaryData.changedDuration = "-";
-      SummaryData.changgedTasks = "-";
-      SummaryData.TotalTasks = "-";
-      SummaryData.baseCriticalPath = "-";
-      SummaryData.changedCriticalPath = "-";
-      SummaryData.TotalResources = "-";
-      SummaryData.group = "";
+      activeIndex = ref('')
+      activeIndex.value = 'Balanced1'
+      radio.value = 0
+      SummaryData.baseDuration = '-'
+      SummaryData.changedDuration = '-'
+      SummaryData.changgedTasks = '-'
+      SummaryData.TotalTasks = '-'
+      SummaryData.baseCriticalPath = '-'
+      SummaryData.changedCriticalPath = '-'
+      SummaryData.TotalResources = '-'
+      SummaryData.group = ''
     }
   },
-  { deep: true }
-);
+  { deep: true },
+)
 /* ---------------------------------图表----------------------------------------- */
 // 初始化图表实例
-let chart = null;
+let chart = null
 
 // 数据配置项
 
 function seriesData(name, basecolor, activecolor) {
-  let size, opacity;
-  if (name == "baseline") {
-    size = 16;
-    opacity = 1;
+  let size, opacity
+  if (name == 'baseline') {
+    size = 16
+    opacity = 1
   } else {
-    size = 8;
-    opacity = 0.5;
+    size = 8
+    opacity = 0.5
   }
 
   return {
-    type: "scatter",
+    type: 'scatter',
 
-    selectedMode: "single",
+    selectedMode: 'single',
     selectedOffset: 10,
     symbol: (data) => {
       // constraintLoss>0
-      let path = `path://M18.018,15.344c-0.285,0-0.555-0.162-0.684-0.441l-6.595-12.076l-6.594,12.076c-0.128,0.279-0.398,0.441-0.684,0.441c-0.491,0-0.706-0.638-0.249-0.929l6.997-12.808l-6.997-12.809c-0.457-0.291-0.242-0.929,0.249-0.929c0.286,0,0.556,0.162,0.684,0.441l6.595,12.076l6.594-12.076c0.127-0.279,0.398-0.441,0.684-0.441c0.49,0,0.705,0.638,0.249,0.929l-6.998,12.808l6.998,12.809c0.456,0.291,0.241,0.929-0.249,0.929H18.018z`;
+      let path = `path://M18.018,15.344c-0.285,0-0.555-0.162-0.684-0.441l-6.595-12.076l-6.594,12.076c-0.128,0.279-0.398,0.441-0.684,0.441c-0.491,0-0.706-0.638-0.249-0.929l6.997-12.808l-6.997-12.809c-0.457-0.291-0.242-0.929,0.249-0.929c0.286,0,0.556,0.162,0.684,0.441l6.595,12.076l6.594-12.076c0.127-0.279,0.398-0.441,0.684-0.441c0.49,0,0.705,0.638,0.249,0.929l-6.998,12.808l6.998,12.809c0.456,0.291,0.241,0.929-0.249,0.929H18.018z`
       if (data[2].result.constraintLoss > 0) {
         // console.log(data[2].result);
-        return path;
+        return path
       }
-      return "circle";
+      return 'circle'
     },
     select: {
       scale: 2,
       itemStyle: {
-        color: "#40aa97",
-        borderColor: "#40aa97",
-        shadowColor: "#40aa97",
+        color: '#40aa97',
+        borderColor: '#40aa97',
+        shadowColor: '#40aa97',
         borderWidth: 10,
         shadowBlur: 30,
         opacity: 1,
@@ -150,8 +151,8 @@ function seriesData(name, basecolor, activecolor) {
     },
     emphasis: {
       scale: 2,
-      focus: "series",
-      blurScope: "coordinateSystem",
+      focus: 'series',
+      blurScope: 'coordinateSystem',
     },
 
     data: store.dataArray[name].data,
@@ -160,33 +161,33 @@ function seriesData(name, basecolor, activecolor) {
 
     itemStyle: {
       color: (data) => {
-        return basecolor;
+        return basecolor
       },
       borderWidth: 1,
-      borderColor: "#0b0f07",
+      borderColor: '#0b0f07',
       opacity: opacity,
     },
-  };
+  }
 }
 // !图表配置项
 var option = computed(() => {
   // 获取 x 轴的最小值和最大值
   const xValues = Object.values(store.dataArray).flatMap((series) =>
     series.data.map((item) => {
-      return item.value[0];
-    })
-  );
-  const xMinValue = parseFloat((Math.min(...xValues) * 0.95).toFixed(2));
-  const xMaxValue = parseFloat((Math.max(...xValues) * 1.05).toFixed(2));
+      return item.value[0]
+    }),
+  )
+  const xMinValue = parseFloat((Math.min(...xValues) * 0.95).toFixed(2))
+  const xMaxValue = parseFloat((Math.max(...xValues) * 1.05).toFixed(2))
 
   // 获取 y 轴的最小值和最大值
   const yValues = Object.values(store.dataArray).flatMap((series) =>
     series.data.map((item) => {
-      return item.value[1];
-    })
-  );
-  const yMinValue = parseFloat((Math.min(...yValues) * 0.95).toFixed(2));
-  const yMaxValue = parseFloat((Math.max(...yValues) * 1.05).toFixed(2));
+      return item.value[1]
+    }),
+  )
+  const yMinValue = parseFloat((Math.min(...yValues) * 0.95).toFixed(2))
+  const yMaxValue = parseFloat((Math.max(...yValues) * 1.05).toFixed(2))
   return {
     toolbox: {
       show: true,
@@ -199,35 +200,35 @@ var option = computed(() => {
     grid: {
       // left: 120
       top: 100,
-      height: "65%",
+      height: '65%',
     },
     xAxis: {
-      name: "Duration (days)",
-      nameLocation: "middle",
+      name: 'Duration (days)',
+      nameLocation: 'middle',
       padding: [10],
       height: 100,
       min: xMinValue,
       max: xMaxValue,
       nameTextStyle: {
-        align: "center",
+        align: 'center',
         padding: [30, 0, 0, 0],
-        fontWeight: "lighter",
+        fontWeight: 'lighter',
         fontSize: 20,
-        color: "black",
+        color: 'black',
       },
     },
     yAxis: {
-      name: "Maximum Resource (units/day)",
+      name: 'Maximum Resource (units/day)',
       max: yMaxValue,
       min: yMinValue,
       padding: [10],
-      nameLocation: "end",
+      nameLocation: 'end',
       nameTextStyle: {
-        align: "center",
+        align: 'center',
         padding: [0, 0, 0, 100],
-        fontWeight: "lighter",
+        fontWeight: 'lighter',
         fontSize: 16,
-        color: "black",
+        color: 'black',
       },
     },
     legend: {
@@ -235,208 +236,249 @@ var option = computed(() => {
 
       data: [
         {
-          name: "baseline",
+          name: 'baseline',
           itemStyle: {
-            color: "rgb(204, 204, 204)",
+            color: 'rgb(204, 204, 204)',
           },
         },
         {
-          name: "Balanced",
+          name: 'Balanced',
           itemStyle: {
-            color: "rgba(130, 181, 199, 0.9)",
+            color: 'rgba(130, 181, 199, 0.9)',
           },
         },
         {
-          name: "Fastest",
+          name: 'Fastest',
           itemStyle: {
-            color: "rgba(247, 220, 91, 0.9)",
+            color: 'rgba(247, 220, 91, 0.9)',
           },
         },
         {
-          name: "Minimum_Resources",
+          name: 'Minimum_Resources',
           itemStyle: {
-            color: "rgba(219, 121, 48, 0.9)",
+            color: 'rgba(219, 121, 48, 0.9)',
           },
         },
         {
-          name: "Levelled_Resources",
+          name: 'Levelled_Resources',
           itemStyle: {
-            color: "rgba(170, 187, 93, 0.9)",
+            color: 'rgba(170, 187, 93, 0.9)',
           },
         },
       ],
-      x: "left",
+      x: 'left',
       itemWidth: 15,
       itemHeight: 15,
     },
     series: [
-      seriesData("baseline", "rgb(204, 204, 204)", "rgba(138, 24, 116)"),
-      seriesData("Balanced", "rgba(130, 181, 199, 0.9)", "rgba(138, 24, 116)"),
-      seriesData("Fastest", "rgba(247, 220, 91, 0.9)", "rgba(138, 24, 116)"),
+      seriesData('baseline', 'rgb(204, 204, 204)', 'rgba(138, 24, 116)'),
+      seriesData('Balanced', 'rgba(130, 181, 199, 0.9)', 'rgba(138, 24, 116)'),
+      seriesData('Fastest', 'rgba(247, 220, 91, 0.9)', 'rgba(138, 24, 116)'),
       seriesData(
-        "Minimum_Resources",
-        "rgba(219, 121, 48, 0.9)",
-        "rgba(138, 24, 116)"
+        'Minimum_Resources',
+        'rgba(219, 121, 48, 0.9)',
+        'rgba(138, 24, 116)',
       ),
       seriesData(
-        "Levelled_Resources",
-        "rgba(170, 187, 93, 0.9)",
-        "rgba(138, 24, 116)"
+        'Levelled_Resources',
+        'rgba(170, 187, 93, 0.9)',
+        'rgba(138, 24, 116)',
       ),
     ],
-  };
-});
+  }
+})
 
 // 初始化图表
 function initChart() {
   if (chart == null) {
-    chart = echarts.init(
-      document.getElementById("myEcharts"),
-      "purple-passion"
-    );
+    chart = echarts.init(document.getElementById('myEcharts'), 'purple-passion')
   }
-  echarts.registerTransform(ecStat.transform.clustering);
+  echarts.registerTransform(ecStat.transform.clustering)
 
   // 图表点击事件获取值
-  chart.on("click", function (param) {
+  chart.on('click', function (param) {
     chart.dispatchAction({
-      type: "select",
+      type: 'select',
       name: param.name,
-    });
-    let datas = param.data.value[2].result;
+    })
+    let datas = param.data.value[2].result
     // activeIndex.value = param.name;
-    selectData.preset = param.seriesName;
-    selectData.step = datas.step;
-    if (param.seriesName == "baseline") {
-      selectData.preset = "Balanced";
+    selectData.preset = param.seriesName
+    selectData.step = datas.step
+    if (param.seriesName == 'baseline') {
+      selectData.preset = 'Balanced'
     } else {
-      selectData.preset = param.seriesName;
+      selectData.preset = param.seriesName
     }
     switch (selectData.preset) {
-      case "Balanced":
-        radio.value = 0;
-        break;
-      case "Fastest":
-        radio.value = 1;
-        break;
-      case "Minimum_Resources":
-        radio.value = 2;
-        break;
-      case "Levelled_Resources":
-        radio.value = 3;
-        break;
+      case 'Balanced':
+        radio.value = 0
+        break
+      case 'Fastest':
+        radio.value = 1
+        break
+      case 'Minimum_Resources':
+        radio.value = 2
+        break
+      case 'Levelled_Resources':
+        radio.value = 3
+        break
 
       default:
-        break;
+        break
     }
-    updateData(datas);
-  });
+    updateData(datas)
+  })
 }
 
 // 更新图表
 function renderChart() {
-  chart.setOption(option.value);
+  chart.setOption(option.value)
 }
 /* -------------------------------------------------------------------------- */
 
 // 右侧数据更新
 function updateData(data) {
-  SummaryData.group = data.group;
-  SummaryData.baseDuration = Math.ceil(data.baselineDurationDaysWithCalendar);
-  SummaryData.changedDuration = Math.ceil(data.projectDurationDays);
-  SummaryData.changgedTasks = Math.ceil(data.changedTasksLen);
-  SummaryData.TotalTasks = Math.ceil(data.baselineTasksLen);
-  SummaryData.baseCriticalPath = Math.ceil(data.baselineCriticalTasksLen);
-  SummaryData.changedCriticalPath = Math.ceil(data.newCriticalTasksLen);
-  SummaryData.TotalResources = Math.ceil(data.totalResourceCount);
+  SummaryData.group = data.group
+  SummaryData.baseDuration = Math.ceil(data.baselineDurationDaysWithCalendar)
+  SummaryData.changedDuration = Math.ceil(data.projectDurationDays)
+  SummaryData.changgedTasks = Math.ceil(data.changedTasksLen)
+  SummaryData.TotalTasks = Math.ceil(data.baselineTasksLen)
+  SummaryData.baseCriticalPath = Math.ceil(data.baselineCriticalTasksLen)
+  SummaryData.changedCriticalPath = Math.ceil(data.newCriticalTasksLen)
+  SummaryData.TotalResources = Math.ceil(data.totalResourceCount)
 }
 
 // 按钮点击跳转
 async function nextOptimized() {
-  selectData.fileName = store.file.name;
-  let data = await api.getOptimized({ ...selectData }, store.file.size);
-  store.SummaryData = { ...SummaryData };
-  store.selectedData = null;
+  selectData.fileName = store.file.name
+  let data = await api.getOptimized({ ...selectData }, store.file.size)
+  store.SummaryData = { ...SummaryData }
+  store.selectedData = null
 
-  store.selectedData = data.data;
+  store.selectedData = data.data
   // console.log(store.selectedData);
-  store.active = 2;
-  store.selectChange = true;
-  router.push({ name: "optimizedSummary" });
+  store.active = 2
+  store.selectChange = true
+  router.push({ name: 'optimizedSummary' })
 }
 
 // 获取4个默认选项的id
-let DefaultData = ref(null);
+let DefaultData = ref(null)
 function getDefault() {
-  let DefaultDatas = [];
+  let DefaultDatas = []
+  // console.log(store.dataArray);
   for (const key in store.dataArray) {
-    let data = toRaw(store.dataArray[key].data);
-    data.sort((a, b) => a.value[2].result.loss - b.value[2].result.loss);
-    DefaultDatas.push(data);
+    let data = toRaw(store.dataArray[key].data)
+    data.sort((a, b) => a.value[2].result.loss - b.value[2].result.loss)
+    DefaultDatas.push(data)
   }
-  return DefaultDatas;
+  return DefaultDatas
 }
 
 // 侧边烂点击事件
 function sideClcik(num) {
   chart.dispatchAction({
-    type: "select",
+    type: 'select',
     name: DefaultData.value[num][0].name,
-  });
-  activeIndex = DefaultData.value[num][0].name;
-  selectData.preset = DefaultData.value[num][0].value[2].name;
-  selectData.step = DefaultData.value[num][0].value[2].result.step;
-  updateData(DefaultData.value[num][0].value[2].result);
+  })
+  activeIndex = DefaultData.value[num][0].name
+  selectData.preset = DefaultData.value[num][0].value[2].name
+  selectData.step = DefaultData.value[num][0].value[2].result.step
+  updateData(DefaultData.value[num][0].value[2].result)
 }
 </script>
 <template>
-  <div >
+  <div>
     <h2>
-      {{ $t("baselineSummary.title[0]") }}
+      {{ $t('baselineSummary.title[0]') }}
       <div class="step">
-        <span
-          >{{ store.setting.Steps }} {{ $t("baselineSummary.title[1]") }}</span
-        >
+        <span>
+          {{ store.setting.Steps }} {{ $t('baselineSummary.title[1]') }}
+        </span>
       </div>
       <div class="step">
-        <span>{{
-          `${store.setting.Ratio[0] * 100}% - ${
-            store.setting.Ratio[1] * 100
-          }% ${$t("baselineSummary.title[2]")}`
-        }}</span>
+        <span>
+          {{
+            `${store.setting.Ratio[0] * 100}% - ${
+              store.setting.Ratio[1] * 100
+            }% ${$t('baselineSummary.title[2]')}`
+          }}
+        </span>
       </div>
     </h2>
     <div class="main">
       <div class="left">
         <div class="lefttop">
-          <div>{{ $t("baselineSummary.chartName[0]") }}</div>
+          <div>{{ $t('baselineSummary.chartName[0]') }}</div>
         </div>
         <Echarts style="width: 720px; height: 500px" id="myEcharts"></Echarts>
       </div>
       <div class="right">
         <div class="righttop">
           <div>
-            {{ $t("baselineSummary.Tsidebar[0]") }}
+            {{ $t('baselineSummary.Tsidebar[0]') }}
 
             {{
-                toPercent(SummaryData.changedDuration-SummaryData.baseDuration,SummaryData.baseDuration).replace(/-/g, "")
+              toPercent(
+                SummaryData.changedDuration - SummaryData.baseDuration,
+                SummaryData.baseDuration,
+              ).replace(/-/g, '')
             }}
             <span class="arrow">
-              <svg v-if="toPercent(SummaryData.changedDuration-SummaryData.baseDuration,SummaryData.baseDuration).indexOf('-')" t="1693809587609" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1982" width="200" height="200"><path d="M529.143158 7.436293l347.212925 397.874796a21.748783 21.748783 0 0 1-16.375554 36.077393h-170.66398a21.492915 21.492915 0 0 0-21.492915 18.678367c-12.793402 92.624229-90.065549 502.268955-455.95684 562.909679a21.748783 21.748783 0 0 1-17.654895-38.380206c62.687669-49.126663 144.56544-144.309572 167.593564-313.694212a1571.285609 1571.285609 0 0 0 12.793402-207.508977 22.260519 22.260519 0 0 0-21.748783-22.260519H165.298811a21.748783 21.748783 0 0 1-16.375554-36.077393L496.39205 7.436293a21.748783 21.748783 0 0 1 32.751108 0z" p-id="1983" fill="red"></path></svg>
-              <svg v-else  t="1693810752990" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1307" width="200" height="200"><path d="M507.649902 1015.81158L160.153845 618.161453a21.75049 21.75049 0 0 1 16.376839-36.080224h187.565987a22.262266 22.262266 0 0 0 21.750489-22.262266 1630.774944 1630.774944 0 0 0-12.538517-207.525259C350.022825 182.895773 268.138628 87.705395 204.934264 38.574877A21.75049 21.75049 0 0 1 223.102321 0.447548C588.766434 60.837143 665.532868 470.514012 679.350826 563.401397a21.238713 21.238713 0 0 0 21.494601 18.679832h170.677372a21.75049 21.75049 0 0 1 16.120951 36.080224L540.403581 1015.81158a21.75049 21.75049 0 0 1-32.753679 0z" p-id="1308" fill="#40aa97"></path></svg>
+              <svg
+                v-if="
+                  toPercent(
+                    SummaryData.changedDuration - SummaryData.baseDuration,
+                    SummaryData.baseDuration,
+                  ).indexOf('-')
+                "
+                t="1693809587609"
+                class="icon"
+                viewBox="0 0 1024 1024"
+                version="1.1"
+                xmlns="http://www.w3.org/2000/svg"
+                p-id="1982"
+                width="200"
+                height="200"
+              >
+                <path
+                  d="M529.143158 7.436293l347.212925 397.874796a21.748783 21.748783 0 0 1-16.375554 36.077393h-170.66398a21.492915 21.492915 0 0 0-21.492915 18.678367c-12.793402 92.624229-90.065549 502.268955-455.95684 562.909679a21.748783 21.748783 0 0 1-17.654895-38.380206c62.687669-49.126663 144.56544-144.309572 167.593564-313.694212a1571.285609 1571.285609 0 0 0 12.793402-207.508977 22.260519 22.260519 0 0 0-21.748783-22.260519H165.298811a21.748783 21.748783 0 0 1-16.375554-36.077393L496.39205 7.436293a21.748783 21.748783 0 0 1 32.751108 0z"
+                  p-id="1983"
+                  fill="red"
+                ></path>
+              </svg>
+              <svg
+                v-else
+                t="1693810752990"
+                class="icon"
+                viewBox="0 0 1024 1024"
+                version="1.1"
+                xmlns="http://www.w3.org/2000/svg"
+                p-id="1307"
+                width="200"
+                height="200"
+              >
+                <path
+                  d="M507.649902 1015.81158L160.153845 618.161453a21.75049 21.75049 0 0 1 16.376839-36.080224h187.565987a22.262266 22.262266 0 0 0 21.750489-22.262266 1630.774944 1630.774944 0 0 0-12.538517-207.525259C350.022825 182.895773 268.138628 87.705395 204.934264 38.574877A21.75049 21.75049 0 0 1 223.102321 0.447548C588.766434 60.837143 665.532868 470.514012 679.350826 563.401397a21.238713 21.238713 0 0 0 21.494601 18.679832h170.677372a21.75049 21.75049 0 0 1 16.120951 36.080224L540.403581 1015.81158a21.75049 21.75049 0 0 1-32.753679 0z"
+                  p-id="1308"
+                  fill="#40aa97"
+                ></path>
+              </svg>
             </span>
           </div>
           <h1>
             {{ SummaryData.changedDuration }}/
-            <span>{{ SummaryData.baseDuration }}</span> days
+            <span>{{ SummaryData.baseDuration }}</span>
+            days
           </h1>
-          <div>{{ $t("baselineSummary.Tsidebar[1]") }}</div>
+          <div>{{ $t('baselineSummary.Tsidebar[1]') }}</div>
           <h1>
             {{ SummaryData.changgedTasks }}/
             <span>{{ SummaryData.TotalTasks }}</span>
           </h1>
           <div>
-            {{ $t("baselineSummary.Tsidebar[2]") }}
+            {{ $t('baselineSummary.Tsidebar[2]') }}
 
             {{
               toPercent(SummaryData.baseCriticalPath, SummaryData.TotalTasks)
@@ -446,37 +488,38 @@ function sideClcik(num) {
             {{ SummaryData.baseCriticalPath }}/
             <span>{{ SummaryData.TotalTasks }}</span>
           </h1>
-          <div>{{ $t("baselineSummary.Tsidebar[3]") }}</div>
+          <div>{{ $t('baselineSummary.Tsidebar[3]') }}</div>
           <h1>{{ SummaryData.TotalResources }}</h1>
         </div>
         <div class="rightbutton">
-          <h1>{{ $t("baselineSummary.Bsidebar[0]") }}</h1>
+          <h1>{{ $t('baselineSummary.Bsidebar[0]') }}</h1>
           <div>
-            {{ $t("baselineSummary.Bsidebar[1]") }}
+            {{ $t('baselineSummary.Bsidebar[1]') }}
           </div>
           <el-radio-group v-model="radio" class="radiobox">
             <el-radio
               @click="
                 () => {
-                  sideClcik(1);
+                  sideClcik(1)
                 }
               "
               :label="0"
-              >{{ $t("types.typeShow[1]") }}
-              <span>{{ $t("types.msg[0]") }} </span></el-radio
             >
-            <el-radio @click="sideClcik(2)" :label="1"
-              >{{ $t("types.typeShow[2]") }}
-              <span>{{ $t("types.msg[1]") }}</span></el-radio
-            >
-            <el-radio :label="2" @click="sideClcik(3)"
-              >{{ $t("types.typeShow[3]") }}
-              <span>{{ $t("types.msg[2]") }}</span></el-radio
-            >
-            <el-radio :label="3" @click="sideClcik(4)"
-              >{{ $t("types.typeShow[4]") }}
-              <span>{{ $t("types.msg[3]") }}</span></el-radio
-            >
+              {{ $t('types.typeShow[1]') }}
+              <span>{{ $t('types.msg[0]') }}</span>
+            </el-radio>
+            <el-radio @click="sideClcik(2)" :label="1">
+              {{ $t('types.typeShow[2]') }}
+              <span>{{ $t('types.msg[1]') }}</span>
+            </el-radio>
+            <el-radio :label="2" @click="sideClcik(3)">
+              {{ $t('types.typeShow[3]') }}
+              <span>{{ $t('types.msg[2]') }}</span>
+            </el-radio>
+            <el-radio :label="3" @click="sideClcik(4)">
+              {{ $t('types.typeShow[4]') }}
+              <span>{{ $t('types.msg[3]') }}</span>
+            </el-radio>
           </el-radio-group>
         </div>
         <v-btn
@@ -484,18 +527,19 @@ function sideClcik(num) {
           @click="nextOptimized"
           class="btn"
           icon="el-icon-delete"
-          >{{ $t("next") }}</v-btn
         >
+          {{ $t('next') }}
+        </v-btn>
       </div>
     </div>
   </div>
 </template>
 <style lang="scss" scoped>
-.arrow{
->svg{
-width: 20px;
-height: 20px;
-}
+.arrow {
+  > svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 h2 {
   width: 100%;

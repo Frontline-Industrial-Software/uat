@@ -98,7 +98,7 @@ export default {
             showClose: true,
             message: str,
             type: 'warning',
-            duration: 0,
+            duration: 20000,
             dangerouslyUseHTMLString: true,
             customClass: 'warn',
             center: true,

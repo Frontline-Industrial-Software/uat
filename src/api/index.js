@@ -5,7 +5,7 @@ import 'nprogress/nprogress.css'
 import { ElMessage } from 'element-plus'
 
 const instance = axios.create({
-  baseURL: 'https://api.frontline-optimizer.com/',
+  baseURL: 'https://wss.frontline-optimizer.com/',
 })
 // 请求拦截器
 instance.interceptors.request.use(
@@ -79,17 +79,26 @@ export default {
           response.data.milestoneTasksInfo &&
           response.data.milestoneTasksInfo.length != 0
         ) {
-          str = `❗The definition of ${response.data.milestoneTasksInfo.length} milestone
-          tasks could potentially block project duration optimization:`
+          str = `
+          <p style="color:black">The definition of ${response.data.milestoneTasksInfo.length} milestone
+          tasks could potentially block project duration optimization:</p>
+         `
           response.data.milestoneTasksInfo.map((e, index) => {
-            str += `${index + 1}.  ID:${e.ID},Name:${e.Name},constraintDate:${
+            str += `<p style="line-height:30px;color:black">${
+              index + 1
+            }.&nbsp  ID:${e.id} &nbsp Name:${e.name} &nbsp constraintDate:${
               e.constraintDate
-            }`
+            }</p>`
           })
           ElMessage({
             showClose: true,
             message: str,
             type: 'warning',
+            duration: 20000,
+            dangerouslyUseHTMLString: true,
+            offset: '30',
+            customClass: 'warn',
+            center: true,
           })
         }
 

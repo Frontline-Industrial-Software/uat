@@ -9,6 +9,9 @@ html {
   color: #545454;
   overflow: auto !important;
 }
+.warn {
+  width: 60vw !important;
+}
 .el-overlay {
   z-index: 1000 !important;
 }

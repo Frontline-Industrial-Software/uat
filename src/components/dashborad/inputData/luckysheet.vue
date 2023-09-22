@@ -9,7 +9,15 @@
     :fullscreen="false"
     v-model="props.open"
   >
-    <button @click="up">上传</button>
+    <v-btn
+      class="upload"
+      color="rgb(64, 170, 151)"
+      style="color: white"
+      @click="up"
+    >
+      Upload
+    </v-btn>
+    <!-- <button class="upload" >上传</button> -->
     <div class="content">
       <div id="luckysheet"></div>
       <div v-show="isMaskShow" id="tip">Downloading</div>
@@ -42,7 +50,7 @@ async function up() {
 function start() {
   setTimeout(() => {
     const value = props.url
-    console.log(value)
+    // console.log(value)
     const name = 'test'
     isMaskShow.value = true
     LuckyExcel.transformExcelToLuckyByUrl(
@@ -110,6 +118,11 @@ const downloadExcel = () => {
 </script>
 
 <style scoped>
+.upload {
+  margin-bottom: 200px;
+  transform: translateY(-40px);
+  width: 100px;
+}
 .dialog {
   height: 80vh;
 }

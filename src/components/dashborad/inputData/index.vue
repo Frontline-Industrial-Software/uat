@@ -249,7 +249,7 @@ async function getTemplateUrl() {
   TemplateUrl.value = await api.constraintsFileUrl(
     `${store.file.name.split('.')[0]}.xlsx`,
   )
-  console.log(TemplateUrl.value)
+  // console.log(TemplateUrl.value)
 }
 async function downloadTemplate() {
   if (!store.file.name) {

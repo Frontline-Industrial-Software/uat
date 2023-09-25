@@ -3931,7 +3931,7 @@ lower-case@^2.0.2:
 
 luckyexcel@^1.0.1:
   version "1.0.1"
-  resolved "https://registry.npmjs.org/luckyexcel/-/luckyexcel-1.0.1.tgz"
+  resolved "https://registry.npmjs.org/luckyexcel/-/luckyexcel-1.0.1.tgz#55791f28bb5393e9dff8ba77c11f9c05f9ceb5ae"
   integrity sha512-hvbJmCXNp/vST/huA6sieDn32Ib8bd80L9aIu5ZGxniJvZle7VlpHZrl6weLGaEnX99+t7cPAoYGqrqbfZp/AQ==
   dependencies:
     jszip "^3.5.0"

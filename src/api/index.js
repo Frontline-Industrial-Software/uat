@@ -3,9 +3,8 @@ import pako from 'pako'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { ElMessage } from 'element-plus'
-
 const instance = axios.create({
-  baseURL: 'https://wss.frontline-optimizer.com/',
+  baseURL: import.meta.env.VITE_PUBLIC_URL,
 })
 // 请求拦截器
 instance.interceptors.request.use(
@@ -98,7 +97,7 @@ export default {
             showClose: true,
             message: str,
             type: 'warning',
-            duration: 20000,
+            duration: 0,
             dangerouslyUseHTMLString: true,
             customClass: 'warn',
             center: true,

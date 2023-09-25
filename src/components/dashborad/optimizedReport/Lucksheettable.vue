@@ -179,6 +179,7 @@ const downloadExcel = () => {
 }
 .content {
   margin-top: 20px;
+  position: relative;
 }
 #luckysheet {
   height: 95vh;

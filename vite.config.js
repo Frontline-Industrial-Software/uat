@@ -1,9 +1,9 @@
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
-import AutoImport from "unplugin-auto-import/vite";
-import Components from "unplugin-vue-components/vite";
-import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
-import path from "path"
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import path from 'path'
 // https://vitejs.dev/config/yar
 export default defineConfig({
   plugins: [
@@ -17,7 +17,9 @@ export default defineConfig({
     // Enabled by default
   ],
   base: './',
-
+  server: {
+    port: 4200, // 将其更改为不同的端口号
+  },
   // serve:{
   //   server: {
   //     proxy: {
@@ -33,7 +35,7 @@ export default defineConfig({
   // },
   resolve: {
     alias: {
-      '@': path.resolve('./src') // @代替src
-    }
-  }
-});
+      '@': path.resolve('./src'), // @代替src
+    },
+  },
+})

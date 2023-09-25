@@ -13,7 +13,7 @@ export const useCounterStore = defineStore(
     // 默认设置
     let setting = reactive({
       IgnoreProject: 'false',
-      Rate: 0.025,
+      Rate: 0.1,
       Ratio: [0.5, 2],
       Steps: 20,
     })
@@ -60,7 +60,7 @@ export const useCounterStore = defineStore(
     }
     // 建立websocket连接
     async function connectWebsocket() {
-      const URL = 'wss://wss.frontline-optimizer.com/websockets'
+      const URL = import.meta.env.VITE_PUBLIC_WSS_URL
       const socket = new WebSocket(
         // 此处填写你要连接的ws地址
         URL,

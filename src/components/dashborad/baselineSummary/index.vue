@@ -537,6 +537,8 @@ watch(
       SummaryData.changedCriticalPath = '-'
       SummaryData.TotalResources = '-'
       SummaryData.group = ''
+      SummaryData.maxResourceUnit = '-'
+      SummaryData.BasemaxResourceUnit = '-'
     }
   },
   { deep: true },
@@ -782,8 +784,9 @@ function updateData(data) {
   SummaryData.changedCriticalPath = Math.ceil(data.newCriticalTasksLen)
   SummaryData.TotalResources = Math.ceil(data.totalResourceCount)
   SummaryData.maxResourceUnit = Math.ceil(data.maxResourceUnitAgg)
-  SummaryData.BasemaxResourceUnit =
-    store.dataArray.baseline.all[0].result.maxResourceUnitAgg
+  SummaryData.BasemaxResourceUnit = Math.ceil(
+    store.dataArray.baseline.all[0].result.maxResourceUnitAgg,
+  )
 }
 
 // 按钮点击跳转

@@ -521,7 +521,14 @@ function initChart() {
       },
       minInterval: 24 * 3600, // 设置最小刻度间隔为1小时 (3600秒 * 1000毫秒)
       // maxInterval: 24 * 3600 * 1000 * 360 , // 设置最大刻度间隔为1天 (24小时 * 3600秒 * 1000毫秒)
-
+      max: function (value) {
+        // console.log(value);
+        return value.max + (value.max - value.min) * 0.01
+      },
+      min: function (value) {
+        // console.log(value);
+        return value.min - (value.max - value.min) * 0.01
+      },
       axisLabel: {
         // width: '80',
         // overflow: 'breakAll',

@@ -20,7 +20,99 @@
         </div>
       </h2>
       <div class="maintop">
-        <div class="item">
+        <!-- <div class="right-items">
+          <div class="right-item">
+            <div class="title">{{ $t('baselineSummary.Tsidebar[0]') }}</div>
+            <div class="content">
+              <div class="t-content">
+                <span class="f"> days</span>
+                <span
+                  style="color: #10be00; font-weight: 700"
+                  v-if="
+                   1
+                  "
+                >
+                  <img
+                    style="vertical-align: bottom"
+                    src="/arrow-up-thin.svg"
+                    alt=""
+                    srcset=""
+                  />
+                  <span>
+                 
+                  </span>
+                </span>
+                <span style="color: #be0010; font-weight: 700" v-else>
+                  <img
+                    style="vertical-align: bottom"
+                    src="/arrow-down-thin.svg"
+                    alt=""
+                    srcset=""
+                  />
+               
+                </span>
+              </div>
+              <div class="b-content">
+                <div style="border-right: 1px solid #f0f1f3" class="bottom">
+                  <span> days</span>
+                  <div>Actual</div>
+                </div>
+                <div class="bottom">
+                  <span> days</span>
+                  <div>Plan</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div> -->
+        <Card
+          :title="$t('optimizedSummary.header[0]')"
+          :height="180"
+          :precent="
+            toPercent(
+              store.SummaryData.baseDuration -
+                store.SummaryData.changedDuration,
+              store.SummaryData.baseDuration,
+            )
+          "
+          :body="[
+            store.SummaryData.changedDuration + 'days',
+            store.SummaryData.baseDuration + 'days',
+            // store.SummaryData.changedDuration + 'days',
+          ]"
+        />
+        <Card
+          :title="$t('optimizedSummary.header[1]')"
+          :height="180"
+          :precent="
+            toPercent(
+              store.SummaryData.TotalTasks - store.SummaryData.changgedTasks,
+              store.SummaryData.TotalTasks,
+            )
+          "
+          :body="[
+            store.SummaryData.changgedTasks,
+            store.SummaryData.TotalTasks,
+            // store.SummaryData.changedDuration + 'days',
+          ]"
+        />
+        <Card
+          :title="$t('optimizedSummary.header[2]')"
+          :height="180"
+          :precent="
+            toPercent(
+              criticalTask.length,
+              store.selectedData.baselineTasks.length,
+            )
+          "
+          :body="[
+            criticalTask.length,
+            store.selectedData.baselineTasks.length,
+            // store.SummaryData.changedDuration + 'days',
+          ]"
+        />
+        <!-- <div class="item">
           <div class="title">{{ $t('optimizedSummary.header[0]') }}</div>
           <div class="center">
             <span class="changed">
@@ -68,7 +160,7 @@
               )
             }}
           </div>
-        </div>
+        </div> -->
       </div>
       <div class="mainEchar1">
         <div class="Echar1top">
@@ -158,6 +250,7 @@ import {
   computed,
   onActivated,
 } from 'vue'
+import Card from '@/components/card.vue'
 import * as echarts from 'echarts'
 import { useRouter } from 'vue-router'
 import ecStat from 'echarts-stat'
@@ -789,6 +882,72 @@ watch(typeActive, () => {
 </script>
 
 <style lang="scss" scoped>
+.right-items {
+  display: flex;
+  justify-content: space-evenly;
+  align-content: space-around;
+  flex-wrap: wrap;
+  height: 50%;
+  width: 100%;
+  .t-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .f {
+      color: #545454;
+      font-weight: 700;
+      font-size: 32px;
+    }
+  }
+  .b-content {
+    border-top: 1px solid #f0f1f3;
+    padding: 0px 16px;
+  }
+  .bottom {
+    color: #b5b5b5;
+    // text-align: center;
+    > span {
+      font-weight: 700;
+      font-size: 20px;
+    }
+  }
+  .title {
+    width: 100%;
+    height: 15%;
+    color: #b5b5b5;
+    padding: 8px 16px;
+  }
+  .content {
+    display: flex;
+
+    flex-wrap: wrap;
+    width: 100%;
+    height: 80%;
+    > div {
+      width: 100%;
+      height: 50%;
+      display: flex;
+      flex-wrap: wrap;
+      > div {
+        // background-color: #40a795;
+        width: 50%;
+        height: 100%;
+        text-align: center;
+      }
+    }
+  }
+  .right-item {
+    box-shadow: 1px 1px 20px rgba(205.06, 205.06, 205.06, 0.25);
+    margin: 4px;
+    box-sizing: border-box;
+    background-color: #fff;
+    border-radius: 16px;
+    width: 48%;
+    height: 49%;
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
 .types {
   display: flex;
   width: 1100px;
@@ -842,14 +1001,15 @@ h2 {
   }
 }
 .maintop {
-  border-radius: 16px;
-  width: 1200px;
-  height: 148px;
-  margin-bottom: 30px;
-  border-radius: 15px;
+  // border-radius: 16px;
+  // width: 1200px;
+  // height: 180px;
+  margin-bottom: 24px;
+  // padding-bottom: 30px;
+  // border-radius: 15px;
   display: flex;
   justify-content: space-between;
-  background-color: #fff;
+  // background-color: #fff;
   .item {
     width: 290px;
     height: 148px;

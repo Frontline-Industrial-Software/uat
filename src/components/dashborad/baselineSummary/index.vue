@@ -1,3 +1,443 @@
+<template>
+  <div>
+    <h2>
+      {{ $t('baselineSummary.title[0]') }}
+      <div class="step">
+        <span>
+          {{ store.setting.Steps }} {{ $t('baselineSummary.title[1]') }}
+        </span>
+      </div>
+      <div class="step">
+        <span>
+          {{
+            `${store.setting.Ratio[0] * 100}% - ${
+              store.setting.Ratio[1] * 100
+            }% ${$t('baselineSummary.title[2]')}`
+          }}
+        </span>
+      </div>
+    </h2>
+    <div class="main">
+      <div class="left">
+        <div class="lefttop">
+          <div>{{ $t('baselineSummary.chartName[0]') }}</div>
+        </div>
+        <Echarts style="width: 720px; height: 500px" id="myEcharts"></Echarts>
+      </div>
+      <div class="right">
+        <div class="righttop">
+          <div>
+            <Card
+              :title="$t('baselineSummary.Tsidebar[0]')"
+              :height="150"
+              :precent="
+                toPercent(
+                  SummaryData.baseDuration - SummaryData.changedDuration,
+                  SummaryData.baseDuration,
+                )
+              "
+              :body="[
+                SummaryData.changedDuration + 'days',
+                SummaryData.baseDuration + 'days',
+                // store.SummaryData.changedDuration + 'days',
+              ]"
+            />
+            <Card
+              :title="$t('baselineSummary.Tsidebar[1]')"
+              :height="150"
+              :precent="
+                toPercent(
+                  SummaryData.TotalTasks - SummaryData.changgedTasks,
+                  SummaryData.TotalTasks,
+                )
+              "
+              :body="[
+                SummaryData.changgedTasks,
+                SummaryData.TotalTasks,
+                // store.SummaryData.changedDuration + 'days',
+              ]"
+            />
+          </div>
+          <div>
+            <Card
+              :title="$t('baselineSummary.Tsidebar[2]')"
+              :height="150"
+              :precent="
+                toPercent(SummaryData.baseCriticalPath, SummaryData.TotalTasks)
+              "
+              :body="[
+                SummaryData.baseCriticalPath,
+                SummaryData.TotalTasks,
+                // store.SummaryData.changedDuration + 'days',
+              ]"
+            />
+            <Card
+              :title="$t('baselineSummary.Tsidebar[3]')"
+              :height="150"
+              :precent="
+                toPercent(
+                  SummaryData.TotalResources,
+                  SummaryData.TotalResources,
+                )
+              "
+              :body="[
+                SummaryData.TotalResources,
+                SummaryData.TotalResources,
+                // store.SummaryData.changedDuration + 'days',
+              ]"
+            />
+          </div>
+        </div>
+
+        <!-- <div class="right-items">
+          <div class="right-item">
+            <div class="title">{{ $t('baselineSummary.Tsidebar[0]') }}</div>
+            <div class="content">
+              <div class="t-content">
+                <span class="f">{{ SummaryData.changedDuration }} days</span>
+                <span
+                  style="color: #10be00; font-weight: 700"
+                  v-if="
+                    !toPercent(
+                      SummaryData.changedDuration - SummaryData.baseDuration,
+                      SummaryData.baseDuration,
+                    ).indexOf('-')
+                  "
+                >
+                  <img
+                    style="vertical-align: bottom"
+                    src="/arrow-up-thin.svg"
+                    alt=""
+                    srcset=""
+                  />
+                  <span>
+                    {{
+                      toPercent(
+                        SummaryData.changedDuration - SummaryData.baseDuration,
+                        SummaryData.baseDuration,
+                      )
+                    }}
+                  </span>
+                </span>
+                <span style="color: #be0010; font-weight: 700" v-else>
+                  <img
+                    style="vertical-align: bottom"
+                    src="/arrow-down-thin.svg"
+                    alt=""
+                    srcset=""
+                  />
+                  {{
+                    toPercent(
+                      SummaryData.changedDuration - SummaryData.baseDuration,
+                      SummaryData.baseDuration,
+                    )
+                  }}
+                </span>
+              </div>
+              <div class="b-content">
+                <div style="border-right: 1px solid #f0f1f3" class="bottom">
+                  <span>{{ SummaryData.baseDuration }} days</span>
+                  <div>Actual</div>
+                </div>
+                <div class="bottom">
+                  <span>{{ SummaryData.baseDuration }} days</span>
+                  <div>Plan</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="right-item">
+            <div class="title">{{ $t('baselineSummary.Tsidebar[1]') }}</div>
+            <div class="content">
+              <div class="t-content">
+                <span class="f">{{ SummaryData.changgedTasks }}</span>
+                <span
+                  style="color: #10be00; font-weight: 700"
+                  v-if="
+                    toPercent(
+                      SummaryData.TotalTasks - SummaryData.changgedTasks,
+                      SummaryData.TotalTasks,
+                    ).indexOf('-')
+                  "
+                >
+                  <img
+                    style="vertical-align: bottom"
+                    src="/arrow-up-thin.svg"
+                    alt=""
+                    srcset=""
+                  />
+                  <span>
+                    {{
+                      toPercent(
+                        SummaryData.TotalTasks - SummaryData.changgedTasks,
+                        SummaryData.TotalTasks,
+                      )
+                    }}
+                  </span>
+                </span>
+                <span style="color: #be0010; font-weight: 700" v-else>
+                  <img
+                    style="vertical-align: bottom"
+                    src="/arrow-down-thin.svg"
+                    alt=""
+                    srcset=""
+                  />
+                  {{
+                    toPercent(
+                      SummaryData.changgedTasks - SummaryData.TotalTasks,
+                      SummaryData.TotalTasks,
+                    )
+                  }}
+                </span>
+              </div>
+              <div class="b-content">
+                <div style="border-right: 1px solid #f0f1f3" class="bottom">
+                  <span>{{ SummaryData.TotalTasks }} </span>
+                  <div>Actual</div>
+                </div>
+                <div class="bottom">
+                  <span>{{ SummaryData.TotalTasks }} </span>
+                  <div>Plan</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="right-item">
+            <div class="title"> {{ $t('baselineSummary.Tsidebar[2]') }}</div>
+            <div class="content">
+              <div class="t-content">
+                <span class="f">{{ SummaryData.baseCriticalPath }}</span>
+                <span
+                  style="color: #10be00; font-weight: 700"
+                  v-if="
+                    toPercent(
+                    SummaryData.TotalTasks - SummaryData.baseCriticalPath,
+                    SummaryData.TotalTasks,
+                    ).indexOf('-')
+                  "
+                >
+                  <img
+                    style="vertical-align: bottom"
+                    src="/arrow-up-thin.svg"
+                    alt=""
+                    srcset=""
+                  />
+                  <span>
+                    {{
+                      toPercent(
+                        SummaryData.TotalTasks - SummaryData.changgedTasks,
+                        SummaryData.TotalTasks,
+                      )
+                    }}
+                  </span>
+                </span>
+                <span style="color: #be0010; font-weight: 700" v-else>
+                  <img
+                    style="vertical-align: bottom"
+                    src="/arrow-down-thin.svg"
+                    alt=""
+                    srcset=""
+                  />
+                  {{
+                    toPercent(
+                      SummaryData.changgedTasks - SummaryData.TotalTasks,
+                      SummaryData.TotalTasks,
+                    )
+                  }}
+                </span>
+              </div>
+              <div class="b-content">
+                <div style="border-right: 1px solid #f0f1f3" class="bottom">
+                  <span>{{ SummaryData.TotalTasks }} </span>
+                  <div>Actual</div>
+                </div>
+                <div class="bottom">
+                  <span>{{ SummaryData.TotalTasks }} </span>
+                  <div>Plan</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="right-item">
+            <div class="title"> {{ $t('baselineSummary.Tsidebar[3]') }}</div>
+            <div class="content">
+              <div class="t-content">
+                <span class="f">{{ SummaryData.TotalResources }}</span>
+                <span
+                  style="color: #10be00; font-weight: 700"
+                  v-if="
+                    toPercent(
+                    SummaryData.TotalTasks - SummaryData.baseCriticalPath,
+                    SummaryData.TotalTasks,
+                    ).indexOf('-')
+                  "
+                >
+                  <img
+                    style="vertical-align: bottom"
+                    src="/arrow-up-thin.svg"
+                    alt=""
+                    srcset=""
+                  />
+                  <span>
+                    {{
+                      toPercent(
+                        SummaryData.TotalTasks - SummaryData.changgedTasks,
+                        SummaryData.TotalTasks,
+                      )
+                    }}
+                  </span>
+                </span>
+                <span style="color: #be0010; font-weight: 700" v-else>
+                  <img
+                    style="vertical-align: bottom"
+                    src="/arrow-down-thin.svg"
+                    alt=""
+                    srcset=""
+                  />
+                  {{
+                    toPercent(
+                      SummaryData.changgedTasks - SummaryData.TotalTasks,
+                      SummaryData.TotalTasks,
+                    )
+                  }}
+                </span>
+              </div>
+              <div class="b-content">
+                <div style="border-right: 1px solid #f0f1f3" class="bottom">
+                  <span>{{ SummaryData.TotalTasks }} </span>
+                  <div>Actual</div>
+                </div>
+                <div class="bottom">
+                  <span>{{ SummaryData.TotalTasks }} </span>
+                  <div>Plan</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> -->
+        <!-- <div class="righttop">
+          <div>
+            {{ $t('baselineSummary.Tsidebar[0]') }}
+
+            {{
+              toPercent(
+                SummaryData.changedDuration - SummaryData.baseDuration,
+                SummaryData.baseDuration,
+              ).replace(/-/g, '')
+            }}
+            <span class="arrow">
+              <svg
+                v-if="
+                  toPercent(
+                    SummaryData.changedDuration - SummaryData.baseDuration,
+                    SummaryData.baseDuration,
+                  ).indexOf('-')
+                "
+                t="1693809587609"
+                class="icon"
+                viewBox="0 0 1024 1024"
+                version="1.1"
+                xmlns="http://www.w3.org/2000/svg"
+                p-id="1982"
+                width="200"
+                height="200"
+              >
+                <path
+                  d="M529.143158 7.436293l347.212925 397.874796a21.748783 21.748783 0 0 1-16.375554 36.077393h-170.66398a21.492915 21.492915 0 0 0-21.492915 18.678367c-12.793402 92.624229-90.065549 502.268955-455.95684 562.909679a21.748783 21.748783 0 0 1-17.654895-38.380206c62.687669-49.126663 144.56544-144.309572 167.593564-313.694212a1571.285609 1571.285609 0 0 0 12.793402-207.508977 22.260519 22.260519 0 0 0-21.748783-22.260519H165.298811a21.748783 21.748783 0 0 1-16.375554-36.077393L496.39205 7.436293a21.748783 21.748783 0 0 1 32.751108 0z"
+                  p-id="1983"
+                  fill="red"
+                ></path>
+              </svg>
+              <svg
+                v-else
+                t="1693810752990"
+                class="icon"
+                viewBox="0 0 1024 1024"
+                version="1.1"
+                xmlns="http://www.w3.org/2000/svg"
+                p-id="1307"
+                width="200"
+                height="200"
+              >
+                <path
+                  d="M507.649902 1015.81158L160.153845 618.161453a21.75049 21.75049 0 0 1 16.376839-36.080224h187.565987a22.262266 22.262266 0 0 0 21.750489-22.262266 1630.774944 1630.774944 0 0 0-12.538517-207.525259C350.022825 182.895773 268.138628 87.705395 204.934264 38.574877A21.75049 21.75049 0 0 1 223.102321 0.447548C588.766434 60.837143 665.532868 470.514012 679.350826 563.401397a21.238713 21.238713 0 0 0 21.494601 18.679832h170.677372a21.75049 21.75049 0 0 1 16.120951 36.080224L540.403581 1015.81158a21.75049 21.75049 0 0 1-32.753679 0z"
+                  p-id="1308"
+                  fill="#40aa97"
+                ></path>
+              </svg>
+            </span>
+          </div>
+          <h1>
+            {{ SummaryData.changedDuration }}/
+            <span>{{ SummaryData.baseDuration }}</span>
+            days
+          </h1>
+          <div>{{ $t('baselineSummary.Tsidebar[1]') }}</div>
+          <h1>
+            {{ SummaryData.changgedTasks }}/
+            <span>{{ SummaryData.TotalTasks }}</span>
+          </h1>
+          <div>
+            {{ $t('baselineSummary.Tsidebar[2]') }}
+
+            {{
+              toPercent(SummaryData.baseCriticalPath, SummaryData.TotalTasks)
+            }}
+          </div>
+          <h1>
+            {{ SummaryData.baseCriticalPath }}/
+            <span>{{ SummaryData.TotalTasks }}</span>
+          </h1>
+          <div>{{ $t('baselineSummary.Tsidebar[3]') }}</div>
+          <h1>{{ SummaryData.TotalResources }}</h1>
+        </div> -->
+        <div class="rightbutton">
+          <h1>{{ $t('baselineSummary.Bsidebar[0]') }}</h1>
+          <!-- <div>
+            {{ $t('baselineSummary.Bsidebar[1]') }}
+          </div> -->
+          <el-radio-group v-model="radio" class="radiobox">
+            <el-radio
+              @click="
+                () => {
+                  sideClcik(1)
+                }
+              "
+              :label="0"
+            >
+              {{ $t('types.typeShow[1]') }}
+              <span>{{ $t('types.msg[0]') }}</span>
+            </el-radio>
+            <el-radio @click="sideClcik(2)" :label="1">
+              {{ $t('types.typeShow[2]') }}
+              <span>{{ $t('types.msg[1]') }}</span>
+            </el-radio>
+            <el-radio :label="2" @click="sideClcik(3)">
+              {{ $t('types.typeShow[3]') }}
+              <span>{{ $t('types.msg[2]') }}</span>
+            </el-radio>
+            <el-radio :label="3" @click="sideClcik(4)">
+              {{ $t('types.typeShow[4]') }}
+              <span>{{ $t('types.msg[3]') }}</span>
+            </el-radio>
+            <el-radio :label="3" @click="sideClcik(4)">
+              Constraint Compliance
+              <span>Satisfies all constraints</span>
+            </el-radio>
+          </el-radio-group>
+        </div>
+        <v-btn
+          :disabled="!store.end.data"
+          @click="nextOptimized"
+          class="btn"
+          icon="el-icon-delete"
+        >
+          {{ $t('next') }}
+        </v-btn>
+      </div>
+    </div>
+  </div>
+</template>
 <script setup>
 import {
   ref,
@@ -19,6 +459,7 @@ import api from '../../../api/index.js'
 import { onBeforeRouteLeave } from 'vue-router'
 import { arrowMiddleware } from 'element-plus'
 import { toRaw } from '@vue/reactivity'
+import Card from '@/components/card.vue'
 /* -----------------------------------变量--------------------------------------- */
 let activeIndex = ref('Balanced1')
 
@@ -388,152 +829,7 @@ function sideClcik(num) {
   updateData(DefaultData.value[num][0].value[2].result)
 }
 </script>
-<template>
-  <div>
-    <h2>
-      {{ $t('baselineSummary.title[0]') }}
-      <div class="step">
-        <span>
-          {{ store.setting.Steps }} {{ $t('baselineSummary.title[1]') }}
-        </span>
-      </div>
-      <div class="step">
-        <span>
-          {{
-            `${store.setting.Ratio[0] * 100}% - ${
-              store.setting.Ratio[1] * 100
-            }% ${$t('baselineSummary.title[2]')}`
-          }}
-        </span>
-      </div>
-    </h2>
-    <div class="main">
-      <div class="left">
-        <div class="lefttop">
-          <div>{{ $t('baselineSummary.chartName[0]') }}</div>
-        </div>
-        <Echarts style="width: 720px; height: 500px" id="myEcharts"></Echarts>
-      </div>
-      <div class="right">
-        <div class="righttop">
-          <div>
-            {{ $t('baselineSummary.Tsidebar[0]') }}
 
-            {{
-              toPercent(
-                SummaryData.changedDuration - SummaryData.baseDuration,
-                SummaryData.baseDuration,
-              ).replace(/-/g, '')
-            }}
-            <span class="arrow">
-              <svg
-                v-if="
-                  toPercent(
-                    SummaryData.changedDuration - SummaryData.baseDuration,
-                    SummaryData.baseDuration,
-                  ).indexOf('-')
-                "
-                t="1693809587609"
-                class="icon"
-                viewBox="0 0 1024 1024"
-                version="1.1"
-                xmlns="http://www.w3.org/2000/svg"
-                p-id="1982"
-                width="200"
-                height="200"
-              >
-                <path
-                  d="M529.143158 7.436293l347.212925 397.874796a21.748783 21.748783 0 0 1-16.375554 36.077393h-170.66398a21.492915 21.492915 0 0 0-21.492915 18.678367c-12.793402 92.624229-90.065549 502.268955-455.95684 562.909679a21.748783 21.748783 0 0 1-17.654895-38.380206c62.687669-49.126663 144.56544-144.309572 167.593564-313.694212a1571.285609 1571.285609 0 0 0 12.793402-207.508977 22.260519 22.260519 0 0 0-21.748783-22.260519H165.298811a21.748783 21.748783 0 0 1-16.375554-36.077393L496.39205 7.436293a21.748783 21.748783 0 0 1 32.751108 0z"
-                  p-id="1983"
-                  fill="red"
-                ></path>
-              </svg>
-              <svg
-                v-else
-                t="1693810752990"
-                class="icon"
-                viewBox="0 0 1024 1024"
-                version="1.1"
-                xmlns="http://www.w3.org/2000/svg"
-                p-id="1307"
-                width="200"
-                height="200"
-              >
-                <path
-                  d="M507.649902 1015.81158L160.153845 618.161453a21.75049 21.75049 0 0 1 16.376839-36.080224h187.565987a22.262266 22.262266 0 0 0 21.750489-22.262266 1630.774944 1630.774944 0 0 0-12.538517-207.525259C350.022825 182.895773 268.138628 87.705395 204.934264 38.574877A21.75049 21.75049 0 0 1 223.102321 0.447548C588.766434 60.837143 665.532868 470.514012 679.350826 563.401397a21.238713 21.238713 0 0 0 21.494601 18.679832h170.677372a21.75049 21.75049 0 0 1 16.120951 36.080224L540.403581 1015.81158a21.75049 21.75049 0 0 1-32.753679 0z"
-                  p-id="1308"
-                  fill="#40aa97"
-                ></path>
-              </svg>
-            </span>
-          </div>
-          <h1>
-            {{ SummaryData.changedDuration }}/
-            <span>{{ SummaryData.baseDuration }}</span>
-            days
-          </h1>
-          <div>{{ $t('baselineSummary.Tsidebar[1]') }}</div>
-          <h1>
-            {{ SummaryData.changgedTasks }}/
-            <span>{{ SummaryData.TotalTasks }}</span>
-          </h1>
-          <div>
-            {{ $t('baselineSummary.Tsidebar[2]') }}
-
-            {{
-              toPercent(SummaryData.baseCriticalPath, SummaryData.TotalTasks)
-            }}
-          </div>
-          <h1>
-            {{ SummaryData.baseCriticalPath }}/
-            <span>{{ SummaryData.TotalTasks }}</span>
-          </h1>
-          <div>{{ $t('baselineSummary.Tsidebar[3]') }}</div>
-          <h1>{{ SummaryData.TotalResources }}</h1>
-        </div>
-        <div class="rightbutton">
-          <h1>{{ $t('baselineSummary.Bsidebar[0]') }}</h1>
-          <div>
-            {{ $t('baselineSummary.Bsidebar[1]') }}
-          </div>
-          <el-radio-group v-model="radio" class="radiobox">
-            <el-radio
-              @click="
-                () => {
-                  sideClcik(1)
-                }
-              "
-              :label="0"
-            >
-              {{ $t('types.typeShow[1]') }}
-              <span>{{ $t('types.msg[0]') }}</span>
-            </el-radio>
-            <el-radio @click="sideClcik(2)" :label="1">
-              {{ $t('types.typeShow[2]') }}
-              <span>{{ $t('types.msg[1]') }}</span>
-            </el-radio>
-            <el-radio :label="2" @click="sideClcik(3)">
-              {{ $t('types.typeShow[3]') }}
-              <span>{{ $t('types.msg[2]') }}</span>
-            </el-radio>
-            <el-radio :label="3" @click="sideClcik(4)">
-              {{ $t('types.typeShow[4]') }}
-              <span>{{ $t('types.msg[3]') }}</span>
-            </el-radio>
-          </el-radio-group>
-        </div>
-        <v-btn
-          :disabled="!store.end.data"
-          @click="nextOptimized"
-          class="btn"
-          icon="el-icon-delete"
-        >
-          {{ $t('next') }}
-        </v-btn>
-      </div>
-    </div>
-  </div>
-</template>
 <style lang="scss" scoped>
 .arrow {
   > svg {
@@ -564,7 +860,7 @@ h2 {
 .main {
   display: flex;
   justify-content: space-between;
-  width: 1200px;
+  width: 1400px;
   .left {
     width: 768px;
     height: 630px;
@@ -594,30 +890,19 @@ h2 {
     }
   }
   .right {
-    width: 420px;
-
+    // width: 420px;
+    padding-left: 16px;
     .righttop {
-      height: 280px;
-      margin-bottom: 11px;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 15px;
-      div {
-        font-size: 15px;
-        font-weight: 600;
-      }
-      h1 {
-        font-size: 28px;
-        span {
-          font-size: 20px;
-          color: #828787;
-        }
+      display: flex;
+      flex-wrap: wrap;
+      > div {
+        display: flex;
       }
     }
     .rightbutton {
-      height: 270px;
+      height: 240px;
       padding: 20px;
-      margin-bottom: 20px;
+      margin: 16px 0px;
       background-color: #fff;
       border-radius: 15px;
       div {

@@ -1,7 +1,13 @@
 <template>
   <div class="optimize-content">
     <!-- 头部 -->
-
+    <div class="content-box">
+      <h2>Online Excel</h2>
+      <div class="sheet">
+        <Lucksheettable :url="excelUrl"></Lucksheettable>
+      </div>
+      <!-- <div class="md" ref="mDom"></div> -->
+    </div>
     <div class="content-row">
       <h2>
         {{ $t('optimizedReport.title[0]') }}&nbsp;
@@ -92,13 +98,7 @@
         </div>
       </div>
     </div>
-    <div class="content-box">
-      <h2>Online Excel</h2>
-      <div class="sheet">
-        <Lucksheettable :url="excelUrl"></Lucksheettable>
-      </div>
-      <!-- <div class="md" ref="mDom"></div> -->
-    </div>
+
     <!-- 尾部 -->
     <div class="content-row">
       <el-button @click="back" class="back">

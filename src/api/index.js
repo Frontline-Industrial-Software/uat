@@ -237,6 +237,7 @@ export default {
     } else {
       res.data = this.arrayBufferToJson(res.data)
     }
+
     return res
   },
   /**

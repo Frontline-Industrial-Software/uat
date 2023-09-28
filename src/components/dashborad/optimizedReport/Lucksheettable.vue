@@ -44,6 +44,7 @@ onMounted(async () => {
           data: exportJson.sheets,
           title: exportJson.info.name,
           userInfo: exportJson.info.name.creator,
+          editable: false,
         })
       },
     )

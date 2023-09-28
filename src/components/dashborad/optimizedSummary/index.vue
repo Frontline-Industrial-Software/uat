@@ -71,26 +71,38 @@
           :height="180"
           :precent="
             toPercent(
-              store.SummaryData.baseDuration -
-                store.SummaryData.changedDuration,
+              store.SummaryData.changedDuration -
+                store.SummaryData.baseDuration,
               store.SummaryData.baseDuration,
             )
           "
+          :isPositive="true"
           :body="[
-            store.SummaryData.changedDuration + 'days',
-            store.SummaryData.baseDuration + 'days',
+            store.SummaryData.changedDuration + ' ' + 'days',
+            store.SummaryData.baseDuration + ' ' + 'days',
             // store.SummaryData.changedDuration + 'days',
           ]"
         />
         <Card
-          :title="$t('optimizedSummary.header[1]')"
+          :title="$t('baselineSummary.Tsidebar[1]')"
           :height="180"
           :precent="
             toPercent(
-              store.SummaryData.TotalTasks - store.SummaryData.changgedTasks,
-              store.SummaryData.TotalTasks,
+              store.SummaryData.maxResourceUnit -
+                store.SummaryData.BasemaxResourceUnit,
+              store.SummaryData.BasemaxResourceUnit,
             )
           "
+          :isPositive="false"
+          :body="[
+            store.SummaryData.maxResourceUnit,
+            store.SummaryData.BasemaxResourceUnit,
+            // store.SummaryData.changedDuration + 'days',
+          ]"
+        />
+        <Card
+          :title="$t('optimizedSummary.header[2]')"
+          :height="180"
           :body="[
             store.SummaryData.changgedTasks,
             store.SummaryData.TotalTasks,
@@ -98,14 +110,8 @@
           ]"
         />
         <Card
-          :title="$t('optimizedSummary.header[2]')"
+          :title="$t('optimizedSummary.header[3]')"
           :height="180"
-          :precent="
-            toPercent(
-              criticalTask.length,
-              store.selectedData.baselineTasks.length,
-            )
-          "
           :body="[
             criticalTask.length,
             store.selectedData.baselineTasks.length,

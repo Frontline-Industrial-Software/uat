@@ -32,13 +32,14 @@
               :height="150"
               :precent="
                 toPercent(
-                  SummaryData.baseDuration - SummaryData.changedDuration,
+                  SummaryData.changedDuration - SummaryData.baseDuration,
                   SummaryData.baseDuration,
                 )
               "
+              :isPositive="true"
               :body="[
-                SummaryData.changedDuration + 'days',
-                SummaryData.baseDuration + 'days',
+                SummaryData.changedDuration + ' ' + 'days',
+                SummaryData.baseDuration + ' ' + 'days',
                 // store.SummaryData.changedDuration + 'days',
               ]"
             />
@@ -47,13 +48,14 @@
               :height="150"
               :precent="
                 toPercent(
-                  SummaryData.TotalTasks - SummaryData.changgedTasks,
-                  SummaryData.TotalTasks,
+                  SummaryData.maxResourceUnit - SummaryData.BasemaxResourceUnit,
+                  SummaryData.BasemaxResourceUnit,
                 )
               "
+              :isPositive="false"
               :body="[
-                SummaryData.changgedTasks,
-                SummaryData.TotalTasks,
+                SummaryData.maxResourceUnit,
+                SummaryData.BasemaxResourceUnit,
                 // store.SummaryData.changedDuration + 'days',
               ]"
             />
@@ -62,11 +64,8 @@
             <Card
               :title="$t('baselineSummary.Tsidebar[2]')"
               :height="150"
-              :precent="
-                toPercent(SummaryData.baseCriticalPath, SummaryData.TotalTasks)
-              "
               :body="[
-                SummaryData.baseCriticalPath,
+                SummaryData.changgedTasks,
                 SummaryData.TotalTasks,
                 // store.SummaryData.changedDuration + 'days',
               ]"
@@ -74,15 +73,9 @@
             <Card
               :title="$t('baselineSummary.Tsidebar[3]')"
               :height="150"
-              :precent="
-                toPercent(
-                  SummaryData.TotalResources,
-                  SummaryData.TotalResources,
-                )
-              "
               :body="[
-                SummaryData.TotalResources,
-                SummaryData.TotalResources,
+                SummaryData.baseCriticalPath,
+                SummaryData.TotalTasks,
                 // store.SummaryData.changedDuration + 'days',
               ]"
             />
@@ -788,6 +781,9 @@ function updateData(data) {
   SummaryData.baseCriticalPath = Math.ceil(data.baselineCriticalTasksLen)
   SummaryData.changedCriticalPath = Math.ceil(data.newCriticalTasksLen)
   SummaryData.TotalResources = Math.ceil(data.totalResourceCount)
+  SummaryData.maxResourceUnit = Math.ceil(data.maxResourceUnitAgg)
+  SummaryData.BasemaxResourceUnit =
+    store.dataArray.baseline.all[0].result.maxResourceUnitAgg
 }
 
 // 按钮点击跳转

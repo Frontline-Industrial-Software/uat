@@ -8,8 +8,11 @@
             {{ props.body && props.body.length > 0 ? props.body[0] : null }}
           </span>
           <span
+            v-if="
+              props.precent &&
+              props.precent.indexOf('-') !== -1 * props.isPositive
+            "
             style="color: #10be00; font-weight: 700"
-            v-if="props.precent && props.precent.indexOf('-')"
           >
             <img
               style="vertical-align: bottom"
@@ -17,16 +20,19 @@
               alt=""
               srcset=""
             />
-            <span style="">{{ props.precent }}</span>
+            <span>{{ props.precent }}</span>
           </span>
-          <span style="color: #be0010; font-weight: 700" v-else>
+          <span
+            v-else-if="props.precent"
+            style="color: #be0010; font-weight: 700"
+          >
             <img
               style="vertical-align: bottom"
               src="/arrow-down-thin.svg"
               alt=""
               srcset=""
             />
-            <span style="">{{ props.precent }}</span>
+            <span>{{ props.precent }}</span>
           </span>
         </div>
         <div class="b-content">
@@ -49,7 +55,7 @@
 </template>
 
 <script setup>
-const props = defineProps(['title', 'body', 'precent', 'height'])
+const props = defineProps(['title', 'body', 'precent', 'height', 'isPositive'])
 </script>
 
 <style lang="scss" scoped>
@@ -61,7 +67,8 @@ const props = defineProps(['title', 'body', 'precent', 'height'])
   width: 100%;
   .t-content {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-left: 16px;
     align-items: center;
     .f {
       color: #545454;

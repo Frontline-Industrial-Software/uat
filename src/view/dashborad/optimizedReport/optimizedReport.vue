@@ -162,10 +162,10 @@ import {
 } from 'vue'
 import { toRaw } from '@vue/reactivity'
 import { data } from '@/utils/constants' //数据要删
-import { useCounterStore } from '../../../store'
+import { useCounterStore } from '@/store'
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
 import { useRouter } from 'vue-router'
-import api from '../../../api/index.js'
+import api from '@/api/index.js'
 import Lucksheettable from './Lucksheettable.vue'
 
 /* -------------------------------------------------------------------------- */
@@ -232,7 +232,7 @@ function exportProjectReport() {
   }_FrontlineExport.${store.file.name.split('.')[1]}`
   api.getProjectReport(Url, store.truefile)
 }
-let excelUrl = ref('')
+let excelUrl = ref({})
 async function getexcelUrl() {
   if (store.SummaryData.group == 'baseline') {
     store.SummaryData.group = 'Balanced'

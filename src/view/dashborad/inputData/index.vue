@@ -198,12 +198,12 @@
 </template>
 
 <script setup>
-import { useCounterStore } from '../../../store'
+import { useCounterStore } from '@/store'
 import { reactive, ref, onMounted, onActivated } from 'vue'
 import Upload from './upload.vue'
 import Luckysheet from './luckysheet.vue'
 import ConstraintsUpload from './constraintsUpload.vue'
-import api from '../../../api/index.js'
+import api from '@/api/index.js'
 import { useRouter } from 'vue-router'
 let dialogTableVisible = ref(false)
 const router = useRouter()

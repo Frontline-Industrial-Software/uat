@@ -19,16 +19,16 @@
   </el-upload>
 </template>
 <script setup>
-import { Delete, Edit, Search, Share, Upload } from "@element-plus/icons-vue";
-import { useCounterStore } from "../../../store";
-const store = useCounterStore();
-import { ref } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
-import api from "../../../api/index.js";
+import { Delete, Edit, Search, Share, Upload } from '@element-plus/icons-vue'
+import { useCounterStore } from '@/store'
+const store = useCounterStore()
+import { ref } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import api from '@/api/index.js'
 
 const beforeUpload = async (files) => {
-  let a = await api.sendConstraintsFile(files, store.file.name);
-  store.ConstraintsFile = a;
-  return false;
-};
+  let a = await api.sendConstraintsFile(files, store.file.name)
+  store.ConstraintsFile = a
+  return false
+}
 </script>

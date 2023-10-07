@@ -108,8 +108,13 @@ export const useCounterStore = defineStore(
       // 发送
 
       socket.onmessage = function (e) {
-        let data = JSON.parse(JSON.parse(e?.data))
-        // console.log(data);
+        let data
+        try {
+          data = JSON.parse(JSON.parse(e?.data))
+        } catch (error) {
+          console.log('Begin')
+          return
+        }
         switch (data?.result?.group) {
           case 'baseline':
             if (dataArray.baseline.all.length === 0) {

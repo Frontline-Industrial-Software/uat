@@ -256,16 +256,16 @@ import {
   computed,
   onActivated,
 } from 'vue'
-import Card from '@/components/card.vue'
+import Card from '@/components/card/index.vue'
 import * as echarts from 'echarts'
 import { useRouter } from 'vue-router'
 import ecStat from 'echarts-stat'
-import { useCounterStore } from '../../../store'
+import { useCounterStore } from '@/store'
 const store = useCounterStore()
 const router = useRouter()
-import api from '../../../api/index.js'
+import api from '@/api/index.js'
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
-import Dialog from '../../dialog/dialog.vue'
+import Dialog from '@/components/dialog/dialog.vue'
 
 // 弹出框
 let dialogVisible = ref(false)

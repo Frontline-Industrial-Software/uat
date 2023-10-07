@@ -30,7 +30,7 @@ import { ref, onMounted, watch } from 'vue'
 import { exportExcel, exportExcelfile } from '@/utils/exportSheet'
 import { isFunction } from '@/utils/is'
 import LuckyExcel from 'luckyexcel'
-import api from '../../../api/index.js'
+import api from '@/api/index.js'
 const props = defineProps({
   open: Boolean,
   url: Object,

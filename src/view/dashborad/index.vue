@@ -14,8 +14,8 @@
 
 <script setup>
 import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router'
-import Header from '../header/index.vue'
-import Navigate from '../navigate/index.vue'
+import Header from '@/components/header/index.vue'
+import Navigate from '@/components/navigate/index.vue'
 </script>
 
 <style lang="scss" scoped>

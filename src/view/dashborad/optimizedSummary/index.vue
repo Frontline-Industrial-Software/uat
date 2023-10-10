@@ -194,7 +194,7 @@
         <div id="main"></div>
         <div
           ref="main"
-          style="width: 1150px; height: 610px"
+          style="width: 1350px; height: 610px"
           id="myEcharts"
         ></div>
       </div>
@@ -227,15 +227,15 @@
         </div>
         <div
           ref="main01"
-          style="width: 1150px; height: 610px"
+          style="width: 1350px; height: 610px"
           id="myEcharts01"
         ></div>
       </div>
       <div class="button">
-        <el-button @click="back" class="btnback">BACK</el-button>
-        <el-button @click="nextReport" class="btngo">
+        <v-btn @click="back" class="btnback">BACK</v-btn>
+        <v-btn @click="nextReport" class="btngo">
           {{ $t('optimizedSummary.btn[1]') }}
-        </el-button>
+        </v-btn>
       </div>
     </div>
   </div>
@@ -987,7 +987,7 @@ watch(typeActive, () => {
 }
 .box {
   margin: 0 auto;
-  width: 1200px;
+  width: 1400px;
 }
 h2 {
   width: 1200px;
@@ -1052,7 +1052,7 @@ h2 {
   }
 }
 .mainEchar1 {
-  width: 1200px;
+  width: 1400px;
   border-radius: 16px;
   height: 750px;
   margin-bottom: 20px;
@@ -1097,7 +1097,7 @@ h2 {
   }
 }
 .mainEchar2 {
-  width: 1200px;
+  width: 1400px;
   border-radius: 16px;
   min-height: 800px;
   margin-bottom: 20px;
@@ -1177,7 +1177,7 @@ h2 {
   }
 }
 .button {
-  width: 1200px;
+  width: 1400px;
   height: 44px;
   display: flex;
   justify-content: space-between;
@@ -1202,7 +1202,6 @@ h2 {
     box-shadow: 1px 2px 2px #cfeae5;
     border-radius: 8px;
     color: #fff;
-    line-height: 44px;
     font-size: 1rem;
   }
 }

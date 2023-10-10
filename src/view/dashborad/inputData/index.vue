@@ -288,7 +288,7 @@ async function downloadTemplate() {
   }
 }
 .container {
-  width: 1200px;
+  width: 1400px;
   background: rgb(255, 255, 255);
   padding: 1px 20px 20px;
   border-radius: 16px;

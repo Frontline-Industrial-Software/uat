@@ -118,10 +118,11 @@
           </el-radio-group>
         </div>
         <v-btn
+          style="outline:none;!important"
           :disabled="!store.end.data"
           @click="nextOptimized"
           class="btn"
-          icon="el-icon-delete"
+          color="rgb(64, 170, 151)"
         >
           {{ $t('next') }}
         </v-btn>

@@ -1,13 +1,6 @@
 <template>
   <div class="optimize-content">
     <!-- 头部 -->
-    <div class="content-box">
-      <h2>Online Excel</h2>
-      <div class="sheet">
-        <Lucksheettable :url="excelUrl"></Lucksheettable>
-      </div>
-      <!-- <div class="md" ref="mDom"></div> -->
-    </div>
     <div class="content-row">
       <h2>
         {{ $t('optimizedReport.title[0]') }}&nbsp;
@@ -31,7 +24,7 @@
           </small>
         </div>
       </h2>
-      <el-button
+      <v-btn
         @click="
           () => {
             dialog = true
@@ -40,8 +33,16 @@
         class="row-btn"
       >
         {{ $t('optimizedReport.btn[1]') }}
-      </el-button>
+      </v-btn>
     </div>
+    <div class="content-box">
+      <h3>Online Excel</h3>
+      <div class="sheet">
+        <Lucksheettable :url="excelUrl"></Lucksheettable>
+      </div>
+      <!-- <div class="md" ref="mDom"></div> -->
+    </div>
+
     <!-- 内容区 -->
     <div class="content-box">
       <!-- Changed Tasks -->
@@ -101,10 +102,10 @@
 
     <!-- 尾部 -->
     <div class="content-row">
-      <el-button @click="back" class="back">
+      <v-btn @click="back" class="back">
         {{ $t('optimizedReport.btn[0]') }}
-      </el-button>
-      <el-button
+      </v-btn>
+      <v-btn
         @click="
           () => {
             dialog = true
@@ -113,7 +114,7 @@
         class="report"
       >
         {{ $t('optimizedReport.btn[1]') }}
-      </el-button>
+      </v-btn>
     </div>
     <!-- exportReport -->
     <!-- 弹出确认框 -->
@@ -372,7 +373,7 @@ let TaskResource = computed(() => {
 //表格
 const tableOptions = reactive({
   data: changedTask,
-  colWidths: [100, 245, 250, 150, 170, 170],
+  colWidths: [100, 245, 250, 250, 250, 250],
   colHeaders: [
     'Critical',
     'Code',
@@ -421,7 +422,7 @@ const tableOptions3 = reactive({
 }
 .optimize-content {
   margin-top: 20px;
-  width: 1200px;
+  width: 1400px;
   max-width: 100%;
   border-radius: 6px;
   .content-row {
@@ -468,7 +469,7 @@ const tableOptions3 = reactive({
       text-transform: uppercase !important;
       font-size: 1rem !important;
       font-family: 'Inter', sans-serif !important;
-      line-height: 1.75;
+
       letter-spacing: 0.02857em;
       padding: 10px 20px !important;
       &:hover {
@@ -491,7 +492,6 @@ const tableOptions3 = reactive({
       text-transform: uppercase !important;
       font-size: 1rem !important;
       font-family: 'Inter', sans-serif !important;
-      line-height: 1.75;
       letter-spacing: 0.02857em;
       padding: 10px 20px !important;
       &:hover {
@@ -512,7 +512,6 @@ const tableOptions3 = reactive({
       text-transform: uppercase !important;
       font-size: 1rem !important;
       font-family: 'Inter', sans-serif !important;
-      line-height: 1.75;
       letter-spacing: 0.02857em;
       padding: 10px 20px !important;
       &:hover {

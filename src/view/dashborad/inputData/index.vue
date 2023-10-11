@@ -201,22 +201,31 @@
 import { useCounterStore } from '@/store'
 import { reactive, ref, onMounted, onActivated } from 'vue'
 import Upload from './upload.vue'
+import LogRocket from 'logrocket'
 import Luckysheet from './luckysheet.vue'
 import ConstraintsUpload from './constraintsUpload.vue'
 import api from '@/api/index.js'
+import { Amplify, Auth } from 'aws-amplify'
 import { useRouter } from 'vue-router'
+
 let dialogTableVisible = ref(false)
 const router = useRouter()
 const store = useCounterStore()
 const sheet = ref(null)
-async function openSheet() {
-  if (!store.file.name) {
-    return
+onMounted(async () => {
+  const userInfo = await Auth.currentAuthenticatedUser()
+  await LogRocket.identify(userInfo.attributes.sub, {
+    email: userInfo.attributes.email,
+  })
+}),
+  async function openSheet() {
+    if (!store.file.name) {
+      return
+    }
+    dialogTableVisible.value = true
+    await getTemplateUrl()
+    sheet.value.start()
   }
-  dialogTableVisible.value = true
-  await getTemplateUrl()
-  sheet.value.start()
-}
 function closeSheet() {
   dialogTableVisible.value = false
 }
@@ -242,7 +251,10 @@ async function uploadDemo() {
       store.file.size = files.size
       let a = await api.sendFile(files)
       store.file.name = a.data.mapping[files.name]
-      store.originalDurationDays = a.data.originalDurationDaysWithCalendar
+      store.originalplan.originalDurationDays =
+        a.data.originalDurationDaysWithCalendar
+      store.originalplan.newCriticalTasksLen = a.data.newCriticalTasksLen
+      store.originalplan.maxResourceUnitAgg = a.data.maxResourceUnitAgg
     })
 }
 let TemplateUrl = ref('')

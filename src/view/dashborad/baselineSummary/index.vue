@@ -430,7 +430,7 @@ function initChart() {
   if (chart == null) {
     chart = echarts.init(document.getElementById('myEcharts'), 'purple-passion')
   }
-  echarts.registerTransform(ecStat.transform.clustering)
+  // echarts.registerTransform(ecStat.transform.clustering)
 
   // 图表点击事件获取值
   chart.on('click', function (param) {
@@ -470,6 +470,7 @@ function initChart() {
 
 // 更新图表
 function renderChart() {
+  // console.log('reset');
   chart.setOption(option.value)
 }
 /* -------------------------------------------------------------------------- */
@@ -480,7 +481,9 @@ function updateData(data) {
   // 持续时间
   SummaryData.baseDuration = Math.ceil(data.baselineDurationDaysWithCalendar)
   SummaryData.changedDuration = Math.ceil(data.projectDurationDaysWithCalendar)
-  SummaryData.planDurationDays = store.originalDurationDays
+  SummaryData.planDurationDays = Math.ceil(
+    store.originalplan.originalDurationDays,
+  )
   SummaryData.changgedTasks = Math.ceil(data.changedTasksLen)
   SummaryData.TotalTasks = Math.ceil(data.baselineTasksLen)
   SummaryData.baseCriticalPath = Math.ceil(data.baselineCriticalTasksLen)
@@ -488,7 +491,7 @@ function updateData(data) {
   SummaryData.TotalResources = Math.ceil(data.totalResourceCount)
   SummaryData.maxResourceUnit = Math.ceil(data.maxResourceUnitAgg)
   SummaryData.BasemaxResourceUnit = Math.ceil(
-    store.dataArray.baseline.all[0].result.maxResourceUnitAgg,
+    store.originalplan.maxResourceUnitAgg,
   )
 }
 

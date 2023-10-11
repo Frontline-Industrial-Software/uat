@@ -18,7 +18,11 @@ export const useCounterStore = defineStore(
       Steps: 20,
     })
     // 原始计划时间
-    let originalDurationDays = ref('-')
+    let originalplan = reactive({
+      originalDurationDays: '',
+      maxResourceUnitAgg: '',
+      newCriticalTasksLen: '',
+    })
     let email = ref('')
     // 是否结束
     let end = reactive({ data: false })
@@ -212,7 +216,7 @@ export const useCounterStore = defineStore(
       selectChange,
       newUpload,
       email,
-      originalDurationDays,
+      originalplan,
     }
   },
   {},

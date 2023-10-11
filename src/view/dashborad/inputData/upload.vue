@@ -26,6 +26,7 @@ const store = useCounterStore()
 import { ref, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/api/index.js'
+import LogRocket from 'logrocket'
 function sanitizeFileName(fileName) {
   // 找到最后一个小数点的位置
   const lastDotIndex = fileName.lastIndexOf('.')
@@ -51,17 +52,14 @@ function sanitizeFileName(fileName) {
 let checkData = ref()
 setTimeout(async () => {
   const userInfo = await Auth.currentAuthenticatedUser()
+  LogRocket.identify(userInfo.attributes.sub, {
+    email: userInfo.attributes.email,
+  })
   let bol = await api.checkUser(userInfo.attributes.email)
   checkData.value = bol
 }, 0)
 
-// let checkData=ref(bol)
-// console.log(checkData.value);
 async function check() {
-  // const userInfo = await Auth.currentAuthenticatedUser();
-  // if (userInfo.attributes.email) {
-  //  let bol=await api.checkUser(userInfo.attributes.email)
-
   if (checkData.value.auth) {
   } else {
     ElMessage.error(`${checkData.value.message} only use demo`)
@@ -84,7 +82,10 @@ const beforeUpload = async (file) => {
     store.newUpload = true
   }
   // clear()
-  store.originalDurationDays = a.data.originalDurationDaysWithCalendar
+  store.originalplan.originalDurationDays =
+    a.data.originalDurationDaysWithCalendar
+  store.originalplan.newCriticalTasksLen = a.data.newCriticalTasksLen
+  store.originalplan.maxResourceUnitAgg = a.data.maxResourceUnitAgg
   return false
 }
 </script>

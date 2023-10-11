@@ -40,7 +40,7 @@
               :body="[
                 SummaryData.changedDuration + ' ' + 'days',
                 SummaryData.baseDuration + ' ' + 'days',
-                // store.SummaryData.changedDuration + 'days',
+                SummaryData.planDurationDays + ' ' + 'days',
               ]"
             />
             <Card
@@ -171,6 +171,7 @@ let SummaryData = reactive({
   changedCriticalPath: '-',
   TotalResources: '-',
   group: '',
+  planDurationDays: '-',
 })
 
 // 右侧单选框
@@ -238,6 +239,7 @@ watch(
       SummaryData.group = ''
       SummaryData.maxResourceUnit = '-'
       SummaryData.BasemaxResourceUnit = '-'
+      SummaryData.planDurationDays = '-'
     }
   },
   { deep: true },
@@ -475,8 +477,10 @@ function renderChart() {
 // 右侧数据更新
 function updateData(data) {
   SummaryData.group = data.group
+  // 持续时间
   SummaryData.baseDuration = Math.ceil(data.baselineDurationDaysWithCalendar)
-  SummaryData.changedDuration = Math.ceil(data.projectDurationDays)
+  SummaryData.changedDuration = Math.ceil(data.projectDurationDaysWithCalendar)
+  SummaryData.planDurationDays = store.originalDurationDays
   SummaryData.changgedTasks = Math.ceil(data.changedTasksLen)
   SummaryData.TotalTasks = Math.ceil(data.baselineTasksLen)
   SummaryData.baseCriticalPath = Math.ceil(data.baselineCriticalTasksLen)

@@ -44,7 +44,13 @@
           </div>
           <div class="bottom">
             <span>
-              {{ props.body && props.body.length > 0 ? props.body[1] : null }}
+              {{
+                props.body && props.body.length > 0
+                  ? props.body[2] !== null && props.body[2] !== undefined
+                    ? props.body[2]
+                    : props.body[1]
+                  : null
+              }}
             </span>
             <div>Plan</div>
           </div>

@@ -242,6 +242,7 @@ async function uploadDemo() {
       store.file.size = files.size
       let a = await api.sendFile(files)
       store.file.name = a.data.mapping[files.name]
+      store.originalDurationDays = a.data.originalDurationDaysWithCalendar
     })
 }
 let TemplateUrl = ref('')

@@ -17,6 +17,8 @@ export const useCounterStore = defineStore(
       Ratio: [0.5, 2],
       Steps: 20,
     })
+    // 原始计划时间
+    let originalDurationDays = ref('-')
     let email = ref('')
     // 是否结束
     let end = reactive({ data: false })
@@ -210,6 +212,7 @@ export const useCounterStore = defineStore(
       selectChange,
       newUpload,
       email,
+      originalDurationDays,
     }
   },
   {},

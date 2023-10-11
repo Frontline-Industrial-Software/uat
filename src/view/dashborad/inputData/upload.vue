@@ -84,8 +84,7 @@ const beforeUpload = async (file) => {
     store.newUpload = true
   }
   // clear()
-
-  console.log(store.file.name, modifiedFile)
+  store.originalDurationDays = a.data.originalDurationDaysWithCalendar
   return false
 }
 </script>

@@ -80,7 +80,7 @@
           :body="[
             store.SummaryData.changedDuration + ' ' + 'days',
             store.SummaryData.baseDuration + ' ' + 'days',
-            // store.SummaryData.changedDuration + 'days',
+            store.SummaryData.planDurationDays + ' ' + 'days',
           ]"
         />
         <Card

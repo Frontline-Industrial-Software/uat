@@ -74,8 +74,9 @@
               :title="$t('baselineSummary.Tsidebar[3]')"
               :height="150"
               :body="[
-                SummaryData.baseCriticalPath,
                 SummaryData.changedCriticalPath,
+                SummaryData.changedCriticalPath,
+                SummaryData.baseCriticalPath,
                 // store.SummaryData.changedDuration + 'days',
               ]"
             />
@@ -477,6 +478,7 @@ function renderChart() {
 
 // 右侧数据更新
 function updateData(data) {
+  console.log(data)
   SummaryData.group = data.group
   // 持续时间
   SummaryData.baseDuration = Math.ceil(data.baselineDurationDaysWithCalendar)

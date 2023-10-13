@@ -113,8 +113,9 @@
           :title="$t('optimizedSummary.header[3]')"
           :height="180"
           :body="[
-            criticalTask.length,
-            store.selectedData.baselineTasks.length,
+            store.SummaryData.changedCriticalPath,
+            store.SummaryData.changedCriticalPath,
+            store.SummaryData.baseCriticalPath,
             // store.SummaryData.changedDuration + 'days',
           ]"
         />

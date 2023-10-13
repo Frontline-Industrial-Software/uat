@@ -16,39 +16,41 @@ const props = defineProps({
 // console.log(props.url);
 // const emit = defineEmits(['close'])
 onMounted(async () => {
-  setTimeout(() => {
+  setTimeout(async () => {
     const value = props.url
 
     const name = 'test'
     isMaskShow.value = true
-    LuckyExcel.transformExcelToLuckyByUrl(
-      value,
-      name,
-      (exportJson, luckysheetfile) => {
-        if (exportJson.sheets == null || exportJson.sheets.length == 0) {
-          alert(
-            'Failed to read the content of the excel file, currently does not support xls files!',
-          )
-          return
-        }
-        // console.log('exportJson', exportJson)
-        jsonData.value = exportJson
+    setTimeout(() => {
+      LuckyExcel.transformExcelToLuckyByUrl(
+        value,
+        name,
+        (exportJson, luckysheetfile) => {
+          if (exportJson.sheets == null || exportJson.sheets.length == 0) {
+            alert(
+              'Failed to read the content of the excel file, currently does not support xls files!',
+            )
+            return
+          }
+          // console.log('exportJson', exportJson)
+          jsonData.value = exportJson
 
-        isMaskShow.value = false
+          isMaskShow.value = false
 
-        isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy()
+          isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy()
 
-        window.luckysheet.create({
-          container: 'luckysheet', //luckysheet is the container id
-          showinfobar: false,
-          data: exportJson.sheets,
-          title: exportJson.info.name,
-          userInfo: exportJson.info.name.creator,
-          editable: false,
-        })
-      },
-    )
-  }, 1000)
+          window.luckysheet.create({
+            container: 'luckysheet', //luckysheet is the container id
+            showinfobar: false,
+            data: exportJson.sheets,
+            title: exportJson.info.name,
+            userInfo: exportJson.info.name.creator,
+            editable: false,
+          })
+        },
+      )
+    }, 0)
+  }, 1500)
 })
 const isMaskShow = ref(false)
 const selected = ref('')

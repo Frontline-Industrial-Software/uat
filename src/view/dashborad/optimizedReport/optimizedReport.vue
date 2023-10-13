@@ -324,13 +324,15 @@ let changedTask = store.selectedData.tasks
     }
   })
 let allResources = store.selectedData.newResources
-  .filter((e) => {
-    // 在这里添加过滤条件
-    // 例如：筛选出 type 为 'someType' 的元素
-    return e.ID != '-65535'
-  })
+  // .filter((e) => {
+  //   console.log(e);
+  //   // 在这里添加过滤条件
+  //   if (e.ID == '-65535') {
+  //     console.log(e);
+  //   }
+  //   return e.ID != '-65535'
+  // })
   .map((e) => {
-    // console.log(e);
     return {
       ID: e.id,
       Code: e.ID,

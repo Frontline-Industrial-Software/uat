@@ -75,7 +75,7 @@
               :height="150"
               :body="[
                 SummaryData.baseCriticalPath,
-                SummaryData.TotalTasks,
+                SummaryData.changedCriticalPath,
                 // store.SummaryData.changedDuration + 'days',
               ]"
             />

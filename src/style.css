@@ -8,6 +8,7 @@ html {
   font-family: 'Inter', sans-serif !important;
   color: #545454;
   overflow: auto !important;
+  height: 100vh;
 }
 .warn {
   min-width: 45vw !important;

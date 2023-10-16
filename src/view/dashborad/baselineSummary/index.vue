@@ -478,7 +478,6 @@ function renderChart() {
 
 // 右侧数据更新
 function updateData(data) {
-  console.log(data)
   SummaryData.group = data.group
   // 持续时间
   SummaryData.baseDuration = Math.ceil(data.baselineDurationDaysWithCalendar)

@@ -111,6 +111,7 @@
               </v-radio-group>
             </v-sheet>
           </v-col>
+
           <v-col>
             <v-sheet class="pa-2 ma-2">
               {{ $t('inputData.threeData[5]') }}
@@ -123,6 +124,69 @@
                   variant="outlined"
                 ></v-text-field>
               </p>
+            </v-sheet>
+          </v-col>
+        </v-row>
+        <v-row no-gutters>
+          <v-col></v-col>
+          <v-col>
+            <v-sheet class="pa-2 ma-2">
+              <el-tooltip class="box-item" effect="dark" placement="top-end">
+                <template #content>
+                  False:
+                  <br />
+                  Tasks without explicitly assigned resources will not receive
+                  any default resource allocation.
+                  <br />
+                  Any:
+                  <br />
+                  Any task without a specified resource will automatically be
+                  allocated a default Labor resource at a rate of 1.0 unit per
+                  hour.
+                  <br />
+                  All:
+                  <br />
+                  Default Labor resources are assigned to tasks only when there
+                  are no existing resource or role definitions or when no tasks
+                  are explicitly assigned to resources or roles.
+                </template>
+                <label>Consider Default Resource Type</label>
+              </el-tooltip>
+
+              <v-radio-group
+                :disabled="!store.file.name"
+                v-model="store.setting.considerDefaultResourceType"
+                inline
+              >
+                <v-radio label="All" value="all"></v-radio>
+                <v-radio label="Any" value="any"></v-radio>
+                <v-radio label="False" value="false"></v-radio>
+              </v-radio-group>
+            </v-sheet>
+          </v-col>
+          <v-col>
+            <v-sheet class="pa-2 ma-2">
+              <el-tooltip class="box-item" effect="dark" placement="top-end">
+                <template #content>
+                  Whether to consider shifting to adjust resource distribution
+                </template>
+                <label>Resource Constraint</label>
+              </el-tooltip>
+
+              <v-radio-group
+                :disabled="!store.file.name"
+                v-model="store.setting.resourceConstraint"
+                inline
+              >
+                <v-radio
+                  :label="$t('inputData.threeData[3]')"
+                  value="true"
+                ></v-radio>
+                <v-radio
+                  :label="$t('inputData.threeData[4]')"
+                  value="false"
+                ></v-radio>
+              </v-radio-group>
             </v-sheet>
           </v-col>
         </v-row>

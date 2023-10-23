@@ -13,6 +13,8 @@ export const useCounterStore = defineStore(
     // 默认设置
     let setting = reactive({
       IgnoreProject: 'false',
+      considerDefaultResourceType: 'false',
+      resourceConstraint: 'false',
       Rate: 0.1,
       Ratio: [0.5, 2],
       Steps: 20,
@@ -95,9 +97,10 @@ export const useCounterStore = defineStore(
             learningRate: setting.Rate,
             minDurationRatio: setting.Ratio[0],
             maxDurationRatio: setting.Ratio[1],
+            resourceConstraint: Boolean(setting.resourceConstraint),
+            considerDefaultResourceType: setting.considerDefaultResourceType,
           },
         }
-
         data = JSON.stringify(data)
         if (file.name) {
           socket.send(data)

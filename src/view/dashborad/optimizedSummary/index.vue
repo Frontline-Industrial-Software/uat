@@ -355,9 +355,9 @@ function baseItem(data) {
 }
 
 function initChart() {
-  // console.log(store.selectedData);
   let changedlineTasks = []
   // 基础任务
+  // console.log(store.selectedData);
   let baselineTasks = store.selectedData.baselineTasks.map(
     (baselineTask, idx) => {
       let newBaselineTask = store.selectedData.tasks.find(
@@ -366,10 +366,7 @@ function initChart() {
 
       newBaselineTask.old = baselineTask
       changedlineTasks.push(newBaselineTask)
-      // console.log(baselineTask,newBaselineTask);
-      // baselineTask.new=newBaselineTask
-      // baselineTask.old={...baselineTask}
-      idx = store.selectedData.baselineTasks.length - idx
+      idx = store.selectedData.baselineTasks.length - idx + 1.5
       return {
         name: baselineTask.name,
         value: [
@@ -400,7 +397,7 @@ function initChart() {
   // 优化任务
   changedlineTasks = changedlineTasks.map((changedlineTask, idx) => {
     // console.log(changedlineTask);
-    idx = changedlineTasks.length - idx + 0.2
+    idx = changedlineTasks.length - idx
 
     return {
       id: changedlineTask.id,
@@ -428,7 +425,8 @@ function initChart() {
       },
     }
   })
-  //表格1
+  //！甘特图
+
   let chart = myEcharts.init(
     document.getElementById('myEcharts'),
     'purple-passion',
@@ -439,7 +437,7 @@ function initChart() {
     dialogVisible.value = true
   })
   var option
-  //表格1
+  //！甘特图
   let renderItem = (params, api) => {
     let start = api.coord([api.value(1), api.value(0)])
     let end = api.coord([api.value(2), api.value(0)])
@@ -462,6 +460,12 @@ function initChart() {
       blurScope: 'coordinateSystem',
       emphasis: {},
     }
+  }
+  let isLabel
+  if (changedlineTasks.length < 30) {
+    isLabel = true
+  } else {
+    isLabel = false
   }
   option = {
     // useUTC:true,
@@ -558,6 +562,20 @@ function initChart() {
         encode: {
           x: [1, 2],
           y: 0,
+          labal: 11,
+        },
+        label: {
+          normal: {
+            show: isLabel, // 启用标签显示
+            color: 'black', // 标签的文本颜色
+            position: 'inside', // 标签的文本位置
+            formatter: function (params) {
+              // 自定义标签内容
+
+              return params.data.name
+            },
+            fontSize: 12,
+          },
         },
       },
       {
@@ -569,6 +587,19 @@ function initChart() {
         encode: {
           x: [1, 2],
           y: 0,
+        },
+        label: {
+          normal: {
+            show: isLabel, // 启用标签显示
+            color: 'black', // 标签的文本颜色
+            position: 'inside', // 标签的文本位置
+            formatter: function (params) {
+              // 自定义标签内容
+              // console.log(params);
+              return params.data.name
+            },
+            fontSize: 12,
+          },
         },
       },
     ],
@@ -657,7 +688,119 @@ function initChart() {
     },
   }
   option && chart.setOption(option)
+  chart.on('datazoom', function (param) {
+    if (!isLabel) {
+      if (param.batch[0].end - param.batch[0].start < 50) {
+        chart.setOption({
+          series: [
+            {
+              name: 'baseline',
+              type: 'custom',
+              data: baselineTasks,
+              large: true,
+              renderItem: renderItem,
+              encode: {
+                x: [1, 2],
+                y: 0,
+                labal: 11,
+              },
+              label: {
+                normal: {
+                  show: true, // 启用标签显示
+                  color: 'black', // 标签的文本颜色
+                  position: 'inside', // 标签的文本位置
+                  formatter: function (params) {
+                    // 自定义标签内容
 
+                    return params.data.name
+                  },
+                  fontSize: 12,
+                },
+              },
+            },
+            {
+              name: 'new',
+              type: 'custom',
+              data: changedlineTasks,
+              large: true,
+              renderItem: renderItem,
+              encode: {
+                x: [1, 2],
+                y: 0,
+              },
+              label: {
+                normal: {
+                  show: true, // 启用标签显示
+                  color: 'black', // 标签的文本颜色
+                  position: 'inside', // 标签的文本位置
+                  formatter: function (params) {
+                    // 自定义标签内容
+                    // console.log(params);
+                    return params.data.name
+                  },
+                  fontSize: 12,
+                },
+              },
+            },
+          ],
+        })
+      } else {
+        chart.setOption({
+          series: [
+            {
+              name: 'baseline',
+              type: 'custom',
+              data: baselineTasks,
+              large: true,
+              renderItem: renderItem,
+              encode: {
+                x: [1, 2],
+                y: 0,
+                labal: 11,
+              },
+              label: {
+                normal: {
+                  show: false, // 启用标签显示
+                  color: 'black', // 标签的文本颜色
+                  position: 'inside', // 标签的文本位置
+                  formatter: function (params) {
+                    // 自定义标签内容
+
+                    return params.data.name
+                  },
+                  fontSize: 12,
+                },
+              },
+            },
+            {
+              name: 'new',
+              type: 'custom',
+              data: changedlineTasks,
+              large: true,
+              renderItem: renderItem,
+              encode: {
+                x: [1, 2],
+                y: 0,
+              },
+              label: {
+                normal: {
+                  show: false, // 启用标签显示
+                  color: 'black', // 标签的文本颜色
+                  position: 'inside', // 标签的文本位置
+                  formatter: function (params) {
+                    // 自定义标签内容
+                    // console.log(params);
+                    return params.data.name
+                  },
+                  fontSize: 12,
+                },
+              },
+            },
+          ],
+        })
+      }
+    }
+  })
   chart.on('mousemove', function (param) {
     chart.dispatchAction({
       type: 'highlight',

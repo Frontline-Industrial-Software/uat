@@ -499,6 +499,10 @@ function updateData(data) {
 // 按钮点击跳转
 async function nextOptimized() {
   selectData.fileName = store.file.name
+  selectData.considerDefaultResourceType =
+    store.setting.considerDefaultResourceType
+  selectData.resourceConstraint = store.setting.resourceConstraint
+  // console.log(selectData);
   let data = await api.getOptimized({ ...selectData }, store.file.size)
   store.SummaryData = { ...SummaryData }
   store.selectedData = null

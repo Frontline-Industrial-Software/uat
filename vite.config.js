@@ -18,7 +18,7 @@ export default defineConfig({
   ],
   base: './',
   server: {
-    port: 4200, // 将其更改为不同的端口号
+    port: 4300, // 将其更改为不同的端口号
   },
   // serve:{
   //   server: {

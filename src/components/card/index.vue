@@ -26,7 +26,7 @@
             >
               <img
                 style="vertical-align: bottom"
-                src="/arrow-up-thin-redsvg"
+                src="/arrow-up-thin-red.svg"
                 alt=""
                 srcset=""
               />

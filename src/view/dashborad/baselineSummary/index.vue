@@ -52,7 +52,6 @@
                   SummaryData.BasemaxResourceUnit,
                 )
               "
-              :isPositive="false"
               :body="[
                 SummaryData.maxResourceUnit,
                 SummaryData.BasemaxResourceUnit,

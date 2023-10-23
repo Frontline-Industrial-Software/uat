@@ -7,32 +7,59 @@
           <span class="f">
             {{ props.body && props.body.length > 0 ? props.body[0] : null }}
           </span>
-          <span
-            v-if="
-              props.precent &&
-              props.precent.indexOf('-') !== -1 * props.isPositive
-            "
-            style="color: #10be00; font-weight: 700"
-          >
-            <img
-              style="vertical-align: bottom"
-              src="/arrow-up-thin.svg"
-              alt=""
-              srcset=""
-            />
-            <span>{{ props.precent }}</span>
+          <span v-if="props.isPositive">
+            <span
+              v-if="props.precent && props.precent.indexOf('-') !== -1"
+              style="color: #10be00; font-weight: 700"
+            >
+              <img
+                style="vertical-align: bottom"
+                src="/arrow-down-thin - green.svg"
+                alt=""
+                srcset=""
+              />
+              <span>{{ props.precent }}</span>
+            </span>
+            <span
+              v-else-if="props.precent"
+              style="color: #be0010; font-weight: 700"
+            >
+              <img
+                style="vertical-align: bottom"
+                src="/arrow-up-thin - red.svg"
+                alt=""
+                srcset=""
+              />
+
+              <span>{{ props.precent }}</span>
+            </span>
           </span>
-          <span
-            v-else-if="props.precent"
-            style="color: #be0010; font-weight: 700"
-          >
-            <img
-              style="vertical-align: bottom"
-              src="/arrow-down-thin.svg"
-              alt=""
-              srcset=""
-            />
-            <span>{{ props.precent }}</span>
+          <span v-else>
+            <span
+              v-if="props.precent && props.precent.indexOf('-') !== -1"
+              style="color: #be0010; font-weight: 700"
+            >
+              <img
+                style="vertical-align: bottom"
+                src="/arrow-down-thin.svg"
+                alt=""
+                srcset=""
+              />
+              <span>{{ props.precent }}</span>
+            </span>
+            <span
+              v-else-if="props.precent"
+              style="color: #10be00; font-weight: 700"
+            >
+              <img
+                style="vertical-align: bottom"
+                src="/arrow-up-thin.svg"
+                alt=""
+                srcset=""
+              />
+
+              <span>{{ props.precent }}</span>
+            </span>
           </span>
         </div>
         <div class="b-content">

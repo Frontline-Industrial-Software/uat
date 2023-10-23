@@ -14,7 +14,7 @@
             >
               <img
                 style="vertical-align: bottom"
-                src="/arrow-down-thin - green.svg"
+                src="/arrow-down-thin-green.svg"
                 alt=""
                 srcset=""
               />
@@ -26,7 +26,7 @@
             >
               <img
                 style="vertical-align: bottom"
-                src="/arrow-up-thin - red.svg"
+                src="/arrow-up-thin-redsvg"
                 alt=""
                 srcset=""
               />

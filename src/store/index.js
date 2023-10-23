@@ -12,9 +12,9 @@ export const useCounterStore = defineStore(
   () => {
     // 默认设置
     let setting = reactive({
-      IgnoreProject: 'false',
+      IgnoreProject: false,
       considerDefaultResourceType: 'false',
-      resourceConstraint: 'false',
+      resourceConstraint: false,
       Rate: 0.1,
       Ratio: [0.5, 2],
       Steps: 20,

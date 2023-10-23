@@ -102,11 +102,11 @@
               >
                 <v-radio
                   :label="$t('inputData.threeData[3]')"
-                  value="true"
+                  :value="true"
                 ></v-radio>
                 <v-radio
                   :label="$t('inputData.threeData[4]')"
-                  value="false"
+                  :value="false"
                 ></v-radio>
               </v-radio-group>
             </v-sheet>
@@ -180,11 +180,11 @@
               >
                 <v-radio
                   :label="$t('inputData.threeData[3]')"
-                  value="true"
+                  :value="true"
                 ></v-radio>
                 <v-radio
                   :label="$t('inputData.threeData[4]')"
-                  value="false"
+                  :value="false"
                 ></v-radio>
               </v-radio-group>
             </v-sheet>

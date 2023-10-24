@@ -43,11 +43,11 @@ export const useCounterStore = defineStore(
     // 任务数据
     let taskData = ref([])
     let dataArray = reactive({
-      baseline: { all: [], data: [] },
-      Balanced: { all: [], data: [] },
-      Fastest: { all: [], data: [] },
-      Minimum_Resources: { all: [], data: [] },
-      Levelled_Resources: { all: [], data: [] },
+      baseline: { all: [], data: [], span: [] },
+      Balanced: { all: [], data: [], span: [] },
+      Fastest: { all: [], data: [], span: [] },
+      Minimum_Resources: { all: [], data: [], span: [] },
+      Levelled_Resources: { all: [], data: [], span: [] },
     })
     let selectedData = ref(null)
     let selectChange = false
@@ -128,18 +128,35 @@ export const useCounterStore = defineStore(
           case 'baseline':
             if (dataArray.baseline.all.length === 0) {
               dataArray.baseline.all.push(data)
+              dataArray.baseline.span.push({
+                value: [
+                  data.result.projectDurationDaysWithCalendar,
+                  data.result.spanResourceUnitAgg,
+                  data,
+                ],
+                name: data.name + data.result.step,
+              })
               dataArray.baseline.data.push({
                 value: [
                   data.result.projectDurationDaysWithCalendar,
                   data.result.maxResourceUnitAgg,
                   data,
                 ],
+
                 name: data.name + data.result.step,
               })
             }
             break
           case 'Balanced':
             dataArray.Balanced.all.push(data)
+            dataArray.Balanced.span.push({
+              value: [
+                data.result.projectDurationDaysWithCalendar,
+                data.result.spanResourceUnitAgg,
+                data,
+              ],
+              name: data.name + data.result.step,
+            })
             dataArray.Balanced.data.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
@@ -151,6 +168,14 @@ export const useCounterStore = defineStore(
             break
           case 'Fastest':
             dataArray.Fastest.all.push(data)
+            dataArray.Fastest.span.push({
+              value: [
+                data.result.projectDurationDaysWithCalendar,
+                data.result.spanResourceUnitAgg,
+                data,
+              ],
+              name: data.name + data.result.step,
+            })
             dataArray.Fastest.data.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
@@ -163,6 +188,14 @@ export const useCounterStore = defineStore(
             break
           case 'Minimum_Resources':
             dataArray.Minimum_Resources.all.push(data)
+            dataArray.Minimum_Resources.span.push({
+              value: [
+                data.result.projectDurationDaysWithCalendar,
+                data.result.spanResourceUnitAgg,
+                data,
+              ],
+              name: data.name + data.result.step,
+            })
             dataArray.Minimum_Resources.data.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
@@ -175,6 +208,14 @@ export const useCounterStore = defineStore(
             break
           case 'Levelled_Resources':
             dataArray.Levelled_Resources.all.push(data)
+            dataArray.Levelled_Resources.span.push({
+              value: [
+                data.result.projectDurationDaysWithCalendar,
+                data.result.spanResourceUnitAgg,
+                data,
+              ],
+              name: data.name + data.result.step,
+            })
             dataArray.Levelled_Resources.data.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
@@ -194,7 +235,7 @@ export const useCounterStore = defineStore(
         //   data.result.group,
         //   data.result,
         // ]);
-
+        // console.log(dataArray);
         if (data.name && data.result?.group !== 'baseline') {
         } else if (dataArray.Levelled_Resources.all.length != 0) {
           end.data = true

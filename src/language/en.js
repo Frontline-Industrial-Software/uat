@@ -26,7 +26,7 @@ export default {
     threeData: [
       'Optimization Settings',
       'Customize your optimization results',
-      'Ignore Project Scheduled Dates',
+      'Ignore Actual Start / Actual Finish',
       'Yes',
       'No',
       'Learning Rate',

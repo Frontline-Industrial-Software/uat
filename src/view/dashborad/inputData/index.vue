@@ -153,7 +153,40 @@
                 <label>Consider Default Resource Type</label>
               </el-tooltip>
 
-              <v-radio-group
+              <el-select
+                v-model="store.setting.considerDefaultResourceType"
+                class="m-2"
+                placeholder="Select"
+                size="large"
+              >
+                <el-option label="All" value="all" />
+
+                <el-option label="Any" value="any" />
+                <el-option label="False" value="false" />
+              </el-select>
+              <!-- <el-tooltip class="box-item" effect="dark" placement="top-end">
+                <template #content>
+                  False:
+                  <br />
+                  Tasks without explicitly assigned resources will not receive
+                  any default resource allocation.
+                  <br />
+                  Any:
+                  <br />
+                  Any task without a specified resource will automatically be
+                  allocated a default Labor resource at a rate of 1.0 unit per
+                  hour.
+                  <br />
+                  All:
+                  <br />
+                  Default Labor resources are assigned to tasks only when there
+                  are no existing resource or role definitions or when no tasks
+                  are explicitly assigned to resources or roles.
+                </template>
+                <label>Consider Default Resource Type</label>
+              </el-tooltip> -->
+
+              <!-- <v-radio-group
                 :disabled="!store.file.name"
                 v-model="store.setting.considerDefaultResourceType"
                 inline
@@ -161,7 +194,7 @@
                 <v-radio label="All" value="all"></v-radio>
                 <v-radio label="Any" value="any"></v-radio>
                 <v-radio label="False" value="false"></v-radio>
-              </v-radio-group>
+              </v-radio-group> -->
             </v-sheet>
           </v-col>
           <v-col>
@@ -173,7 +206,7 @@
                 <label>Resource Constraint</label>
               </el-tooltip>
 
-              <v-radio-group
+              <!-- <v-radio-group
                 :disabled="!store.file.name"
                 v-model="store.setting.resourceConstraint"
                 inline
@@ -186,7 +219,17 @@
                   :label="$t('inputData.threeData[4]')"
                   :value="false"
                 ></v-radio>
-              </v-radio-group>
+              </v-radio-group>  -->
+              <!-- <label>Resource Constraint</label> -->
+              <el-select
+                v-model="store.setting.resourceConstraint"
+                class="m-3"
+                placeholder="Select"
+                size="large"
+              >
+                <el-option label="Adjust task duration" :value="true" />
+                <el-option label="Adjust task-task lag" :value="false" />
+              </el-select>
             </v-sheet>
           </v-col>
         </v-row>
@@ -389,4 +432,7 @@ label {
   -webkit-box-align: center;
   align-items: center;
 }
+// .m-3{
+//   width: 200px;
+// }
 </style>

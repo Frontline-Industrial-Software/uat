@@ -441,7 +441,7 @@ function initChart() {
   let renderItem = (params, api) => {
     let start = api.coord([api.value(1), api.value(0)])
     let end = api.coord([api.value(2), api.value(0)])
-    let height = api.size([0, 1])[1] * 0.5
+    let height = api.size([0, 1])[1] * 0.8
     let shape = echarts.graphic.clipRectByRect(
       {
         x: start[0],
@@ -690,7 +690,10 @@ function initChart() {
   option && chart.setOption(option)
   chart.on('datazoom', function (param) {
     if (!isLabel) {
-      if (param.batch[0].end - param.batch[0].start < 50) {
+      if (
+        param.batch[0].end - param.batch[0].start <
+        (30 / changedlineTasks.length) * 100
+      ) {
         chart.setOption({
           series: [
             {

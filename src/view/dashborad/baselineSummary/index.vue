@@ -117,10 +117,10 @@
               {{ $t('types.typeShow[4]') }}
               <span>{{ $t('types.msg[3]') }}</span>
             </el-radio>
-            <el-radio :label="3" @click="sideClcik(4)">
+            <!-- <el-radio :label="3" @click="sideClcik(4)">
               Constraint Compliance
               <span>Satisfies all constraints</span>
-            </el-radio>
+            </el-radio> -->
           </el-radio-group>
         </div>
         <v-btn
@@ -517,7 +517,16 @@ var spanOption = computed(() => {
         saveAsImage: { show: true },
       },
     },
-
+    dataZoom: [
+      {
+        type: 'inside', // 启用内部缩放（框选缩放）
+        xAxisIndex: [0], // 将内部缩放应用于 x 轴
+      },
+      {
+        type: 'inside', // 启用内部缩放（框选缩放）
+        yAxisIndex: [0], // 将内部缩放应用于 x 轴
+      },
+    ],
     grid: {
       // left: 120
       top: 100,
@@ -629,6 +638,10 @@ function initChart() {
 
   // 图表点击事件获取值
   chart.on('click', function (param) {
+    spanChart.dispatchAction({
+      type: 'select',
+      name: param.name,
+    })
     chart.dispatchAction({
       type: 'select',
       name: param.name,
@@ -662,6 +675,11 @@ function initChart() {
     updateData(datas)
   })
   spanChart.on('click', function (param) {
+    spanChart.dispatchAction({
+      type: 'select',
+      name: param.name,
+    })
+
     chart.dispatchAction({
       type: 'select',
       name: param.name,
@@ -803,15 +821,13 @@ h2 {
   display: flex;
   justify-content: space-between;
   width: 768 * 2px;
-  flex-wrap: wrap;
   .chartContent {
-    display: flex;
+    // display: flex;
     // width: 1600px;
   }
   .left {
-    width: 768 * 2 px;
-    display: block;
-    height: 630px;
+    width: 768 px;
+    height: 630 * 2 px;
     padding: 20px;
     background-color: #fff;
     border-radius: 15px;
@@ -848,7 +864,7 @@ h2 {
       }
     }
     .rightbutton {
-      height: 240px;
+      height: 220px;
       padding: 20px;
       margin: 16px 0px;
       background-color: #fff;

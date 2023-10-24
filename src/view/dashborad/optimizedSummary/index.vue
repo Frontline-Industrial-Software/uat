@@ -366,7 +366,7 @@ function initChart() {
 
       newBaselineTask.old = baselineTask
       changedlineTasks.push(newBaselineTask)
-      idx = store.selectedData.baselineTasks.length - idx + 1
+      idx = store.selectedData.baselineTasks.length - idx + 1.5
       return {
         name: baselineTask.name,
         value: [

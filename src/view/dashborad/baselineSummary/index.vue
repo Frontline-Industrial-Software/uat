@@ -22,8 +22,13 @@
         <div class="lefttop">
           <div>{{ $t('baselineSummary.chartName[0]') }}</div>
         </div>
-        <Echarts style="width: 720px; height: 500px" id="myEcharts"></Echarts>
-        <!-- <Echarts style="width: 720px; height: 500px" id="twoEcharts"></Echarts> -->
+        <div class="chartContent">
+          <Echarts style="width: 720px; height: 500px" id="myEcharts"></Echarts>
+          <Echarts
+            style="width: 720px; height: 500px"
+            id="twoEcharts"
+          ></Echarts>
+        </div>
       </div>
       <div class="right">
         <div class="righttop">
@@ -204,12 +209,12 @@ const router = useRouter()
 
 watch(activeIndex, () => {
   chart.setOption(option.value)
-  // spanChart.setOption(spanOption.value)
+  spanChart.setOption(spanOption.value)
 })
 
 watch(store.dataArray, () => {
   chart.setOption(option.value)
-  // spanChart.setOption(spanOption.value)
+  spanChart.setOption(spanOption.value)
 })
 /* 监听所有数据是否获取完成 -------------------------------------------------------------------------- */
 watch(
@@ -225,10 +230,10 @@ watch(
           type: 'select',
           name: DefaultData.value[1][0].name,
         })
-        // spanChart.dispatchAction({
-        //   type: 'select',
-        //   name: DefaultData.value[1][0].name,
-        // })
+        spanChart.dispatchAction({
+          type: 'select',
+          name: DefaultData.value[1][0].name,
+        })
         updateData(DefaultData.value[1][0].value[2].result)
         selectData.preset = 'Balanced'
         selectData.step = DefaultData.value[1][0].value[2].result.step
@@ -257,61 +262,61 @@ watch(
 let chart = null
 let spanChart = null
 // 数据配置项
-// function seriesSpanData(name, basecolor, activecolor) {
-//   let size, opacity
-//   if (name == 'baseline') {
-//     size = 16
-//     opacity = 1
-//   } else {
-//     size = 8
-//     opacity = 0.5
-//   }
-//   return {
-//     type: 'scatter',
+function seriesSpanData(name, basecolor, activecolor) {
+  let size, opacity
+  if (name == 'baseline') {
+    size = 16
+    opacity = 1
+  } else {
+    size = 8
+    opacity = 0.5
+  }
+  return {
+    type: 'scatter',
 
-//     selectedMode: 'single',
-//     selectedOffset: 10,
-//     symbol: (data) => {
-//       // constraintLoss>0
-//       let path = `path://M18.018,15.344c-0.285,0-0.555-0.162-0.684-0.441l-6.595-12.076l-6.594,12.076c-0.128,0.279-0.398,0.441-0.684,0.441c-0.491,0-0.706-0.638-0.249-0.929l6.997-12.808l-6.997-12.809c-0.457-0.291-0.242-0.929,0.249-0.929c0.286,0,0.556,0.162,0.684,0.441l6.595,12.076l6.594-12.076c0.127-0.279,0.398-0.441,0.684-0.441c0.49,0,0.705,0.638,0.249,0.929l-6.998,12.808l6.998,12.809c0.456,0.291,0.241,0.929-0.249,0.929H18.018z`
-//       if (data[2].result.constraintLoss > 0) {
-//         // console.log(data[2].result);
-//         return path
-//       }
-//       return 'circle'
-//     },
-//     select: {
-//       scale: 2,
-//       itemStyle: {
-//         color: '#40aa97',
-//         borderColor: '#40aa97',
-//         shadowColor: '#40aa97',
-//         borderWidth: 10,
-//         shadowBlur: 30,
-//         opacity: 1,
-//         // symbolSize: 10, // 调整被选中元素的大小
-//       },
-//     },
-//     emphasis: {
-//       scale: 2,
-//       focus: 'series',
-//       blurScope: 'coordinateSystem',
-//     },
+    selectedMode: 'single',
+    selectedOffset: 10,
+    symbol: (data) => {
+      // constraintLoss>0
+      let path = `path://M18.018,15.344c-0.285,0-0.555-0.162-0.684-0.441l-6.595-12.076l-6.594,12.076c-0.128,0.279-0.398,0.441-0.684,0.441c-0.491,0-0.706-0.638-0.249-0.929l6.997-12.808l-6.997-12.809c-0.457-0.291-0.242-0.929,0.249-0.929c0.286,0,0.556,0.162,0.684,0.441l6.595,12.076l6.594-12.076c0.127-0.279,0.398-0.441,0.684-0.441c0.49,0,0.705,0.638,0.249,0.929l-6.998,12.808l6.998,12.809c0.456,0.291,0.241,0.929-0.249,0.929H18.018z`
+      if (data[2].result.constraintLoss > 0) {
+        // console.log(data[2].result);
+        return path
+      }
+      return 'circle'
+    },
+    select: {
+      scale: 2,
+      itemStyle: {
+        color: '#40aa97',
+        borderColor: '#40aa97',
+        shadowColor: '#40aa97',
+        borderWidth: 10,
+        shadowBlur: 30,
+        opacity: 1,
+        // symbolSize: 10, // 调整被选中元素的大小
+      },
+    },
+    emphasis: {
+      scale: 2,
+      focus: 'series',
+      blurScope: 'coordinateSystem',
+    },
 
-//     data: store.dataArray[name].span,
-//     name: name,
-//     symbolSize: size,
+    data: store.dataArray[name].span,
+    name: name,
+    symbolSize: size,
 
-//     itemStyle: {
-//       color: (data) => {
-//         return basecolor
-//       },
-//       borderWidth: 1,
-//       borderColor: '#0b0f07',
-//       opacity: opacity,
-//     },
-//   }
-// }
+    itemStyle: {
+      color: (data) => {
+        return basecolor
+      },
+      borderWidth: 1,
+      borderColor: '#0b0f07',
+      opacity: opacity,
+    },
+  }
+}
 function seriesData(name, basecolor, activecolor) {
   let size, opacity
   if (name == 'baseline') {
@@ -615,10 +620,10 @@ var spanOption = computed(() => {
 function initChart() {
   if (chart == null) {
     chart = echarts.init(document.getElementById('myEcharts'), 'purple-passion')
-    // spanChart = echarts.init(
-    //   document.getElementById('twoEcharts'),
-    //   'purple-passion',
-    // )
+    spanChart = echarts.init(
+      document.getElementById('twoEcharts'),
+      'purple-passion',
+    )
   }
   // echarts.registerTransform(ecStat.transform.clustering)
 
@@ -656,46 +661,46 @@ function initChart() {
     }
     updateData(datas)
   })
-  // spanChart.on('click', function (param) {
-  //   chart.dispatchAction({
-  //     type: 'select',
-  //     name: param.name,
-  //   })
-  //   let datas = param.data.value[2].result
-  //   // activeIndex.value = param.name;
-  //   selectData.preset = param.seriesName
-  //   selectData.step = datas.step
-  //   if (param.seriesName == 'baseline') {
-  //     selectData.preset = 'Balanced'
-  //   } else {
-  //     selectData.preset = param.seriesName
-  //   }
-  //   switch (selectData.preset) {
-  //     case 'Balanced':
-  //       radio.value = 0
-  //       break
-  //     case 'Fastest':
-  //       radio.value = 1
-  //       break
-  //     case 'Minimum_Resources':
-  //       radio.value = 2
-  //       break
-  //     case 'Levelled_Resources':
-  //       radio.value = 3
-  //       break
+  spanChart.on('click', function (param) {
+    chart.dispatchAction({
+      type: 'select',
+      name: param.name,
+    })
+    let datas = param.data.value[2].result
+    // activeIndex.value = param.name;
+    selectData.preset = param.seriesName
+    selectData.step = datas.step
+    if (param.seriesName == 'baseline') {
+      selectData.preset = 'Balanced'
+    } else {
+      selectData.preset = param.seriesName
+    }
+    switch (selectData.preset) {
+      case 'Balanced':
+        radio.value = 0
+        break
+      case 'Fastest':
+        radio.value = 1
+        break
+      case 'Minimum_Resources':
+        radio.value = 2
+        break
+      case 'Levelled_Resources':
+        radio.value = 3
+        break
 
-  //     default:
-  //       break
-  //   }
-  //   updateData(datas)
-  // })
+      default:
+        break
+    }
+    updateData(datas)
+  })
 }
 
 // 更新图表
 function renderChart() {
   // console.log('reset');
   chart.setOption(option.value)
-  // spanChart.setOption(spanOption.value)
+  spanChart.setOption(spanOption.value)
 }
 /* -------------------------------------------------------------------------- */
 
@@ -756,10 +761,10 @@ function sideClcik(num) {
     type: 'select',
     name: DefaultData.value[num][0].name,
   })
-  // spanChart.dispatchAction({
-  //   type: 'select',
-  //   name: DefaultData.value[num][0].name,
-  // })
+  spanChart.dispatchAction({
+    type: 'select',
+    name: DefaultData.value[num][0].name,
+  })
   activeIndex = DefaultData.value[num][0].name
   selectData.preset = DefaultData.value[num][0].value[2].name
   selectData.step = DefaultData.value[num][0].value[2].result.step
@@ -797,9 +802,15 @@ h2 {
 .main {
   display: flex;
   justify-content: space-between;
-  width: 1400px;
+  width: 768 * 2px;
+  flex-wrap: wrap;
+  .chartContent {
+    display: flex;
+    // width: 1600px;
+  }
   .left {
-    width: 768px;
+    width: 768 * 2 px;
+    display: block;
     height: 630px;
     padding: 20px;
     background-color: #fff;

@@ -20,52 +20,6 @@
         </div>
       </h2>
       <div class="maintop">
-        <!-- <div class="right-items">
-          <div class="right-item">
-            <div class="title">{{ $t('baselineSummary.Tsidebar[0]') }}</div>
-            <div class="content">
-              <div class="t-content">
-                <span class="f"> days</span>
-                <span
-                  style="color: #10be00; font-weight: 700"
-                  v-if="
-                   1
-                  "
-                >
-                  <img
-                    style="vertical-align: bottom"
-                    src="/arrow-up-thin.svg"
-                    alt=""
-                    srcset=""
-                  />
-                  <span>
-                 
-                  </span>
-                </span>
-                <span style="color: #be0010; font-weight: 700" v-else>
-                  <img
-                    style="vertical-align: bottom"
-                    src="/arrow-down-thin.svg"
-                    alt=""
-                    srcset=""
-                  />
-               
-                </span>
-              </div>
-              <div class="b-content">
-                <div style="border-right: 1px solid #f0f1f3" class="bottom">
-                  <span> days</span>
-                  <div>Actual</div>
-                </div>
-                <div class="bottom">
-                  <span> days</span>
-                  <div>Plan</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div> -->
         <Card
           :title="$t('optimizedSummary.header[0]')"
           :height="180"
@@ -119,59 +73,19 @@
             // store.SummaryData.changedDuration + 'days',
           ]"
         />
-        <!-- <div class="item">
-          <div class="title">{{ $t('optimizedSummary.header[0]') }}</div>
-          <div class="center">
-            <span class="changed">
-              {{ store.SummaryData.changedDuration }}/
-            </span>
-            <span class="base">{{ store.SummaryData.baseDuration }}</span>
-          </div>
-          <div class="bottom">
-            {{
-              toPercent(
-                store.SummaryData.changedDuration,
-                store.SummaryData.baseDuration,
-              )
-            }}
-          </div>
-        </div>
-        <div class="item">
-          <div class="title">{{ $t('optimizedSummary.header[1]') }}</div>
-          <div class="center">
-            <span class="changed">{{ store.SummaryData.changgedTasks }}/</span>
-            <span class="base">{{ store.SummaryData.TotalTasks }}</span>
-          </div>
-          <div class="bottom">
-            {{
-              toPercent(
-                store.SummaryData.changgedTasks,
-                store.SummaryData.TotalTasks,
-              )
-            }}
-          </div>
-        </div>
-        <div class="item">
-          <div class="title">{{ $t('optimizedSummary.header[2]') }}</div>
-          <div class="center">
-            <span class="changed">{{ criticalTask.length }}/</span>
-            <span class="base">
-              {{ store.selectedData.baselineTasks.length }}
-            </span>
-          </div>
-          <div class="bottom">
-            {{
-              toPercent(
-                criticalTask.length,
-                store.selectedData.baselineTasks.length,
-              )
-            }}
-          </div>
-        </div> -->
       </div>
       <div class="mainEchar1">
         <div class="Echar1top">
           <div>{{ $t('optimizedSummary.chartName[0]') }}</div>
+          <el-select
+            v-model="selectMode"
+            class="m-2"
+            placeholder="Select"
+            size="large"
+          >
+            <el-option label="Compare Mode" value="Compare" />
+            <el-option label="Separate Mode" value="Separate" />
+          </el-select>
         </div>
         <span>{{ $t('optimizedSummary.chartName[1]') }}</span>
         <div class="choosebox">
@@ -267,6 +181,9 @@ const router = useRouter()
 import api from '@/api/index.js'
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
 import Dialog from '@/components/dialog/dialog.vue'
+
+// 选择框
+let selectMode = ref('Compare')
 
 // 弹出框
 let dialogVisible = ref(false)
@@ -700,6 +617,149 @@ function initChart() {
     },
   }
   option && chart.setOption(option)
+
+  watch(selectMode, (newval, oldval) => {
+    if (newval === 'Compare') {
+      let Compareoption = {
+        series: [
+          {
+            name: 'baseline',
+            type: 'custom',
+            data: baselineTasks,
+            large: true,
+            renderItem: renderItem,
+            encode: {
+              x: [1, 2],
+              y: 0,
+              labal: 11,
+            },
+            label: {
+              normal: {
+                show: isLabel, // 启用标签显示
+                color: 'black', // 标签的文本颜色
+                position: 'inside', // 标签的文本位置
+                formatter: function (params) {
+                  // 自定义标签内容
+
+                  return params.data.name
+                },
+                fontSize: 12,
+              },
+            },
+          },
+          {
+            name: 'new',
+            type: 'custom',
+            data: changedlineTasks,
+            large: true,
+            renderItem: renderItem,
+            encode: {
+              x: [1, 2],
+              y: 0,
+            },
+            label: {
+              normal: {
+                show: isLabel, // 启用标签显示
+                color: 'black', // 标签的文本颜色
+                position: 'inside', // 标签的文本位置
+                formatter: function (params) {
+                  // 自定义标签内容
+                  // console.log(params);
+                  return params.data.name
+                },
+                fontSize: 12,
+              },
+            },
+          },
+        ],
+      }
+      chart.setOption(Compareoption)
+      chart.off('datazoom')
+      chart.on('datazoom', function (param) {
+        zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
+      })
+    } else {
+      let SeparatebaselineTasks = JSON.parse(JSON.stringify(baselineTasks)).map(
+        (e, index) => {
+          // console.log(e);
+          let newObject = { ...e } // 创建一个新对象副本
+          newObject.value[0] = baselineTasks.length * 2 - index
+          return newObject // 返回新的对象
+        },
+      )
+      let SeparatechangedlineTasks = JSON.parse(
+        JSON.stringify(changedlineTasks),
+      ).map((e, index) => {
+        let newObject = { ...e }
+        newObject.value[0] = baselineTasks.length - index
+        return newObject
+      })
+      let Separateoption = {
+        series: [
+          {
+            name: 'baseline',
+            type: 'custom',
+            data: SeparatebaselineTasks,
+            large: true,
+            renderItem: renderItem,
+            encode: {
+              x: [1, 2],
+              y: 0,
+              labal: 11,
+            },
+            label: {
+              normal: {
+                show: isLabel, // 启用标签显示
+                color: 'black', // 标签的文本颜色
+                position: 'inside', // 标签的文本位置
+                formatter: function (params) {
+                  // 自定义标签内容
+
+                  return params.data.name
+                },
+                fontSize: 12,
+              },
+            },
+          },
+          {
+            name: 'new',
+            type: 'custom',
+            data: SeparatechangedlineTasks,
+            large: true,
+            renderItem: renderItem,
+            encode: {
+              x: [1, 2],
+              y: 0,
+            },
+            label: {
+              normal: {
+                show: isLabel, // 启用标签显示
+                color: 'black', // 标签的文本颜色
+                position: 'inside', // 标签的文本位置
+                formatter: function (params) {
+                  // 自定义标签内容
+                  // console.log(params);
+                  return params.data.name
+                },
+                fontSize: 12,
+              },
+            },
+          },
+        ],
+      }
+      chart.setOption(Separateoption)
+      chart.off('datazoom')
+      chart.on('datazoom', function (param) {
+        zoomEvent(
+          param,
+          SeparatebaselineTasks,
+          SeparatechangedlineTasks,
+          isLabel,
+        )
+      })
+    }
+  })
+
   function zoomEvent(param, baselineTasks, changedlineTasks, isLabel) {
     if (!isLabel) {
       if (

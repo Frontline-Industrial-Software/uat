@@ -67,33 +67,21 @@
           </div>
           <div>
             <Card
-              :title="$t('baselineSummary.Tsidebar[0]')"
+              :title="$t('baselineSummary.Tsidebar[2]')"
               :height="150"
-              :precent="
-                toPercent(
-                  SummaryData.changedDuration - SummaryData.baseDuration,
-                  SummaryData.baseDuration,
-                )
-              "
-              :isPositive="true"
               :body="[
-                SummaryData.changedDuration + ' ' + 'days',
-                SummaryData.baseDuration + ' ' + 'days',
-                SummaryData.planDurationDays + ' ' + 'days',
+                SummaryData.changgedTasks,
+                SummaryData.TotalTasks,
+                // store.SummaryData.changedDuration + 'days',
               ]"
             />
             <Card
-              :title="$t('baselineSummary.Tsidebar[1]')"
+              :title="$t('baselineSummary.Tsidebar[3]')"
               :height="150"
-              :precent="
-                toPercent(
-                  SummaryData.maxResourceUnit - SummaryData.BasemaxResourceUnit,
-                  SummaryData.BasemaxResourceUnit,
-                )
-              "
               :body="[
-                SummaryData.maxResourceUnit,
-                SummaryData.BasemaxResourceUnit,
+                SummaryData.changedCriticalPath,
+                SummaryData.changedCriticalPath,
+                SummaryData.baseCriticalPath,
                 // store.SummaryData.changedDuration + 'days',
               ]"
             />

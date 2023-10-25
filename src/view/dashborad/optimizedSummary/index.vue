@@ -366,7 +366,14 @@ function initChart() {
 
       newBaselineTask.old = baselineTask
       changedlineTasks.push(newBaselineTask)
-      idx = store.selectedData.baselineTasks.length - idx + 1.5
+      function calculateIdx(inputNumber) {
+        if (inputNumber === 1) {
+          return 1
+        } else {
+          return inputNumber + (inputNumber - 1) * 4
+        }
+      }
+      idx = calculateIdx(store.selectedData.baselineTasks.length - idx)
       return {
         name: baselineTask.name,
         value: [
@@ -396,9 +403,14 @@ function initChart() {
   // console.log(baselineTasks);
   // 优化任务
   changedlineTasks = changedlineTasks.map((changedlineTask, idx) => {
-    // console.log(changedlineTask);
-    idx = changedlineTasks.length - idx
-
+    function calculateIdx(inputNumber) {
+      if (inputNumber === 2) {
+        return 2
+      } else {
+        return inputNumber + (inputNumber - 2) * 4
+      }
+    }
+    idx = calculateIdx(changedlineTasks.length - idx + 1)
     return {
       id: changedlineTask.id,
       name: changedlineTask.name,
@@ -441,7 +453,7 @@ function initChart() {
   let renderItem = (params, api) => {
     let start = api.coord([api.value(1), api.value(0)])
     let end = api.coord([api.value(2), api.value(0)])
-    let height = api.size([0, 1])[1] * 0.8
+    let height = api.size([0, 1])[1]
     let shape = echarts.graphic.clipRectByRect(
       {
         x: start[0],
@@ -688,7 +700,7 @@ function initChart() {
     },
   }
   option && chart.setOption(option)
-  chart.on('datazoom', function (param) {
+  function zoomEvent(param, baselineTasks, changedlineTasks, isLabel) {
     if (!isLabel) {
       if (
         param.batch[0].end - param.batch[0].start <
@@ -803,6 +815,10 @@ function initChart() {
         })
       }
     }
+  }
+  chart.off('datazoom')
+  chart.on('datazoom', function (param) {
+    zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
   })
   chart.on('mousemove', function (param) {
     chart.dispatchAction({

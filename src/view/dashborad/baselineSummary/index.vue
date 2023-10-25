@@ -67,21 +67,33 @@
           </div>
           <div>
             <Card
-              :title="$t('baselineSummary.Tsidebar[2]')"
+              :title="$t('baselineSummary.Tsidebar[0]')"
               :height="150"
+              :precent="
+                toPercent(
+                  SummaryData.changedDuration - SummaryData.baseDuration,
+                  SummaryData.baseDuration,
+                )
+              "
+              :isPositive="true"
               :body="[
-                SummaryData.changgedTasks,
-                SummaryData.TotalTasks,
-                // store.SummaryData.changedDuration + 'days',
+                SummaryData.changedDuration + ' ' + 'days',
+                SummaryData.baseDuration + ' ' + 'days',
+                SummaryData.planDurationDays + ' ' + 'days',
               ]"
             />
             <Card
-              :title="$t('baselineSummary.Tsidebar[3]')"
+              :title="$t('baselineSummary.Tsidebar[1]')"
               :height="150"
+              :precent="
+                toPercent(
+                  SummaryData.maxResourceUnit - SummaryData.BasemaxResourceUnit,
+                  SummaryData.BasemaxResourceUnit,
+                )
+              "
               :body="[
-                SummaryData.changedCriticalPath,
-                SummaryData.changedCriticalPath,
-                SummaryData.baseCriticalPath,
+                SummaryData.maxResourceUnit,
+                SummaryData.BasemaxResourceUnit,
                 // store.SummaryData.changedDuration + 'days',
               ]"
             />
@@ -820,11 +832,8 @@ h2 {
 .main {
   display: flex;
   justify-content: space-between;
-  width: 768 * 2px;
-  .chartContent {
-    // display: flex;
-    // width: 1600px;
-  }
+  width: 1400px;
+
   .left {
     width: 768 px;
     height: 630 * 2 px;

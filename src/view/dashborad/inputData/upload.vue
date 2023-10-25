@@ -86,6 +86,7 @@ const beforeUpload = async (file) => {
     a.data.originalDurationDaysWithCalendar
   store.originalplan.newCriticalTasksLen = a.data.newCriticalTasksLen
   store.originalplan.maxResourceUnitAgg = a.data.maxResourceUnitAgg
+  store.ConstraintsFile = ''
   return false
 }
 </script>

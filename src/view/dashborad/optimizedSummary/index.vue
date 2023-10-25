@@ -270,53 +270,52 @@ function baseItem(data) {
   // style="color:#8c8c8c"
   return `<span >${data}</span>`
 }
-
+var changedlineTasks
+var baselineTasks
 function initChart() {
-  let changedlineTasks = []
+  changedlineTasks = []
   // 基础任务
   // console.log(store.selectedData);
-  let baselineTasks = store.selectedData.baselineTasks.map(
-    (baselineTask, idx) => {
-      let newBaselineTask = store.selectedData.tasks.find(
-        (task) => task.id === baselineTask.id,
-      )
+  baselineTasks = store.selectedData.baselineTasks.map((baselineTask, idx) => {
+    let newBaselineTask = store.selectedData.tasks.find(
+      (task) => task.id === baselineTask.id,
+    )
 
-      newBaselineTask.old = baselineTask
-      changedlineTasks.push(newBaselineTask)
-      function calculateIdx(inputNumber) {
-        if (inputNumber === 1) {
-          return 1
-        } else {
-          return inputNumber + (inputNumber - 1) * 4
-        }
+    newBaselineTask.old = baselineTask
+    changedlineTasks.push(newBaselineTask)
+    function calculateIdx(inputNumber) {
+      if (inputNumber === 1) {
+        return 1
+      } else {
+        return inputNumber + (inputNumber - 1) * 4
       }
-      idx = calculateIdx(store.selectedData.baselineTasks.length - idx)
-      return {
-        name: baselineTask.name,
-        value: [
-          idx,
-          utcTime(baselineTask.newStart),
-          utcTime(baselineTask.newFinish),
-          baselineTask,
-          {
-            baseNew: {
-              start: baselineTask.newStart,
-              finish: baselineTask.newFinish,
-              duration: baselineTask.newDuration,
-            },
-            changeNew: {
-              start: newBaselineTask.newStart,
-              finish: newBaselineTask.newFinish,
-              duration: newBaselineTask.newDuration,
-            },
+    }
+    idx = calculateIdx(store.selectedData.baselineTasks.length - idx)
+    return {
+      name: baselineTask.name,
+      value: [
+        idx,
+        utcTime(baselineTask.newStart),
+        utcTime(baselineTask.newFinish),
+        baselineTask,
+        {
+          baseNew: {
+            start: baselineTask.newStart,
+            finish: baselineTask.newFinish,
+            duration: baselineTask.newDuration,
           },
-        ],
-        itemStyle: {
-          color: baselineTask.critical ? 'pink' : undefined,
+          changeNew: {
+            start: newBaselineTask.newStart,
+            finish: newBaselineTask.newFinish,
+            duration: newBaselineTask.newDuration,
+          },
         },
-      }
-    },
-  )
+      ],
+      itemStyle: {
+        color: baselineTask.critical ? 'pink' : undefined,
+      },
+    }
+  })
   // console.log(baselineTasks);
   // 优化任务
   changedlineTasks = changedlineTasks.map((changedlineTask, idx) => {
@@ -617,7 +616,10 @@ function initChart() {
     },
   }
   option && chart.setOption(option)
-
+  chart.off('datazoom')
+  chart.on('datazoom', function (param) {
+    zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
+  })
   watch(selectMode, (newval, oldval) => {
     if (newval === 'Compare') {
       let Compareoption = {
@@ -876,10 +878,7 @@ function initChart() {
       }
     }
   }
-  chart.off('datazoom')
-  chart.on('datazoom', function (param) {
-    zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
-  })
+
   chart.on('mousemove', function (param) {
     chart.dispatchAction({
       type: 'highlight',

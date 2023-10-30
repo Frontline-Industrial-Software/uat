@@ -227,8 +227,8 @@
                 placeholder="Select"
                 size="large"
               >
-                <el-option label="Adjust task duration" :value="true" />
-                <el-option label="Adjust task-task lag" :value="false" />
+                <el-option label="Adjust task duration" :value="false" />
+                <el-option label="Adjust task-task lag" :value="true" />
               </el-select>
             </v-sheet>
           </v-col>

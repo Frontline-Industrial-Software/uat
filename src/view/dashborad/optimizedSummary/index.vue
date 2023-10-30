@@ -273,6 +273,7 @@ function baseItem(data) {
 var changedlineTasks
 var baselineTasks
 function initChart() {
+  selectMode.value = 'Compare'
   changedlineTasks = []
   // 基础任务
   // console.log(store.selectedData);

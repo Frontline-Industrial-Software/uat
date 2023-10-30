@@ -91,7 +91,7 @@ export const useCounterStore = defineStore(
           fileName: file.name,
           size: formatBytes(file.size),
           setting: {
-            considerActualDates: true,
+            considerActualDates: !setting.IgnoreProject,
             considerDataDate: true,
             optimizationSteps: setting.Steps,
             learningRate: setting.Rate,

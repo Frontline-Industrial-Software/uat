@@ -221,11 +221,16 @@ watch(
   store.end,
   async () => {
     if (store.end.data) {
+      // spanChart.setOption({
+      //   series: [],
+      // })
+      // chart.setOption({
+      //   series: [],
+      // })
       DefaultData.value = getDefault()
       // console.log(DefaultData.value);
       radio.value = 0
       setTimeout(() => {
-        // console.log(DefaultData.value);
         chart.dispatchAction({
           type: 'select',
           name: DefaultData.value[1][0].name,

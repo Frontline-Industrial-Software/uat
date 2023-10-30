@@ -340,6 +340,7 @@ async function Port() {
   Object.keys(store.dataArray).forEach((key) => {
     store.dataArray[key].all = []
     store.dataArray[key].data = []
+    store.dataArray[key].span = []
   })
   // clear()
   store.selectedData = null
@@ -350,6 +351,7 @@ async function Port() {
 }
 
 async function uploadDemo() {
+  store.ConstraintsFile = ''
   fetch('demo_project.xml')
     .then((r) => r.blob())
     .then(async (r) => {

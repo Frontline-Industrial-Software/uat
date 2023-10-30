@@ -54,6 +54,8 @@ export const useCounterStore = defineStore(
     // 真实文件名称
     let truefile = ref(null)
     let SummaryData = ref(null)
+
+    let wss = ref(null)
     // size大小转换函数
     function formatBytes(size) {
       if (!size) return ''
@@ -243,6 +245,7 @@ export const useCounterStore = defineStore(
           // taskData.value=[]
         }
       }
+      return socket
     }
     return {
       setting,
@@ -261,6 +264,7 @@ export const useCounterStore = defineStore(
       newUpload,
       email,
       originalplan,
+      wss,
     }
   },
   {},

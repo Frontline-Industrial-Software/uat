@@ -163,37 +163,6 @@
                 <el-option label="Any" value="any" />
                 <el-option label="False" value="false" />
               </el-select>
-              <!-- <el-tooltip class="box-item" effect="dark" placement="top-end">
-                <template #content>
-                  False:
-                  <br />
-                  Tasks without explicitly assigned resources will not receive
-                  any default resource allocation.
-                  <br />
-                  Any:
-                  <br />
-                  Any task without a specified resource will automatically be
-                  allocated a default Labor resource at a rate of 1.0 unit per
-                  hour.
-                  <br />
-                  All:
-                  <br />
-                  Default Labor resources are assigned to tasks only when there
-                  are no existing resource or role definitions or when no tasks
-                  are explicitly assigned to resources or roles.
-                </template>
-                <label>Consider Default Resource Type</label>
-              </el-tooltip> -->
-
-              <!-- <v-radio-group
-                :disabled="!store.file.name"
-                v-model="store.setting.considerDefaultResourceType"
-                inline
-              >
-                <v-radio label="All" value="all"></v-radio>
-                <v-radio label="Any" value="any"></v-radio>
-                <v-radio label="False" value="false"></v-radio>
-              </v-radio-group> -->
             </v-sheet>
           </v-col>
           <v-col>
@@ -222,22 +191,6 @@
                 </template>
                 <label>Resource Constraint</label>
               </el-tooltip>
-
-              <!-- <v-radio-group
-                :disabled="!store.file.name"
-                v-model="store.setting.resourceConstraint"
-                inline
-              >
-                <v-radio
-                  :label="$t('inputData.threeData[3]')"
-                  :value="true"
-                ></v-radio>
-                <v-radio
-                  :label="$t('inputData.threeData[4]')"
-                  :value="false"
-                ></v-radio>
-              </v-radio-group>  -->
-              <!-- <label>Resource Constraint</label> -->
               <el-select
                 v-model="store.setting.resourceConstraint"
                 class="m-3"
@@ -361,7 +314,7 @@ async function Port() {
   })
   // clear()
   store.selectedData = null
-  await store.connectWebsocket()
+  store.wss = await store.connectWebsocket()
   router.push({ name: 'BaselineSummary' })
   store.active = 1
   store.end.data = false

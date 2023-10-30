@@ -554,7 +554,7 @@ var spanOption = computed(() => {
       },
     },
     yAxis: {
-      name: 'Resource spread VS duration ',
+      name: 'Resource spread(units/day)',
       max: yMaxValue,
       min: yMinValue,
       padding: [10],
@@ -750,6 +750,8 @@ function updateData(data) {
 
 // 按钮点击跳转
 async function nextOptimized() {
+  // console.log(store.wss);
+  store.wss.close()
   selectData.fileName = store.file.name
   selectData.considerDefaultResourceType =
     store.setting.considerDefaultResourceType

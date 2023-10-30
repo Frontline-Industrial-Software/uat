@@ -1186,7 +1186,7 @@ watch(typeActive, () => {
 }
 .types {
   display: flex;
-  width: 1100px;
+  width: 1350px;
   flex-wrap: wrap;
   overflow-y: auto;
   min-width: 100px;

@@ -408,7 +408,7 @@ var option = computed(() => {
 
     grid: {
       // left: 120
-      top: 100,
+      top: 70,
       height: '65%',
     },
     xAxis: {
@@ -535,7 +535,7 @@ var spanOption = computed(() => {
     ],
     grid: {
       // left: 120
-      top: 100,
+      top: 70,
       height: '65%',
     },
     xAxis: {

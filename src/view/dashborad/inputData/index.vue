@@ -133,19 +133,18 @@
             <v-sheet class="pa-2 ma-2">
               <el-tooltip class="box-item" effect="dark" placement="top-end">
                 <template #content>
-                  False:
-                  <br />
+                  <h4 style="color: white">False:</h4>
                   Tasks without explicitly assigned resources will not receive
                   any default resource allocation.
                   <br />
-                  Any:
-                  <br />
+
+                  <h4 style="color: white">Any:</h4>
                   Any task without a specified resource will automatically be
                   allocated a default Labor resource at a rate of 1.0 unit per
                   hour.
                   <br />
-                  All:
-                  <br />
+
+                  <h4 style="color: white">All:</h4>
                   Default Labor resources are assigned to tasks only when there
                   are no existing resource or role definitions or when no tasks
                   are explicitly assigned to resources or roles.
@@ -201,7 +200,25 @@
             <v-sheet class="pa-2 ma-2">
               <el-tooltip class="box-item" effect="dark" placement="top-end">
                 <template #content>
-                  Whether to consider shifting to adjust resource distribution
+                  <h4 style="color: white">Adjust task duration:</h4>
+                  This option involves modifying the actual time required to
+                  complete a task, aiming to align it with the available
+                  resources.
+                  <br />
+                  For instance, this could mean shortening or extending the
+                  duration of a task to fit within the constraints of the
+                  available resources.
+                  <br />
+                  <h4 style="color: white">Adjust task-task lag:</h4>
+                  This option revolves around altering the time gap between
+                  tasks, ensuring a more reasonable schedule for the waiting
+                  time between tasks considering the limitations in available
+                  resources.
+                  <br />
+                  This adjustment might involve delaying the start time of the
+                  subsequent task to accommodate the existing resource
+                  constraints.
+                  <br />
                 </template>
                 <label>Resource Constraint</label>
               </el-tooltip>

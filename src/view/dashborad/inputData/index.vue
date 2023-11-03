@@ -311,6 +311,7 @@ async function Port() {
     store.dataArray[key].all = []
     store.dataArray[key].data = []
     store.dataArray[key].span = []
+    store.dataArray[key].cost = []
   })
   // clear()
   store.selectedData = null

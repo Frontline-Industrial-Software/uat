@@ -28,6 +28,10 @@
             style="width: 720px; height: 500px"
             id="twoEcharts"
           ></Echarts>
+          <Echarts
+            style="width: 720px; height: 500px"
+            id="costEcharts"
+          ></Echarts>
         </div>
       </div>
       <div class="right">
@@ -210,11 +214,13 @@ const router = useRouter()
 watch(activeIndex, () => {
   chart.setOption(option.value)
   spanChart.setOption(spanOption.value)
+  costChart.setOption(costOption.value)
 })
 
 watch(store.dataArray, () => {
   chart.setOption(option.value)
   spanChart.setOption(spanOption.value)
+  costChart.setOption(costOption.value)
 })
 /* 监听所有数据是否获取完成 -------------------------------------------------------------------------- */
 watch(
@@ -236,6 +242,10 @@ watch(
           name: DefaultData.value[1][0].name,
         })
         spanChart.dispatchAction({
+          type: 'select',
+          name: DefaultData.value[1][0].name,
+        })
+        costChart.dispatchAction({
           type: 'select',
           name: DefaultData.value[1][0].name,
         })
@@ -266,6 +276,7 @@ watch(
 // 初始化图表实例
 let chart = null
 let spanChart = null
+let costChart = null
 // 数据配置项
 function seriesSpanData(name, basecolor, activecolor) {
   let size, opacity
@@ -365,6 +376,61 @@ function seriesData(name, basecolor, activecolor) {
     },
 
     data: store.dataArray[name].data,
+    name: name,
+    symbolSize: size,
+
+    itemStyle: {
+      color: (data) => {
+        return basecolor
+      },
+      borderWidth: 1,
+      borderColor: '#0b0f07',
+      opacity: opacity,
+    },
+  }
+}
+function seriesCostData(name, basecolor, activecolor) {
+  let size, opacity
+  if (name == 'baseline') {
+    size = 16
+    opacity = 1
+  } else {
+    size = 8
+    opacity = 0.5
+  }
+  return {
+    type: 'scatter',
+
+    selectedMode: 'single',
+    selectedOffset: 10,
+    symbol: (data) => {
+      // constraintLoss>0
+      let path = `path://M18.018,15.344c-0.285,0-0.555-0.162-0.684-0.441l-6.595-12.076l-6.594,12.076c-0.128,0.279-0.398,0.441-0.684,0.441c-0.491,0-0.706-0.638-0.249-0.929l6.997-12.808l-6.997-12.809c-0.457-0.291-0.242-0.929,0.249-0.929c0.286,0,0.556,0.162,0.684,0.441l6.595,12.076l6.594-12.076c0.127-0.279,0.398-0.441,0.684-0.441c0.49,0,0.705,0.638,0.249,0.929l-6.998,12.808l6.998,12.809c0.456,0.291,0.241,0.929-0.249,0.929H18.018z`
+      if (data[2].result.constraintLoss > 0) {
+        // console.log(data[2].result);
+        return path
+      }
+      return 'circle'
+    },
+    select: {
+      scale: 2,
+      itemStyle: {
+        color: '#40aa97',
+        borderColor: '#40aa97',
+        shadowColor: '#40aa97',
+        borderWidth: 10,
+        shadowBlur: 30,
+        opacity: 1,
+        // symbolSize: 10, // 调整被选中元素的大小
+      },
+    },
+    emphasis: {
+      scale: 2,
+      focus: 'series',
+      blurScope: 'coordinateSystem',
+    },
+
+    data: store.dataArray[name].cost,
     name: name,
     symbolSize: size,
 
@@ -631,12 +697,153 @@ var spanOption = computed(() => {
     ],
   }
 })
+var costOption = computed(() => {
+  // 获取 x 轴的最小值和最大值
+  // console.log(store.dataArray);
+  const xValues = Object.values(store.dataArray).flatMap((series) =>
+    series.data.map((item) => {
+      return item.value[0]
+    }),
+  )
+  const xMinValue = parseFloat((Math.min(...xValues) * 0.95).toFixed(2))
+  const xMaxValue = parseFloat((Math.max(...xValues) * 1.05).toFixed(2))
+
+  // 获取 y 轴的最小值和最大值
+  const yValues = Object.values(store.dataArray).flatMap((series) =>
+    series.cost.map((item) => {
+      return item.value[1]
+    }),
+  )
+
+  const yMinValue = parseFloat((Math.min(...yValues) * 0.95).toFixed(2))
+  const yMaxValue = parseFloat((Math.max(...yValues) * 1.05).toFixed(2))
+  return {
+    toolbox: {
+      show: true,
+      feature: {
+        dataView: { show: true, readOnly: false },
+        saveAsImage: { show: true },
+      },
+    },
+    dataZoom: [
+      {
+        type: 'inside', // 启用内部缩放（框选缩放）
+        xAxisIndex: [0], // 将内部缩放应用于 x 轴
+      },
+      {
+        type: 'inside', // 启用内部缩放（框选缩放）
+        yAxisIndex: [0], // 将内部缩放应用于 x 轴
+      },
+    ],
+    grid: {
+      // left: 120
+      top: 70,
+      height: '65%',
+    },
+    xAxis: {
+      name: 'Duration (days)',
+      nameLocation: 'middle',
+      padding: [10],
+      height: 100,
+      min: xMinValue,
+      max: xMaxValue,
+      nameTextStyle: {
+        align: 'center',
+        padding: [30, 0, 0, 0],
+        fontWeight: 'lighter',
+        fontSize: 20,
+        color: 'black',
+      },
+    },
+    yAxis: {
+      name: 'Total Cost',
+      max: yMaxValue,
+      min: yMinValue,
+      padding: [10],
+      nameLocation: 'end',
+      nameTextStyle: {
+        align: 'center',
+        padding: [0, 0, 0, 100],
+        fontWeight: 'lighter',
+        fontSize: 16,
+        color: 'black',
+      },
+    },
+    legend: {
+      itemGap: 40,
+
+      data: [
+        {
+          name: 'baseline',
+          itemStyle: {
+            color: 'rgb(204, 204, 204)',
+          },
+        },
+        {
+          name: 'Balanced',
+          itemStyle: {
+            color: 'rgba(130, 181, 199, 0.9)',
+          },
+        },
+        {
+          name: 'Fastest',
+          itemStyle: {
+            color: 'rgba(247, 220, 91, 0.9)',
+          },
+        },
+        {
+          name: 'Minimum_Resources',
+          itemStyle: {
+            color: 'rgba(219, 121, 48, 0.9)',
+          },
+        },
+        {
+          name: 'Levelled_Resources',
+          itemStyle: {
+            color: 'rgba(170, 187, 93, 0.9)',
+          },
+        },
+      ],
+      x: 'left',
+      itemWidth: 15,
+      itemHeight: 15,
+    },
+    series: [
+      seriesCostData('baseline', 'rgb(204, 204, 204)', 'rgba(138, 24, 116)'),
+      seriesCostData(
+        'Balanced',
+        'rgba(130, 181, 199, 0.9)',
+        'rgba(138, 24, 116)',
+      ),
+      seriesCostData(
+        'Fastest',
+        'rgba(247, 220, 91, 0.9)',
+        'rgba(138, 24, 116)',
+      ),
+      seriesCostData(
+        'Minimum_Resources',
+        'rgba(219, 121, 48, 0.9)',
+        'rgba(138, 24, 116)',
+      ),
+      seriesCostData(
+        'Levelled_Resources',
+        'rgba(170, 187, 93, 0.9)',
+        'rgba(138, 24, 116)',
+      ),
+    ],
+  }
+})
+
 // 初始化图表
 function initChart() {
   if (chart == null) {
     chart = echarts.init(document.getElementById('myEcharts'), 'purple-passion')
     spanChart = echarts.init(
       document.getElementById('twoEcharts'),
+      'purple-passion',
+    )
+    costChart = echarts.init(
+      document.getElementById('costEcharts'),
       'purple-passion',
     )
   }
@@ -649,6 +856,10 @@ function initChart() {
       name: param.name,
     })
     chart.dispatchAction({
+      type: 'select',
+      name: param.name,
+    })
+    costChart.dispatchAction({
       type: 'select',
       name: param.name,
     })
@@ -681,6 +892,48 @@ function initChart() {
     updateData(datas)
   })
   spanChart.on('click', function (param) {
+    spanChart.dispatchAction({
+      type: 'select',
+      name: param.name,
+    })
+
+    chart.dispatchAction({
+      type: 'select',
+      name: param.name,
+    })
+    costChart.dispatchAction({
+      type: 'select',
+      name: param.name,
+    })
+    let datas = param.data.value[2].result
+    // activeIndex.value = param.name;
+    selectData.preset = param.seriesName
+    selectData.step = datas.step
+    if (param.seriesName == 'baseline') {
+      selectData.preset = 'Balanced'
+    } else {
+      selectData.preset = param.seriesName
+    }
+    switch (selectData.preset) {
+      case 'Balanced':
+        radio.value = 0
+        break
+      case 'Fastest':
+        radio.value = 1
+        break
+      case 'Minimum_Resources':
+        radio.value = 2
+        break
+      case 'Levelled_Resources':
+        radio.value = 3
+        break
+
+      default:
+        break
+    }
+    updateData(datas)
+  })
+  costChart.on('click', function (param) {
     spanChart.dispatchAction({
       type: 'select',
       name: param.name,
@@ -725,6 +978,7 @@ function renderChart() {
   // console.log('reset');
   chart.setOption(option.value)
   spanChart.setOption(spanOption.value)
+  costChart.setOption(costOption.value)
 }
 /* -------------------------------------------------------------------------- */
 
@@ -829,7 +1083,10 @@ h2 {
   display: flex;
   justify-content: space-between;
   width: 1400px;
-
+  .chartContent {
+    display: flex;
+    flex-direction: column-reverse; /* 垂直方向反向排列 */
+  }
   .left {
     width: 768 px;
     height: 630 * 2 px;

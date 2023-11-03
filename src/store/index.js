@@ -43,11 +43,11 @@ export const useCounterStore = defineStore(
     // 任务数据
     let taskData = ref([])
     let dataArray = reactive({
-      baseline: { all: [], data: [], span: [] },
-      Balanced: { all: [], data: [], span: [] },
-      Fastest: { all: [], data: [], span: [] },
-      Minimum_Resources: { all: [], data: [], span: [] },
-      Levelled_Resources: { all: [], data: [], span: [] },
+      baseline: { all: [], data: [], span: [], cost: [] },
+      Balanced: { all: [], data: [], span: [], cost: [] },
+      Fastest: { all: [], data: [], span: [], cost: [] },
+      Minimum_Resources: { all: [], data: [], span: [], cost: [] },
+      Levelled_Resources: { all: [], data: [], span: [], cost: [] },
     })
     let selectedData = ref(null)
     let selectChange = false
@@ -147,6 +147,15 @@ export const useCounterStore = defineStore(
 
                 name: data.name + data.result.step,
               })
+              dataArray.baseline.cost.push({
+                value: [
+                  data.result.projectDurationDaysWithCalendar,
+                  data.result?.totalCost || 1,
+                  data,
+                ],
+
+                name: data.name + data.result.step,
+              })
             }
             break
           case 'Balanced':
@@ -165,6 +174,15 @@ export const useCounterStore = defineStore(
                 data.result.maxResourceUnitAgg,
                 data,
               ],
+              name: data.name + data.result.step,
+            })
+            dataArray.Balanced.cost.push({
+              value: [
+                data.result.projectDurationDaysWithCalendar,
+                data.result?.totalCost || 1,
+                data,
+              ],
+
               name: data.name + data.result.step,
             })
             break
@@ -186,7 +204,15 @@ export const useCounterStore = defineStore(
               ],
               name: data.name + data.result.step,
             })
+            dataArray.Fastest.cost.push({
+              value: [
+                data.result.projectDurationDaysWithCalendar,
+                data.result?.totalCost || 22,
+                data,
+              ],
 
+              name: data.name + data.result.step,
+            })
             break
           case 'Minimum_Resources':
             dataArray.Minimum_Resources.all.push(data)
@@ -206,7 +232,15 @@ export const useCounterStore = defineStore(
               ],
               name: data.name + data.result.step,
             })
+            dataArray.Minimum_Resources.cost.push({
+              value: [
+                data.result.projectDurationDaysWithCalendar,
+                data.result?.totalCost || 1,
+                data,
+              ],
 
+              name: data.name + data.result.step,
+            })
             break
           case 'Levelled_Resources':
             dataArray.Levelled_Resources.all.push(data)
@@ -224,6 +258,15 @@ export const useCounterStore = defineStore(
                 data.result.maxResourceUnitAgg,
                 data,
               ],
+              name: data.name + data.result.step,
+            })
+            dataArray.Levelled_Resources.cost.push({
+              value: [
+                data.result.projectDurationDaysWithCalendar,
+                data.result?.totalCost || 1,
+                data,
+              ],
+
               name: data.name + data.result.step,
             })
             break

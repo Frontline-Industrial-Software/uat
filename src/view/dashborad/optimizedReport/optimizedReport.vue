@@ -98,7 +98,18 @@
           <Table :tableOptions="tableOptions3"></Table>
         </div>
       </div>
-    </div>
+
+      <!-- 11 
+      <div class="sub-content">
+        <div class="content-row">
+          <h3>{{ $t('optimizedReport.tableName[2]') }}</h3>
+        </div>
+        
+        <div class="table">
+          <Table :tableOptions="tableOptions4"></Table>
+        </div>
+      </div> 
+    --></div>
 
     <!-- 尾部 -->
     <div class="content-row">
@@ -413,6 +424,20 @@ const tableOptions3 = reactive({
     'UnitsPerHour(Old)',
     'UnitsPerHour(New)',
     'Total Planned Units',
+  ],
+  tableName: 'three',
+})
+const tableOptions4 = reactive({
+  data: TaskResource.value,
+  colWidths: [100, 245, 250, 150, 150, 150, 150, 150, 150],
+  colHeaders: [
+    'Resource Name',
+    'Estimated Quantity/Area (Unit)',
+    'Estimated Unit Price (Unit)',
+    'Estimated Total Cost (Unit)',
+    'Actual Quantity/Area (Unit)',
+    'Actual Unit Price (Unit)',
+    'Actual Total Cost (Unit)',
   ],
   tableName: 'three',
 })

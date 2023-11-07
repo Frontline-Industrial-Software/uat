@@ -75,7 +75,7 @@ export default {
   optimizedSummary: {
     title: ['Overview', 'steps', 'ratio'],
     header: [
-      'Project Duration(days)',
+      'Project Duration (days)',
       'Maximum resources',
       'Changed tasks',
       'Tasks on Critical Path',

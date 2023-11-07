@@ -155,13 +155,23 @@
               <el-select
                 v-model="store.setting.considerDefaultResourceType"
                 class="m-2"
+                style="width: 300px"
                 placeholder="Select"
                 size="large"
               >
-                <el-option label="All" value="all" />
+                <el-option
+                  label="All:All tasks filled with default resources"
+                  value="all"
+                />
 
-                <el-option label="Any" value="any" />
-                <el-option label="False" value="false" />
+                <el-option
+                  label="Any:Fill unassigned tasks with default resources"
+                  value="any"
+                />
+                <el-option
+                  label="False:No default resources needed"
+                  value="false"
+                />
               </el-select>
             </v-sheet>
           </v-col>

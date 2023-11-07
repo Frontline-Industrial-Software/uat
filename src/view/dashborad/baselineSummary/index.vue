@@ -23,119 +23,121 @@
           <div>{{ $t('baselineSummary.chartName[0]') }}</div>
         </div>
         <div class="chartContent">
+          <Echarts
+            style="width: 720px; height: 500px"
+            id="costEcharts"
+          ></Echarts>
           <Echarts style="width: 720px; height: 500px" id="myEcharts"></Echarts>
           <Echarts
             style="width: 720px; height: 500px"
             id="twoEcharts"
           ></Echarts>
-          <Echarts
-            style="width: 720px; height: 500px"
-            id="costEcharts"
-          ></Echarts>
-        </div>
-      </div>
-      <div class="right">
-        <div class="righttop">
-          <div>
-            <Card
-              :title="$t('baselineSummary.Tsidebar[0]')"
-              :height="150"
-              :precent="
-                toPercent(
-                  SummaryData.changedDuration - SummaryData.baseDuration,
-                  SummaryData.baseDuration,
-                )
-              "
-              :isPositive="true"
-              :body="[
-                SummaryData.changedDuration + ' ' + 'days',
-                SummaryData.baseDuration + ' ' + 'days',
-                SummaryData.planDurationDays + ' ' + 'days',
-              ]"
-            />
-            <Card
-              :title="$t('baselineSummary.Tsidebar[1]')"
-              :height="150"
-              :precent="
-                toPercent(
-                  SummaryData.maxResourceUnit - SummaryData.BasemaxResourceUnit,
-                  SummaryData.BasemaxResourceUnit,
-                )
-              "
-              :body="[
-                SummaryData.maxResourceUnit,
-                SummaryData.BasemaxResourceUnit,
-                // store.SummaryData.changedDuration + 'days',
-              ]"
-            />
-          </div>
-          <div>
-            <Card
-              :title="$t('baselineSummary.Tsidebar[2]')"
-              :height="150"
-              :body="[
-                SummaryData.changgedTasks,
-                SummaryData.TotalTasks,
-                // store.SummaryData.changedDuration + 'days',
-              ]"
-            />
-            <Card
-              :title="$t('baselineSummary.Tsidebar[3]')"
-              :height="150"
-              :body="[
-                SummaryData.changedCriticalPath,
-                SummaryData.changedCriticalPath,
-                SummaryData.baseCriticalPath,
-                // store.SummaryData.changedDuration + 'days',
-              ]"
-            />
-          </div>
-        </div>
 
-        <div class="rightbutton">
-          <h1>{{ $t('baselineSummary.Bsidebar[0]') }}</h1>
-          <!-- <div>
+          <div class="right">
+            <div class="righttop">
+              <div>
+                <Card
+                  :title="$t('baselineSummary.Tsidebar[0]')"
+                  :height="150"
+                  :precent="
+                    toPercent(
+                      SummaryData.changedDuration - SummaryData.baseDuration,
+                      SummaryData.baseDuration,
+                    )
+                  "
+                  :isPositive="true"
+                  :body="[
+                    SummaryData.changedDuration + ' ' + 'days',
+                    SummaryData.baseDuration + ' ' + 'days',
+                    SummaryData.planDurationDays + ' ' + 'days',
+                  ]"
+                />
+                <Card
+                  :title="$t('baselineSummary.Tsidebar[1]')"
+                  :height="150"
+                  :precent="
+                    toPercent(
+                      SummaryData.maxResourceUnit -
+                        SummaryData.BasemaxResourceUnit,
+                      SummaryData.BasemaxResourceUnit,
+                    )
+                  "
+                  :body="[
+                    SummaryData.maxResourceUnit,
+                    SummaryData.BasemaxResourceUnit,
+                    // store.SummaryData.changedDuration + 'days',
+                  ]"
+                />
+              </div>
+              <div>
+                <Card
+                  :title="$t('baselineSummary.Tsidebar[2]')"
+                  :height="150"
+                  :body="[
+                    SummaryData.changgedTasks,
+                    SummaryData.TotalTasks,
+                    // store.SummaryData.changedDuration + 'days',
+                  ]"
+                />
+                <Card
+                  :title="$t('baselineSummary.Tsidebar[3]')"
+                  :height="150"
+                  :body="[
+                    SummaryData.changedCriticalPath,
+                    SummaryData.changedCriticalPath,
+                    SummaryData.baseCriticalPath,
+                    // store.SummaryData.changedDuration + 'days',
+                  ]"
+                />
+              </div>
+            </div>
+
+            <div class="rightbutton">
+              <h1>{{ $t('baselineSummary.Bsidebar[0]') }}</h1>
+              <!-- <div>
             {{ $t('baselineSummary.Bsidebar[1]') }}
           </div> -->
-          <el-radio-group v-model="radio" class="radiobox">
-            <el-radio
-              @click="
-                () => {
-                  sideClcik(1)
-                }
-              "
-              :label="0"
-            >
-              {{ $t('types.typeShow[1]') }}
-              <span>{{ $t('types.msg[0]') }}</span>
-            </el-radio>
-            <el-radio @click="sideClcik(2)" :label="1">
-              {{ $t('types.typeShow[2]') }}
-              <span>{{ $t('types.msg[1]') }}</span>
-            </el-radio>
-            <el-radio :label="2" @click="sideClcik(3)">
-              {{ $t('types.typeShow[3]') }}
-              <span>{{ $t('types.msg[2]') }}</span>
-            </el-radio>
-            <el-radio :label="3" @click="sideClcik(4)">
-              {{ $t('types.typeShow[4]') }}
-              <span>{{ $t('types.msg[3]') }}</span>
-            </el-radio>
-            <!-- <el-radio :label="3" @click="sideClcik(4)">
+              <el-radio-group v-model="radio" class="radiobox">
+                <el-radio
+                  @click="
+                    () => {
+                      sideClcik(1)
+                    }
+                  "
+                  :label="0"
+                >
+                  {{ $t('types.typeShow[1]') }}
+                  <span>{{ $t('types.msg[0]') }}</span>
+                </el-radio>
+                <el-radio @click="sideClcik(2)" :label="1">
+                  {{ $t('types.typeShow[2]') }}
+                  <span>{{ $t('types.msg[1]') }}</span>
+                </el-radio>
+                <el-radio :label="2" @click="sideClcik(3)">
+                  {{ $t('types.typeShow[3]') }}
+                  <span>{{ $t('types.msg[2]') }}</span>
+                </el-radio>
+                <el-radio :label="3" @click="sideClcik(4)">
+                  {{ $t('types.typeShow[4]') }}
+                  <span>{{ $t('types.msg[3]') }}</span>
+                </el-radio>
+                <!-- <el-radio :label="3" @click="sideClcik(4)">
               Constraint Compliance
               <span>Satisfies all constraints</span>
             </el-radio> -->
-          </el-radio-group>
+              </el-radio-group>
+            </div>
+            <v-btn
+              style="outline:none;!important"
+              :disabled="!store.end.data"
+              @click="nextOptimized"
+              class="btn"
+              color="rgb(64, 170, 151)"
+            >
+              {{ $t('next') }}
+            </v-btn>
+          </div>
         </div>
-        <v-btn
-          style="outline:none;!important"
-          :disabled="!store.end.data"
-          @click="nextOptimized"
-          class="btn"
-          color="rgb(64, 170, 151)"
-        >
-          {{ $t('next') }}
-        </v-btn>
       </div>
     </div>
   </div>
@@ -464,6 +466,7 @@ var option = computed(() => {
   const yMinValue = parseFloat((Math.min(...yValues) * 0.95).toFixed(2))
   const yMaxValue = parseFloat((Math.max(...yValues) * 1.05).toFixed(2))
   return {
+    tooltip: { show: true },
     toolbox: {
       show: true,
       feature: {
@@ -582,6 +585,7 @@ var spanOption = computed(() => {
   const yMinValue = parseFloat((Math.min(...yValues) * 0.95).toFixed(2))
   const yMaxValue = parseFloat((Math.max(...yValues) * 1.05).toFixed(2))
   return {
+    tooltip: { show: true },
     toolbox: {
       show: true,
       feature: {
@@ -620,7 +624,7 @@ var spanOption = computed(() => {
       },
     },
     yAxis: {
-      name: 'Resource spread(units/day)',
+      name: 'Resources spreadb (units/day)',
       max: yMaxValue,
       min: yMinValue,
       padding: [10],
@@ -718,6 +722,7 @@ var costOption = computed(() => {
   const yMinValue = parseFloat((Math.min(...yValues) * 0.95).toFixed(2))
   const yMaxValue = parseFloat((Math.max(...yValues) * 1.05).toFixed(2))
   return {
+    tooltip: { show: true },
     toolbox: {
       show: true,
       feature: {
@@ -762,8 +767,8 @@ var costOption = computed(() => {
       padding: [10],
       nameLocation: 'end',
       nameTextStyle: {
-        align: 'center',
-        padding: [0, 0, 0, 100],
+        align: 'left',
+        padding: [0, 0, 0, -30],
         fontWeight: 'lighter',
         fontSize: 16,
         color: 'black',
@@ -837,13 +842,13 @@ var costOption = computed(() => {
 // 初始化图表
 function initChart() {
   if (chart == null) {
+    costChart = echarts.init(
+      document.getElementById('costEcharts'),
+      'purple-passion',
+    )
     chart = echarts.init(document.getElementById('myEcharts'), 'purple-passion')
     spanChart = echarts.init(
       document.getElementById('twoEcharts'),
-      'purple-passion',
-    )
-    costChart = echarts.init(
-      document.getElementById('costEcharts'),
       'purple-passion',
     )
   }
@@ -1082,14 +1087,15 @@ h2 {
 .main {
   display: flex;
   justify-content: space-between;
-  width: 1400px;
+  flex-wrap: wrap;
   .chartContent {
+    width: 1600px;
     display: flex;
-    flex-direction: column-reverse; /* 垂直方向反向排列 */
+    justify-content: space-around;
+    // flex-direction: column-reverse; /* 垂直方向反向排列 */
+    flex-wrap: wrap;
   }
   .left {
-    width: 768 px;
-    height: 630 * 2 px;
     padding: 20px;
     background-color: #fff;
     border-radius: 15px;
@@ -1116,7 +1122,7 @@ h2 {
     }
   }
   .right {
-    // width: 420px;
+    width: 720px;
     padding-left: 16px;
     .righttop {
       display: flex;

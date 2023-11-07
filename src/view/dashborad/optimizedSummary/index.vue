@@ -288,7 +288,7 @@ function initChart() {
       if (inputNumber === 1) {
         return 1
       } else {
-        return inputNumber + (inputNumber - 1) * 4
+        return inputNumber + (inputNumber - 1) * 2
       }
     }
     idx = calculateIdx(store.selectedData.baselineTasks.length - idx)
@@ -324,7 +324,7 @@ function initChart() {
       if (inputNumber === 2) {
         return 2
       } else {
-        return inputNumber + (inputNumber - 2) * 4
+        return inputNumber + (inputNumber - 2) * 2
       }
     }
     idx = calculateIdx(changedlineTasks.length - idx + 1)

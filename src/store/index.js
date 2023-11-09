@@ -150,7 +150,7 @@ export const useCounterStore = defineStore(
               dataArray.baseline.cost.push({
                 value: [
                   data.result.projectDurationDaysWithCalendar,
-                  data.result?.totalCost || 1,
+                  data.result?.totalCost,
                   data,
                 ],
 
@@ -179,7 +179,7 @@ export const useCounterStore = defineStore(
             dataArray.Balanced.cost.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
-                data.result?.totalCost || 1,
+                data.result?.totalCost,
                 data,
               ],
 
@@ -207,7 +207,7 @@ export const useCounterStore = defineStore(
             dataArray.Fastest.cost.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
-                data.result?.totalCost || 22,
+                data.result?.totalCost,
                 data,
               ],
 
@@ -235,7 +235,7 @@ export const useCounterStore = defineStore(
             dataArray.Minimum_Resources.cost.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
-                data.result?.totalCost || 1,
+                data.result?.totalCost,
                 data,
               ],
 
@@ -263,7 +263,7 @@ export const useCounterStore = defineStore(
             dataArray.Levelled_Resources.cost.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
-                data.result?.totalCost || 1,
+                data.result?.totalCost,
                 data,
               ],
 

@@ -121,6 +121,11 @@
                   {{ $t('types.typeShow[4]') }}
                   <span>{{ $t('types.msg[3]') }}</span>
                 </el-radio>
+                <el-radio :label="4" @click="sideClcik(5)">
+                  Minimum Costs
+                  <span>Least amount of required costs</span>
+                </el-radio>
+
                 <!-- <el-radio :label="3" @click="sideClcik(4)">
               Constraint Compliance
               <span>Satisfies all constraints</span>
@@ -624,7 +629,7 @@ var spanOption = computed(() => {
       },
     },
     yAxis: {
-      name: 'Resources spreadb (units/day)',
+      name: 'Resources spread (units/day)',
       max: yMaxValue,
       min: yMinValue,
       padding: [10],
@@ -1037,6 +1042,10 @@ function getDefault() {
     data.sort((a, b) => a.value[2].result.loss - b.value[2].result.loss)
     DefaultDatas.push(data)
   }
+  let a = [].concat(...DefaultDatas)
+  a.sort((a, b) => a.value[2].result.totalCost - b.value[2].result.totalCost)
+  // console.log(a);
+  DefaultDatas.push([a[0]])
   return DefaultDatas
 }
 
@@ -1047,6 +1056,10 @@ function sideClcik(num) {
     name: DefaultData.value[num][0].name,
   })
   spanChart.dispatchAction({
+    type: 'select',
+    name: DefaultData.value[num][0].name,
+  })
+  costChart.dispatchAction({
     type: 'select',
     name: DefaultData.value[num][0].name,
   })

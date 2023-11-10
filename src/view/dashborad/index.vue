@@ -32,7 +32,7 @@ import Navigate from '@/components/navigate/index.vue'
   background: rgb(240, 241, 243);
   margin: 0px;
   min-height: 100vh;
-  min-width: 1400px;
+  min-width: 1700px;
   display: flex;
   flex-direction: column;
 }

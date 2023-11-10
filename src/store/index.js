@@ -43,11 +43,12 @@ export const useCounterStore = defineStore(
     // 任务数据
     let taskData = ref([])
     let dataArray = reactive({
-      baseline: { all: [], data: [], span: [], cost: [] },
+      Baseline: { all: [], data: [], span: [], cost: [] },
       Balanced: { all: [], data: [], span: [], cost: [] },
       Fastest: { all: [], data: [], span: [], cost: [] },
-      Minimum_Resources: { all: [], data: [], span: [], cost: [] },
-      Levelled_Resources: { all: [], data: [], span: [], cost: [] },
+      'Minimum Resources': { all: [], data: [], span: [], cost: [] },
+      'Levelled Resources': { all: [], data: [], span: [], cost: [] },
+      'Minimum Costs': { all: [], data: [], span: [], cost: [] },
     })
     let selectedData = ref(null)
     let selectChange = false
@@ -126,11 +127,21 @@ export const useCounterStore = defineStore(
           console.log('Begin')
           return
         }
+
+        if (data.name == 'Minimum_Resources') {
+          data.name = 'Minimum Resources'
+        } else if (data.name == 'Levelled_Resources') {
+          data.name = 'Levelled Resources'
+        } else if (data.name == 'Levelled_Resources') {
+          data.name = 'Levelled Resources'
+        } else if (data.name == 'Minimum_Costs') {
+          data.name = 'Minimum Costs'
+        }
         switch (data?.result?.group) {
           case 'baseline':
-            if (dataArray.baseline.all.length === 0) {
-              dataArray.baseline.all.push(data)
-              dataArray.baseline.span.push({
+            if (dataArray.Baseline.all.length === 0) {
+              dataArray.Baseline.all.push(data)
+              dataArray.Baseline.span.push({
                 value: [
                   data.result.projectDurationDaysWithCalendar,
                   data.result.spanResourceUnitAgg,
@@ -138,7 +149,7 @@ export const useCounterStore = defineStore(
                 ],
                 name: data.name + data.result.step,
               })
-              dataArray.baseline.data.push({
+              dataArray.Baseline.data.push({
                 value: [
                   data.result.projectDurationDaysWithCalendar,
                   data.result.maxResourceUnitAgg,
@@ -147,7 +158,7 @@ export const useCounterStore = defineStore(
 
                 name: data.name + data.result.step,
               })
-              dataArray.baseline.cost.push({
+              dataArray.Baseline.cost.push({
                 value: [
                   data.result.projectDurationDaysWithCalendar,
                   data.result?.totalCost,
@@ -215,8 +226,8 @@ export const useCounterStore = defineStore(
             })
             break
           case 'Minimum_Resources':
-            dataArray.Minimum_Resources.all.push(data)
-            dataArray.Minimum_Resources.span.push({
+            dataArray['Minimum Resources'].all.push(data)
+            dataArray['Minimum Resources'].span.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
                 data.result.spanResourceUnitAgg,
@@ -224,7 +235,7 @@ export const useCounterStore = defineStore(
               ],
               name: data.name + data.result.step,
             })
-            dataArray.Minimum_Resources.data.push({
+            dataArray['Minimum Resources'].data.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
                 data.result.maxResourceUnitAgg,
@@ -232,7 +243,7 @@ export const useCounterStore = defineStore(
               ],
               name: data.name + data.result.step,
             })
-            dataArray.Minimum_Resources.cost.push({
+            dataArray['Minimum Resources'].cost.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
                 data.result?.totalCost,
@@ -243,8 +254,8 @@ export const useCounterStore = defineStore(
             })
             break
           case 'Levelled_Resources':
-            dataArray.Levelled_Resources.all.push(data)
-            dataArray.Levelled_Resources.span.push({
+            dataArray['Levelled Resources'].all.push(data)
+            dataArray['Levelled Resources'].span.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
                 data.result.spanResourceUnitAgg,
@@ -252,7 +263,7 @@ export const useCounterStore = defineStore(
               ],
               name: data.name + data.result.step,
             })
-            dataArray.Levelled_Resources.data.push({
+            dataArray['Levelled Resources'].data.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
                 data.result.maxResourceUnitAgg,
@@ -260,7 +271,35 @@ export const useCounterStore = defineStore(
               ],
               name: data.name + data.result.step,
             })
-            dataArray.Levelled_Resources.cost.push({
+            dataArray['Levelled Resources'].cost.push({
+              value: [
+                data.result.projectDurationDaysWithCalendar,
+                data.result?.totalCost,
+                data,
+              ],
+
+              name: data.name + data.result.step,
+            })
+            break
+          case 'Minimum_Costs':
+            dataArray['Minimum Costs'].all.push(data)
+            dataArray['Minimum Costs'].span.push({
+              value: [
+                data.result.projectDurationDaysWithCalendar,
+                data.result.spanResourceUnitAgg,
+                data,
+              ],
+              name: data.name + data.result.step,
+            })
+            dataArray['Minimum Costs'].data.push({
+              value: [
+                data.result.projectDurationDaysWithCalendar,
+                data.result.maxResourceUnitAgg,
+                data,
+              ],
+              name: data.name + data.result.step,
+            })
+            dataArray['Minimum Costs'].cost.push({
               value: [
                 data.result.projectDurationDaysWithCalendar,
                 data.result?.totalCost,
@@ -271,7 +310,6 @@ export const useCounterStore = defineStore(
             })
             break
           default:
-            break
         }
         // taskData.value.push([
         //   data.result.projectDurationDays,

@@ -256,6 +256,20 @@ watch(
           type: 'select',
           name: DefaultData.value[1][0].name,
         })
+        let costName = ''
+        costName =
+          'Total Cost' +
+          ` (units/${
+            store.dataArray.Balanced.all[0].result.currName
+              ? store.dataArray.Balanced.all[0].result.currName
+              : ''
+          }${store.dataArray.Balanced.all[0].result.currSymbol})`
+
+        costChart.setOption({
+          yAxis: {
+            name: costName,
+          },
+        })
         updateData(DefaultData.value[1][0].value[2].result)
         selectData.preset = 'Balanced'
         selectData.step = DefaultData.value[1][0].value[2].result.step
@@ -287,7 +301,7 @@ let costChart = null
 // 数据配置项
 function seriesSpanData(name, basecolor, activecolor) {
   let size, opacity
-  if (name == 'baseline') {
+  if (name == 'Baseline') {
     size = 16
     opacity = 1
   } else {
@@ -343,7 +357,7 @@ function seriesSpanData(name, basecolor, activecolor) {
 }
 function seriesData(name, basecolor, activecolor) {
   let size, opacity
-  if (name == 'baseline') {
+  if (name == 'Baseline') {
     size = 16
     opacity = 1
   } else {
@@ -398,7 +412,7 @@ function seriesData(name, basecolor, activecolor) {
 }
 function seriesCostData(name, basecolor, activecolor) {
   let size, opacity
-  if (name == 'baseline') {
+  if (name == 'Baseline') {
     size = 16
     opacity = 1
   } else {
@@ -479,7 +493,16 @@ var option = computed(() => {
         saveAsImage: { show: true },
       },
     },
-
+    dataZoom: [
+      {
+        type: 'inside', // 启用内部缩放（框选缩放）
+        xAxisIndex: [0], // 将内部缩放应用于 x 轴
+      },
+      {
+        type: 'inside', // 启用内部缩放（框选缩放）
+        yAxisIndex: [0], // 将内部缩放应用于 x 轴
+      },
+    ],
     grid: {
       // left: 120
       top: 70,
@@ -515,11 +538,11 @@ var option = computed(() => {
       },
     },
     legend: {
-      itemGap: 40,
+      // itemGap: 40,
 
       data: [
         {
-          name: 'baseline',
+          name: 'Baseline',
           itemStyle: {
             color: 'rgb(204, 204, 204)',
           },
@@ -537,15 +560,21 @@ var option = computed(() => {
           },
         },
         {
-          name: 'Minimum_Resources',
+          name: 'Minimum Resources',
           itemStyle: {
             color: 'rgba(219, 121, 48, 0.9)',
           },
         },
         {
-          name: 'Levelled_Resources',
+          name: 'Levelled Resources',
           itemStyle: {
             color: 'rgba(170, 187, 93, 0.9)',
+          },
+        },
+        {
+          name: 'Minimum Costs',
+          itemStyle: {
+            color: 'rgba(245, 34, 45, 0.9)',
           },
         },
       ],
@@ -554,17 +583,22 @@ var option = computed(() => {
       itemHeight: 15,
     },
     series: [
-      seriesData('baseline', 'rgb(204, 204, 204)', 'rgba(138, 24, 116)'),
+      seriesData('Baseline', 'rgb(204, 204, 204)', 'rgba(138, 24, 116)'),
       seriesData('Balanced', 'rgba(130, 181, 199, 0.9)', 'rgba(138, 24, 116)'),
       seriesData('Fastest', 'rgba(247, 220, 91, 0.9)', 'rgba(138, 24, 116)'),
       seriesData(
-        'Minimum_Resources',
+        'Minimum Resources',
         'rgba(219, 121, 48, 0.9)',
         'rgba(138, 24, 116)',
       ),
       seriesData(
-        'Levelled_Resources',
+        'Levelled Resources',
         'rgba(170, 187, 93, 0.9)',
+        'rgba(138, 24, 116)',
+      ),
+      seriesData(
+        'Minimum Costs',
+        'rgba(245, 34, 45, 0.9)',
         'rgba(138, 24, 116)',
       ),
     ],
@@ -643,11 +677,9 @@ var spanOption = computed(() => {
       },
     },
     legend: {
-      itemGap: 40,
-
       data: [
         {
-          name: 'baseline',
+          name: 'Baseline',
           itemStyle: {
             color: 'rgb(204, 204, 204)',
           },
@@ -665,15 +697,21 @@ var spanOption = computed(() => {
           },
         },
         {
-          name: 'Minimum_Resources',
+          name: 'Minimum Resources',
           itemStyle: {
             color: 'rgba(219, 121, 48, 0.9)',
           },
         },
         {
-          name: 'Levelled_Resources',
+          name: 'Levelled Resources',
           itemStyle: {
             color: 'rgba(170, 187, 93, 0.9)',
+          },
+        },
+        {
+          name: 'Minimum Costs',
+          itemStyle: {
+            color: 'rgba(245, 34, 45, 0.9)',
           },
         },
       ],
@@ -682,7 +720,7 @@ var spanOption = computed(() => {
       itemHeight: 15,
     },
     series: [
-      seriesSpanData('baseline', 'rgb(204, 204, 204)', 'rgba(138, 24, 116)'),
+      seriesSpanData('Baseline', 'rgb(204, 204, 204)', 'rgba(138, 24, 116)'),
       seriesSpanData(
         'Balanced',
         'rgba(130, 181, 199, 0.9)',
@@ -694,13 +732,18 @@ var spanOption = computed(() => {
         'rgba(138, 24, 116)',
       ),
       seriesSpanData(
-        'Minimum_Resources',
+        'Minimum Resources',
         'rgba(219, 121, 48, 0.9)',
         'rgba(138, 24, 116)',
       ),
       seriesSpanData(
-        'Levelled_Resources',
+        'Levelled Resources',
         'rgba(170, 187, 93, 0.9)',
+        'rgba(138, 24, 116)',
+      ),
+      seriesSpanData(
+        'Minimum Costs',
+        'rgba(245, 34, 45, 0.9)',
         'rgba(138, 24, 116)',
       ),
     ],
@@ -708,7 +751,7 @@ var spanOption = computed(() => {
 })
 var costOption = computed(() => {
   // 获取 x 轴的最小值和最大值
-  // console.log(store.dataArray);
+  let costName = ''
   const xValues = Object.values(store.dataArray).flatMap((series) =>
     series.data.map((item) => {
       return item.value[0]
@@ -766,7 +809,7 @@ var costOption = computed(() => {
       },
     },
     yAxis: {
-      name: 'Total Cost',
+      name: costName,
       max: yMaxValue,
       min: yMinValue,
       padding: [10],
@@ -780,11 +823,9 @@ var costOption = computed(() => {
       },
     },
     legend: {
-      itemGap: 40,
-
       data: [
         {
-          name: 'baseline',
+          name: 'Baseline',
           itemStyle: {
             color: 'rgb(204, 204, 204)',
           },
@@ -802,15 +843,21 @@ var costOption = computed(() => {
           },
         },
         {
-          name: 'Minimum_Resources',
+          name: 'Minimum Resources',
           itemStyle: {
             color: 'rgba(219, 121, 48, 0.9)',
           },
         },
         {
-          name: 'Levelled_Resources',
+          name: 'Levelled Resources',
           itemStyle: {
             color: 'rgba(170, 187, 93, 0.9)',
+          },
+        },
+        {
+          name: 'Minimum Costs',
+          itemStyle: {
+            color: 'rgba(245, 34, 45, 0.9)',
           },
         },
       ],
@@ -819,7 +866,7 @@ var costOption = computed(() => {
       itemHeight: 15,
     },
     series: [
-      seriesCostData('baseline', 'rgb(204, 204, 204)', 'rgba(138, 24, 116)'),
+      seriesCostData('Baseline', 'rgb(204, 204, 204)', 'rgba(138, 24, 116)'),
       seriesCostData(
         'Balanced',
         'rgba(130, 181, 199, 0.9)',
@@ -831,13 +878,18 @@ var costOption = computed(() => {
         'rgba(138, 24, 116)',
       ),
       seriesCostData(
-        'Minimum_Resources',
+        'Minimum Resources',
         'rgba(219, 121, 48, 0.9)',
         'rgba(138, 24, 116)',
       ),
       seriesCostData(
-        'Levelled_Resources',
+        'Levelled Resources',
         'rgba(170, 187, 93, 0.9)',
+        'rgba(138, 24, 116)',
+      ),
+      seriesCostData(
+        'Minimum Costs',
+        'rgba(245, 34, 45, 0.9)',
         'rgba(138, 24, 116)',
       ),
     ],
@@ -877,7 +929,7 @@ function initChart() {
     // activeIndex.value = param.name;
     selectData.preset = param.seriesName
     selectData.step = datas.step
-    if (param.seriesName == 'baseline') {
+    if (param.seriesName == 'Baseline') {
       selectData.preset = 'Balanced'
     } else {
       selectData.preset = param.seriesName
@@ -919,7 +971,7 @@ function initChart() {
     // activeIndex.value = param.name;
     selectData.preset = param.seriesName
     selectData.step = datas.step
-    if (param.seriesName == 'baseline') {
+    if (param.seriesName == 'Baseline') {
       selectData.preset = 'Balanced'
     } else {
       selectData.preset = param.seriesName
@@ -957,7 +1009,7 @@ function initChart() {
     // activeIndex.value = param.name;
     selectData.preset = param.seriesName
     selectData.step = datas.step
-    if (param.seriesName == 'baseline') {
+    if (param.seriesName == 'Baseline') {
       selectData.preset = 'Balanced'
     } else {
       selectData.preset = param.seriesName
@@ -1020,7 +1072,7 @@ async function nextOptimized() {
   selectData.considerDefaultResourceType =
     store.setting.considerDefaultResourceType
   selectData.resourceConstraint = store.setting.resourceConstraint
-  // console.log(selectData);
+  selectData.preset = selectData.preset.replace(/ /g, '_')
   let data = await api.getOptimized({ ...selectData }, store.file.size)
   store.SummaryData = { ...SummaryData }
   store.selectedData = null
@@ -1042,15 +1094,12 @@ function getDefault() {
     data.sort((a, b) => a.value[2].result.loss - b.value[2].result.loss)
     DefaultDatas.push(data)
   }
-  let a = [].concat(...DefaultDatas)
-  a.sort((a, b) => a.value[2].result.totalCost - b.value[2].result.totalCost)
-  // console.log(a);
-  DefaultDatas.push([a[0]])
   return DefaultDatas
 }
 
 // 侧边烂点击事件
 function sideClcik(num) {
+  // console.log(DefaultData.value);
   chart.dispatchAction({
     type: 'select',
     name: DefaultData.value[num][0].name,

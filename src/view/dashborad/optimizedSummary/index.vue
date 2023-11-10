@@ -3,7 +3,7 @@
     <div class="box">
       <h2>
         {{ $t('optimizedSummary.title[0]') }}
-        <span class="sp">{{ store.SummaryData.group }}</span>
+        <span class="sp">{{ store.SummaryData.group.replace('_', ' ') }}</span>
         <div class="step">
           <span>
             {{ store.setting.Steps }} {{ $t('optimizedSummary.title[1]') }}
@@ -938,6 +938,7 @@ function groupBy(objectArray, property) {
 }
 
 let types = computed(() => {
+  console.log(store.selectedData.baselineResources)
   let data = store.selectedData.baselineResources.map((e) => {
     return { id: e.id, name: e.name, type: e.type }
   })

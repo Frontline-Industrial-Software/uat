@@ -27,47 +27,47 @@
   </div>
 </template>
 <script setup>
-import { useRouter } from "vue-router";
-import { ref } from "vue";
-import { useCounterStore } from "../../store";
-const store = useCounterStore();
+import { useRouter } from 'vue-router'
+import { ref } from 'vue'
+import { useCounterStore } from '../../store'
+const store = useCounterStore()
 const text = [
-  "dashboard/inputData",
-  "dashboard/baselineSummary",
-  "dashboard/optimizedSummary",
-  "dashboard/optimizedReport",
-];
+  'dashboard/inputData',
+  'dashboard/baselineSummary',
+  'dashboard/optimizedSummary',
+  'dashboard/optimizedReport',
+]
 
-const router = useRouter();
+const router = useRouter()
 function navigate(pathname, number) {
   // console.log(pathname);
   switch (pathname) {
-    case "dashboard/inputData":
-      router.push(`/${pathname}`);
-      store.active = number;
-      break;
-    case "dashboard/baselineSummary":
-      if (store.dataArray['baseline'].all.length != 0) {
-        router.push(`/${pathname}`);
-        store.active = number;
+    case 'dashboard/inputData':
+      router.push(`/${pathname}`)
+      store.active = number
+      break
+    case 'dashboard/baselineSummary':
+      if (store.dataArray['Baseline'].all.length != 0) {
+        router.push(`/${pathname}`)
+        store.active = number
       }
 
-      break;
-    case "dashboard/optimizedSummary":
+      break
+    case 'dashboard/optimizedSummary':
       if (store.selectedData) {
-        router.push(`/${pathname}`);
-        store.active = number;
+        router.push(`/${pathname}`)
+        store.active = number
       }
 
-      break;
-    case "dashboard/optimizedReport":
+      break
+    case 'dashboard/optimizedReport':
       if (store.selectedData) {
-        router.push(`/${pathname}`);
-        store.active = number;
+        router.push(`/${pathname}`)
+        store.active = number
       }
-      break;
+      break
     default:
-      break;
+      break
   }
   // if (store.taskData.length != 0) {
   //   if (

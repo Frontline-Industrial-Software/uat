@@ -160,16 +160,16 @@
                 size="large"
               >
                 <el-option
-                  label="All:All tasks filled with default resources"
+                  label="All:Fill default resource for all tasks"
                   value="all"
                 />
 
                 <el-option
-                  label="Any:Fill unassigned tasks with default resources"
+                  label="Any:Fill default resource for unassigned tasks"
                   value="any"
                 />
                 <el-option
-                  label="False:No default resources needed"
+                  label="False:No default resource filled"
                   value="false"
                 />
               </el-select>
@@ -199,13 +199,14 @@
                   constraints.
                   <br />
                 </template>
-                <label>Resource Constraint</label>
+                <label>Resource Constraint Adjust Type</label>
               </el-tooltip>
               <el-select
                 v-model="store.setting.resourceConstraint"
                 class="m-3"
                 placeholder="Select"
                 size="large"
+                style="width: 300px"
               >
                 <el-option label="Adjust task duration" :value="false" />
                 <el-option label="Adjust task-task lag" :value="true" />

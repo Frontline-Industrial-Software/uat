@@ -7,7 +7,7 @@
         <span
           style="text-transform: capitalize; color: rgba(130, 181, 199, 0.9)"
         >
-          {{ store.SummaryData.group }}
+          {{ store.SummaryData.group.replace('_', ' ') }}
         </span>
         <div class="chip primary">
           <small>

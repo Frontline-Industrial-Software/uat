@@ -24,12 +24,12 @@
         </div>
         <div class="chartContent">
           <Echarts
-            style="width: 720px; height: 500px"
+            style="width: 720px; height: 610px"
             id="costEcharts"
           ></Echarts>
-          <Echarts style="width: 720px; height: 500px" id="myEcharts"></Echarts>
+          <Echarts style="width: 720px; height: 610px" id="myEcharts"></Echarts>
           <Echarts
-            style="width: 720px; height: 500px"
+            style="width: 720px; height: 610px"
             id="twoEcharts"
           ></Echarts>
 
@@ -211,6 +211,9 @@ onActivated(() => {
 
 // 去百分比
 function toPercent(num, total) {
+  if (total == 0) {
+    return 0 + '%'
+  }
   return Math.round((num / total) * 10000) / 100.0 + '%' // 小数点后两位百分比
 }
 // 组件销毁时摧毁实例
@@ -230,6 +233,7 @@ watch(store.dataArray, () => {
   costChart.setOption(costOption.value)
 })
 /* 监听所有数据是否获取完成 -------------------------------------------------------------------------- */
+var costName = ''
 watch(
   store.end,
   async () => {
@@ -256,12 +260,12 @@ watch(
           type: 'select',
           name: DefaultData.value[1][0].name,
         })
-        let costName = ''
+
         costName =
           'Total Cost' +
-          ` (units/${
+          ` (${
             store.dataArray.Balanced.all[0].result.currName
-              ? store.dataArray.Balanced.all[0].result.currName
+              ? store.dataArray.Balanced.all[0].result.currName + ' , '
               : ''
           }${store.dataArray.Balanced.all[0].result.currSymbol})`
 
@@ -506,7 +510,7 @@ var option = computed(() => {
     grid: {
       // left: 120
       top: 70,
-      height: '65%',
+      height: '75%',
     },
     xAxis: {
       name: 'Duration (days)',
@@ -645,7 +649,7 @@ var spanOption = computed(() => {
     grid: {
       // left: 120
       top: 70,
-      height: '65%',
+      height: '75%',
     },
     xAxis: {
       name: 'Duration (days)',
@@ -663,7 +667,7 @@ var spanOption = computed(() => {
       },
     },
     yAxis: {
-      name: 'Resources spread (units/day)',
+      name: 'Resources Spread (units/day)',
       max: yMaxValue,
       min: yMinValue,
       padding: [10],
@@ -751,7 +755,6 @@ var spanOption = computed(() => {
 })
 var costOption = computed(() => {
   // 获取 x 轴的最小值和最大值
-  let costName = ''
   const xValues = Object.values(store.dataArray).flatMap((series) =>
     series.data.map((item) => {
       return item.value[0]
@@ -791,7 +794,7 @@ var costOption = computed(() => {
     grid: {
       // left: 120
       top: 70,
-      height: '65%',
+      height: '75%',
     },
     xAxis: {
       name: 'Duration (days)',
@@ -809,14 +812,14 @@ var costOption = computed(() => {
       },
     },
     yAxis: {
-      name: costName,
+      name: costName === '' ? 'Total Cost' : costName,
       max: yMaxValue,
       min: yMinValue,
       padding: [10],
       nameLocation: 'end',
       nameTextStyle: {
         align: 'left',
-        padding: [0, 0, 0, -30],
+        padding: [0, 0, 0, -55],
         fontWeight: 'lighter',
         fontSize: 16,
         color: 'black',
@@ -1060,13 +1063,12 @@ function updateData(data) {
   SummaryData.TotalResources = Math.ceil(data.totalResourceCount)
   SummaryData.maxResourceUnit = Math.ceil(data.maxResourceUnitAgg)
   SummaryData.BasemaxResourceUnit = Math.ceil(
-    store.originalplan.maxResourceUnitAgg,
+    store.dataArray.Baseline.all[0].result.maxResourceUnitAgg,
   )
 }
 
 // 按钮点击跳转
 async function nextOptimized() {
-  // console.log(store.wss);
   store.wss.close()
   selectData.fileName = store.file.name
   selectData.considerDefaultResourceType =
@@ -1189,8 +1191,10 @@ h2 {
     .righttop {
       display: flex;
       flex-wrap: wrap;
+
       > div {
         display: flex;
+        width: 100%;
       }
     }
     .rightbutton {

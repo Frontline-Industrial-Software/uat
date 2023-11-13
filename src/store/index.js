@@ -319,8 +319,8 @@ export const useCounterStore = defineStore(
         //   data.result,
         // ]);
         // console.log(dataArray);
-        if (data.name && data.result?.group !== 'baseline') {
-        } else if (dataArray.Levelled_Resources.all.length != 0) {
+        if (data.name && data.result?.group !== 'Baseline') {
+        } else if (dataArray['Levelled Resources'].all.length != 0) {
           end.data = true
           NProgress.done()
           // taskData.value=[]

@@ -103,7 +103,7 @@
           </div>
           <div class="choose">
             <div style="background-color: pink" class="item"></div>
-            <div>Critical Path(baseline)</div>
+            <div>Critical Path(Baseline)</div>
           </div>
         </div>
         <div id="main"></div>
@@ -440,11 +440,12 @@ function initChart() {
       },
     ],
     legend: {
-      data: ['baseline', 'new'],
+      data: ['Baseline', 'New'],
     },
     xAxis: {
       name: 'date',
       type: 'time',
+      splitNumber: 5,
       boundaryGap: [0, 0], // 设置boundaryGap为['data', 'data']
       // splitNumber:10,
       // minInterval: 10,
@@ -483,7 +484,7 @@ function initChart() {
 
     series: [
       {
-        name: 'baseline',
+        name: 'Baseline',
         type: 'custom',
         data: baselineTasks,
         large: true,
@@ -508,7 +509,7 @@ function initChart() {
         },
       },
       {
-        name: 'new',
+        name: 'New',
         type: 'custom',
         data: changedlineTasks,
         large: true,
@@ -626,7 +627,7 @@ function initChart() {
       let Compareoption = {
         series: [
           {
-            name: 'baseline',
+            name: 'Baseline',
             type: 'custom',
             data: baselineTasks,
             large: true,
@@ -651,7 +652,7 @@ function initChart() {
             },
           },
           {
-            name: 'new',
+            name: 'New',
             type: 'custom',
             data: changedlineTasks,
             large: true,
@@ -700,7 +701,7 @@ function initChart() {
       let Separateoption = {
         series: [
           {
-            name: 'baseline',
+            name: 'Baseline',
             type: 'custom',
             data: SeparatebaselineTasks,
             large: true,
@@ -725,7 +726,7 @@ function initChart() {
             },
           },
           {
-            name: 'new',
+            name: 'New',
             type: 'custom',
             data: SeparatechangedlineTasks,
             large: true,
@@ -772,7 +773,7 @@ function initChart() {
         chart.setOption({
           series: [
             {
-              name: 'baseline',
+              name: 'Baseline',
               type: 'custom',
               data: baselineTasks,
               large: true,
@@ -797,7 +798,7 @@ function initChart() {
               },
             },
             {
-              name: 'new',
+              name: 'New',
               type: 'custom',
               data: changedlineTasks,
               large: true,
@@ -938,7 +939,7 @@ function groupBy(objectArray, property) {
 }
 
 let types = computed(() => {
-  console.log(store.selectedData.baselineResources)
+  console.log(store.selectedData)
   let data = store.selectedData.baselineResources.map((e) => {
     return { id: e.id, name: e.name, type: e.type }
   })
@@ -1036,7 +1037,7 @@ let resourcesOption = computed(() => {
     },
     animation: false,
     legend: {
-      data: ['baseline', 'new'],
+      data: ['Baseline', 'New'],
     },
     xAxis: {
       name: 'date',
@@ -1058,7 +1059,7 @@ let resourcesOption = computed(() => {
 
     series: [
       {
-        name: 'baseline',
+        name: 'Baseline',
         type: 'bar',
         data: toArray(baselineResources.value),
         large: true,
@@ -1075,7 +1076,7 @@ let resourcesOption = computed(() => {
         },
       },
       {
-        name: 'new',
+        name: 'New',
         type: 'bar',
         data: toArray(newResources.value),
         large: true,

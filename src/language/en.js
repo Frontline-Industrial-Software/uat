@@ -63,9 +63,9 @@ export default {
 
     Tsidebar: [
       'Project Duration',
-      'Maximum resources',
-      'Changed tasks',
-      'Tasks on critical path',
+      'Maximum Resources',
+      'Changed Tasks',
+      'Tasks on Critical Path',
     ],
     Bsidebar: [
       'Optimization Presets',
@@ -76,8 +76,8 @@ export default {
     title: ['Overview', 'steps', 'ratio'],
     header: [
       'Project Duration (days)',
-      'Maximum resources',
-      'Changed tasks',
+      'Maximum Resources',
+      'Changed Tasks',
       'Tasks on Critical Path',
     ],
     chartName: [

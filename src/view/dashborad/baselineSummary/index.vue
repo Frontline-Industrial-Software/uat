@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="all">
     <h2>
       {{ $t('baselineSummary.title[0]') }}
       <div class="step">
@@ -263,11 +263,11 @@ watch(
 
         costName =
           'Total Cost' +
-          ` (${
+          `(${store.dataArray.Balanced.all[0].result.currSymbol}${
             store.dataArray.Balanced.all[0].result.currName
-              ? store.dataArray.Balanced.all[0].result.currName + ' , '
+              ? ' , ' + store.dataArray.Balanced.all[0].result.currName
               : ''
-          }${store.dataArray.Balanced.all[0].result.currSymbol})`
+          })`
 
         costChart.setOption({
           yAxis: {
@@ -497,6 +497,10 @@ var option = computed(() => {
         saveAsImage: { show: true },
       },
     },
+    axisPointer: {
+      show: true,
+      snap: true,
+    },
     dataZoom: [
       {
         type: 'inside', // 启用内部缩放（框选缩放）
@@ -635,6 +639,10 @@ var spanOption = computed(() => {
         dataView: { show: true, readOnly: false },
         saveAsImage: { show: true },
       },
+    },
+    axisPointer: {
+      show: true,
+      snap: true,
     },
     dataZoom: [
       {
@@ -780,6 +788,10 @@ var costOption = computed(() => {
         dataView: { show: true, readOnly: false },
         saveAsImage: { show: true },
       },
+    },
+    axisPointer: {
+      show: true,
+      snap: true,
     },
     dataZoom: [
       {
@@ -1153,7 +1165,8 @@ h2 {
   justify-content: space-between;
   flex-wrap: wrap;
   .chartContent {
-    width: 1600px;
+    width: 100%;
+    // min-width: 1600px;
     display: flex;
     justify-content: space-around;
     // flex-direction: column-reverse; /* 垂直方向反向排列 */
@@ -1163,6 +1176,11 @@ h2 {
     padding: 20px;
     background-color: #fff;
     border-radius: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    min-width: 600px;
+    // justify-content: space-between;
+
     .lefttop {
       display: flex;
       justify-content: space-between;
@@ -1238,5 +1256,20 @@ h2 {
       font-size: 1rem;
     }
   }
+}
+.all {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 70%;
+  max-width: 1600px;
+  // h2{
+  //   min-width: 200px;
+  // }
+  // >div{
+  //   min-width: 200px;
+  // }
 }
 </style>

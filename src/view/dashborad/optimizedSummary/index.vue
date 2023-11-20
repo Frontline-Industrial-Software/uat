@@ -3,7 +3,11 @@
     <div class="box">
       <h2>
         {{ $t('optimizedSummary.title[0]') }}
-        <span class="sp">{{ store.SummaryData.group.replace('_', ' ') }}</span>
+        <span class="sp">
+          {{
+            store.SummaryData.group.replace('_', ' ').replace('base', 'Base')
+          }}
+        </span>
         <div class="step">
           <span>
             {{ store.setting.Steps }} {{ $t('optimizedSummary.title[1]') }}
@@ -1209,10 +1213,13 @@ watch(typeActive, () => {
 .contain {
   background-color: rgb(240, 241, 243);
   height: 100%;
+  display: flex;
+  min-width: 100%;
 }
 .box {
   margin: 0 auto;
-  width: 1400px;
+  min-width: 1400px;
+  max-width: 1400px;
 }
 h2 {
   width: 1200px;

@@ -376,6 +376,7 @@ async function downloadTemplate() {
   display: flex;
   justify-content: center;
   align-items: center;
+  min-width: 200px;
 }
 .main {
   width: 1200px;

@@ -51,7 +51,7 @@
               store.SummaryData.BasemaxResourceUnit,
             )
           "
-          :isPositive="false"
+          :isPositive="true"
           :body="[
             store.SummaryData.maxResourceUnit,
             store.SummaryData.BasemaxResourceUnit,

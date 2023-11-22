@@ -10,6 +10,9 @@ const router = useRouter()
 export const useCounterStore = defineStore(
   'counter',
   () => {
+    // 登录状态
+    let loginStatus = ref(false)
+    let isVip = ref(false)
     // 默认设置
     let setting = reactive({
       IgnoreProject: false,
@@ -346,6 +349,8 @@ export const useCounterStore = defineStore(
       email,
       originalplan,
       wss,
+      loginStatus,
+      isVip,
     }
   },
   {},

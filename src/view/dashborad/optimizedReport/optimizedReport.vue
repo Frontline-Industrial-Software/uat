@@ -24,14 +24,7 @@
           </small>
         </div>
       </h2>
-      <v-btn
-        @click="
-          () => {
-            dialog = true
-          }
-        "
-        class="row-btn"
-      >
+      <v-btn @click="verifyVip" class="row-btn">
         {{ $t('optimizedReport.btn[1]') }}
       </v-btn>
     </div>
@@ -159,11 +152,14 @@
       </v-card>
     </v-dialog>
   </div>
+  <Login @close="closeDialogVisible" :dialogVisible="dialogVisible" />
+  <Invite @close="closeinviteVisible" :dialogVisible="inviteVisible" />
 </template>
 
 <script setup>
-import Table from './Table.vue'
+import Table from '@/view/dashborad/optimizedReport/Table.vue'
 import Echarts from './Echarts.vue'
+import Login from '@/components/loginbox/index.vue'
 import {
   ref,
   reactive,
@@ -182,6 +178,14 @@ import Lucksheettable from './Lucksheettable.vue'
 
 /* -------------------------------------------------------------------------- */
 import Vditor from 'vditor'
+let dialogVisible = ref(false)
+function closeDialogVisible() {
+  dialogVisible.value = false
+}
+let inviteVisible = ref(false)
+function closeinviteVisible() {
+  inviteVisible.value = false
+}
 const store = useCounterStore()
 function openSheet() {
   // console.log('open', dialogTableVisible.value)
@@ -230,7 +234,18 @@ onMounted(() => {
   // console.log('缓存');
 })
 let dialog = ref(false)
-
+function verifyVip() {
+  if (store.loginStatus === true) {
+    dialog.value = true
+  } else {
+    ElMessage({
+      showClose: true,
+      message: '仅登录用户使用',
+      type: 'error',
+    })
+    dialogVisible.value = true
+  }
+}
 const router = useRouter()
 
 function exportProjectReport() {

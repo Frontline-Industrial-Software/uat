@@ -301,7 +301,20 @@ const router = useRouter()
 const store = useCounterStore()
 const sheet = ref(null)
 onMounted(async () => {
-  const userInfo = await Auth.currentAuthenticatedUser()
+  let userInfo
+  try {
+    userInfo = await Auth.currentAuthenticatedUser()
+    // 在这里放置处理 userInfo 的逻辑
+    // 例如，根据 userInfo 的值设置 store.loginStatus
+    if (userInfo) {
+      store.loginStatus = true
+      store.email = userInfo.attributes.email
+    } else {
+      store.loginStatus = false
+    }
+  } catch (error) {
+    store.loginStatus = false
+  }
   await LogRocket.identify(userInfo.attributes.sub, {
     email: userInfo.attributes.email,
   })

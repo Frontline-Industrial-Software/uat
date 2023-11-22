@@ -74,6 +74,7 @@ export default {
         return null
       } else {
         let str
+
         if (
           response.data.milestoneTasksInfo &&
           response.data.milestoneTasksInfo.length != 0

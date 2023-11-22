@@ -1,6 +1,5 @@
 <template>
   <el-upload
-    :disabled="!checkData?.auth"
     class="upload-demo"
     action=""
     multiple
@@ -17,8 +16,12 @@
       Upload
     </el-button>
   </el-upload>
+  <Login @close="closeDialogVisible" :dialogVisible="dialogVisible" />
+  <Invite @close="closeinviteVisible" :dialogVisible="inviteVisible" />
 </template>
 <script setup>
+import Login from '@/components/loginbox/index.vue'
+import Invite from '@/components/invite/index.vue'
 import { Delete, Edit, Search, Share, Upload } from '@element-plus/icons-vue'
 import { Amplify, Auth } from 'aws-amplify'
 import { useCounterStore } from '@/store'
@@ -27,6 +30,14 @@ import { ref, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/api/index.js'
 import LogRocket from 'logrocket'
+let dialogVisible = ref(false)
+function closeDialogVisible() {
+  dialogVisible.value = false
+}
+let inviteVisible = ref(false)
+function closeinviteVisible() {
+  inviteVisible.value = false
+}
 function sanitizeFileName(fileName) {
   // 找到最后一个小数点的位置
   const lastDotIndex = fileName.lastIndexOf('.')
@@ -57,13 +68,15 @@ setTimeout(async () => {
   })
   let bol = await api.checkUser(userInfo.attributes.email)
   checkData.value = bol
+  store.isVip = checkData
+  console.log(store.isVip.auth)
 }, 0)
 
 async function check() {
-  if (checkData.value.auth) {
-  } else {
-    ElMessage.error(`${checkData.value.message} only use demo`)
-  }
+  // if (checkData.value.auth) {
+  // } else {
+  //   ElMessage.error(`${checkData.value.message} only use demo`)
+  // }
   // }
 }
 
@@ -76,6 +89,39 @@ const beforeUpload = async (file) => {
   store.file.size = modifiedFile.size // 使用修改后的文件对象的 size 属性
   let a = await api.sendFile(modifiedFile) // 使用修改后的文件对象进行上传
 
+  console.log(store.isVip)
+  if (a.data.loginAndauthRequired === false) {
+    console.log('文件满足要求')
+  } else {
+    if (store.loginStatus === true) {
+      console.log('用户已登录')
+      if (store.isVip.auth === true) {
+        console.log('用户为付费用户')
+      } else {
+        console.log('用户未付费')
+        ElMessage({
+          showClose: true,
+          message:
+            'File size exceeded, requires permission authorization. Please contact us.',
+          type: 'error',
+          duration: 10000,
+        })
+        inviteVisible.value = true
+        return
+      }
+    } else {
+      console.log('用户未登录')
+
+      ElMessage({
+        showClose: true,
+        message: 'File size exceeded, please log in to obtain authorization.',
+        type: 'error',
+        duration: 10000,
+      })
+      dialogVisible.value = true
+      return
+    }
+  }
   store.file.name = a.data.mapping[sanitizedFileName]
   // 上传成功后清除之前文件并还原
   if (a.data.mapping[sanitizedFileName]) {

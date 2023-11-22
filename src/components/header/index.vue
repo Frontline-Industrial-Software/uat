@@ -10,10 +10,11 @@
         <span>v2.2.2</span>
       </div>
       <div class="right">
+        <span>{{ store.email }}</span>
         <v-menu>
           <template v-slot:activator="{ props }">
             <v-btn color="rgb(240, 241, 243)" v-bind="props">
-              <v-icon size="large" icon="mdi-format-list-bulleted"> </v-icon>
+              <v-icon size="large" icon="mdi-format-list-bulleted"></v-icon>
             </v-btn>
           </template>
           <v-list>
@@ -21,14 +22,12 @@
               <div>
                 <div>
                   <v-btn elevation="0">
-                    
-
                     <a
                       style="text-decoration: none; color: black"
                       href="https://app.frontline-optimizer.com/v1.0.0/"
                       target="_blank"
                     >
-                    <v-icon start icon="mdi-laptop"> </v-icon>
+                      <v-icon start icon="mdi-laptop"></v-icon>
                       Back to v1.0.0
                     </a>
                   </v-btn>
@@ -43,28 +42,32 @@
             </v-list-item>
           </v-list>
         </v-menu>
-        <LanguageButton style="margin-left: 30px;" />
+        <LanguageButton style="margin-left: 30px" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
-
-const router = useRouter();
+import { useRouter } from 'vue-router'
+import { useCounterStore } from '@/store'
+const store = useCounterStore()
+const router = useRouter()
 function logout() {
-  localStorage.clear();
-  router.push(`/login`);
+  localStorage.clear()
+  store.email = ''
+  // router.push(`/login`);
 }
 </script>
 
 <style lang="scss" scoped>
-.right{
-display: flex;
-justify-content: space-around;
-align-items: center;
-
+.right {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  > span {
+    padding-right: 100px;
+  }
 }
 :deep(.v-btn--variant-elevated) {
   box-shadow: 0px;

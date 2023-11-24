@@ -2,6 +2,8 @@
   <div>
     <el-dialog
       v-model="props.dialogVisible"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
       class="upgrade-dialog"
       title="Upgrade for More Benefits"
     >

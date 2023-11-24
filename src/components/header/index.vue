@@ -10,7 +10,26 @@
         <span>v2.2.2</span>
       </div>
       <div class="right">
-        <span>{{ store.email }}</span>
+        <div v-if="store.email">
+          <span class="email">{{ store.email }}</span>
+          <el-avatar
+            class="avatar"
+            src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+          />
+        </div>
+
+        <div v-else>
+          <el-icon
+            @click="
+              () => {
+                dialogVisible = true
+              }
+            "
+            style="vertical-align: middle; margin-right: 30px"
+          >
+            <Avatar />
+          </el-icon>
+        </div>
         <v-menu>
           <template v-slot:activator="{ props }">
             <v-btn color="rgb(240, 241, 243)" v-bind="props">
@@ -43,30 +62,60 @@
           </v-list>
         </v-menu>
         <LanguageButton style="margin-left: 30px" />
+        <div v-if="store.email" style="margin-left: 30px" @click="logout">
+          Log out
+        </div>
       </div>
     </div>
   </div>
+  <Login @close="closeDialogVisible" :dialogVisible="dialogVisible" />
 </template>
 
 <script setup>
+import { ref } from 'vue'
+import Login from '@/components/loginbox/index.vue'
 import { useRouter } from 'vue-router'
 import { useCounterStore } from '@/store'
+import { Authenticator } from '@aws-amplify/ui-vue'
+import { Amplify, Auth } from 'aws-amplify'
+let dialogVisible = ref(false)
+function closeDialogVisible() {
+  dialogVisible.value = false
+}
 const store = useCounterStore()
 const router = useRouter()
+const handleSignOut = async () => {
+  try {
+    await Auth.signOut()
+  } catch (error) {
+    console.error('Error signing out', error)
+  }
+}
 function logout() {
+  handleSignOut()
   localStorage.clear()
+  store.loginStatus = false
+  store.isVip = ''
   store.email = ''
+  ElMessage({
+    showClose: true,
+    message: 'SignOut Success',
+    type: 'success',
+  })
   // router.push(`/login`);
 }
 </script>
 
 <style lang="scss" scoped>
+// .avatar {
+//   width: 50px;
+// }
 .right {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  > span {
-    padding-right: 100px;
+  .email {
+    padding-right: 20px;
   }
 }
 :deep(.v-btn--variant-elevated) {

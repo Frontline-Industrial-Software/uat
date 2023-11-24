@@ -153,7 +153,6 @@
     </v-dialog>
   </div>
   <Login @close="closeDialogVisible" :dialogVisible="dialogVisible" />
-  <Invite @close="closeinviteVisible" :dialogVisible="inviteVisible" />
 </template>
 
 <script setup>
@@ -238,9 +237,11 @@ function verifyVip() {
   if (store.loginStatus === true) {
     dialog.value = true
   } else {
+    dialogVisible.value = false
+    // console.log(dialogVisible.value);
     ElMessage({
       showClose: true,
-      message: '仅登录用户使用',
+      message: 'Restricted to logged-in users only.',
       type: 'error',
     })
     dialogVisible.value = true

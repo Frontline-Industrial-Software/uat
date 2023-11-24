@@ -14,6 +14,9 @@ auth.value = useAuthenticator()
 Amplify.configure(awsconfig)
 const props = defineProps(['dialogVisible'])
 const emit = defineEmits(['close'])
+function handleCancel() {
+  emit('close')
+}
 watch(
   auth,
   async (newdata) => {
@@ -55,7 +58,7 @@ let formFields = {
 </script>
 
 <template>
-  <el-dialog v-model="props.dialogVisible">
+  <el-dialog @close="handleCancel" v-model="props.dialogVisible">
     <div class="auth">
       <Authenticator :form-fields="formFields"></Authenticator>
     </div>

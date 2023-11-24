@@ -104,12 +104,6 @@ export default {
             center: true,
           })
         }
-
-        ElMessage({
-          showClose: true,
-          message: 'Upload Success',
-          type: 'success',
-        })
       }
       return response
     } catch (error) {

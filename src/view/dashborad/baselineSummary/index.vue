@@ -33,7 +33,7 @@
             id="twoEcharts"
           ></Echarts>
 
-          <div class="right">
+          <div class="right echarts-box">
             <div class="righttop">
               <div>
                 <Card
@@ -1167,12 +1167,18 @@ h2 {
   flex-wrap: wrap;
   .chartContent {
     width: 100%;
-    // min-width: 1600px;
-    display: flex;
+    min-width: 1600px;
+
+    // display: flex;
     justify-content: space-around;
     // flex-direction: column-reverse; /* 垂直方向反向排列 */
     flex-wrap: wrap;
   }
+  .echarts-box {
+    float: left;
+    margin: 25px;
+  }
+
   .left {
     padding: 20px;
     background-color: #fff;
@@ -1264,7 +1270,7 @@ h2 {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  width: 70%;
+  width: 100%;
   max-width: 1600px;
   // h2{
   //   min-width: 200px;

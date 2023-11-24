@@ -81,6 +81,7 @@ async function check() {
 }
 
 const beforeUpload = async (file) => {
+  store.file.name = ''
   const originalFileName = file.name // 保存原始文件名
   const sanitizedFileName = sanitizeFileName(originalFileName) // 使用 sanitizeFileName 处理文件名
   const modifiedFile = new File([file], sanitizedFileName, { type: file.type }) // 创建新的文件对象，修改文件名
@@ -92,11 +93,21 @@ const beforeUpload = async (file) => {
   console.log(store.isVip)
   if (a.data.loginAndauthRequired === false) {
     console.log('文件满足要求')
+    ElMessage({
+      showClose: true,
+      message: 'Upload Success',
+      type: 'success',
+    })
   } else {
     if (store.loginStatus === true) {
       console.log('用户已登录')
       if (store.isVip.auth === true) {
         console.log('用户为付费用户')
+        ElMessage({
+          showClose: true,
+          message: 'Upload Success',
+          type: 'success',
+        })
       } else {
         console.log('用户未付费')
         ElMessage({

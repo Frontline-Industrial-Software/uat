@@ -20,7 +20,9 @@
         </p>
         <p>
           Feel free to contact us via email at
-          <a href="mailto:your.email@example.com">sales@frontlinec.com</a>
+          <a href="mailto:luis@frontlinec.com">luis@frontlinec.com</a>
+          and
+          <a href="mailto:ricky@frontlinec.com">ricky@frontlinec.com</a>
           .
         </p>
         <p class="thank-you">Thank you for your trust and support!</p>

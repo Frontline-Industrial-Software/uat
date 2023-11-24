@@ -4,6 +4,7 @@
       v-model="props.dialogVisible"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
+      @close="handleCancel"
       class="upgrade-dialog"
       title="Upgrade for More Benefits"
     >
@@ -33,6 +34,10 @@
 
 <script setup>
 const props = defineProps(['dialogVisible'])
+const emit = defineEmits(['close'])
+function handleCancel() {
+  emit('close')
+}
 </script>
 
 <style lang="scss" scoped>

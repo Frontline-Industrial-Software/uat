@@ -62,8 +62,15 @@
           </v-list>
         </v-menu>
         <LanguageButton style="margin-left: 30px" />
-        <div v-if="store.email" style="margin-left: 30px" @click="logout">
-          Log out
+        <FeedBack />
+        <div
+          class="logout"
+          v-if="store.email"
+          style="margin-left: 10px; margin-top: 10px"
+          @click="logout"
+        >
+          <el-icon :size="20"><SwitchButton /></el-icon>
+          <span class="text">Log out</span>
         </div>
       </div>
     </div>
@@ -74,6 +81,7 @@
 <script setup>
 import { ref } from 'vue'
 import Login from '@/components/loginbox/index.vue'
+import FeedBack from '@/components/feedback/index.vue'
 import { useRouter } from 'vue-router'
 import { useCounterStore } from '@/store'
 import { Authenticator } from '@aws-amplify/ui-vue'
@@ -110,6 +118,18 @@ function logout() {
 // .avatar {
 //   width: 50px;
 // }
+.logout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-left: 4px;
+  margin-top: 30px;
+}
+.text {
+  font-size: 13px;
+}
 .right {
   display: flex;
   justify-content: space-around;

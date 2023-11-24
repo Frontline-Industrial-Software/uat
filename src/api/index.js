@@ -46,6 +46,22 @@ export default {
     })
     return response.data
   },
+  // !反馈接口
+  async feedBack(user, datetime, feedback) {
+    const response = await instance.post(`feedback`, {
+      params: {
+        user,
+        datetime,
+        feedback,
+      },
+    })
+    ElMessage({
+      showClose: true,
+      message: 'Success',
+      type: 'success',
+    })
+    return response.data
+  },
 
   /**
    * @function 上传初始工程文件

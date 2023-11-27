@@ -13,6 +13,8 @@ export const useCounterStore = defineStore(
     // 登录状态
     let loginStatus = ref(false)
     let isVip = ref(false)
+    let loginAndauthRequired = ref()
+
     // 默认设置
     let setting = reactive({
       IgnoreProject: false,
@@ -351,6 +353,7 @@ export const useCounterStore = defineStore(
       wss,
       loginStatus,
       isVip,
+      loginAndauthRequired,
     }
   },
   {},

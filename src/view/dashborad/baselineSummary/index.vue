@@ -133,7 +133,7 @@
             </el-radio> -->
               </el-radio-group>
             </div>
-            <v-btn
+            <!-- <v-btn
               style="outline:none;!important"
               :disabled="!store.end.data"
               @click="nextOptimized"
@@ -141,7 +141,13 @@
               color="rgb(64, 170, 151)"
             >
               {{ $t('next') }}
-            </v-btn>
+            </v-btn> -->
+            <NextButton
+              :style="'color:white;width:1000px'"
+              :disabled="store.end.data"
+              @clicked="nextOptimized"
+              :title="'next'"
+            />
           </div>
         </div>
       </div>
@@ -171,6 +177,7 @@ import { arrowMiddleware } from 'element-plus'
 import { toRaw } from '@vue/reactivity'
 import Card from '@/components/card/index.vue'
 import { log } from 'logrocket'
+import NextButton from '@/components/next/next.vue'
 /* -----------------------------------变量--------------------------------------- */
 let activeIndex = ref('Balanced1')
 
@@ -1012,6 +1019,10 @@ function initChart() {
     updateData(datas)
   })
   costChart.on('click', function (param) {
+    costChart.dispatchAction({
+      type: 'select',
+      name: param.name,
+    })
     spanChart.dispatchAction({
       type: 'select',
       name: param.name,

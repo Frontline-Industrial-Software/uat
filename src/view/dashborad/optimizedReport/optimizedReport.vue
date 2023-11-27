@@ -109,14 +109,7 @@
       <v-btn @click="back" class="back">
         {{ $t('optimizedReport.btn[0]') }}
       </v-btn>
-      <v-btn
-        @click="
-          () => {
-            dialog = true
-          }
-        "
-        class="report"
-      >
+      <v-btn @click="verifyVip" class="report">
         {{ $t('optimizedReport.btn[1]') }}
       </v-btn>
     </div>

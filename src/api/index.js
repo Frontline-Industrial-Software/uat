@@ -49,11 +49,9 @@ export default {
   // !反馈接口
   async feedBack(user, datetime, feedback) {
     const response = await instance.post(`feedback`, {
-      params: {
-        user,
-        datetime,
-        feedback,
-      },
+      user,
+      datetime,
+      feedback,
     })
     ElMessage({
       showClose: true,

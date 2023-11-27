@@ -152,9 +152,15 @@
       </div>
       <div class="button">
         <v-btn @click="back" class="btnback">BACK</v-btn>
-        <v-btn @click="nextReport" class="btngo">
+        <!-- <v-btn @click="nextReport" class="btngo">
           {{ $t('optimizedSummary.btn[1]') }}
-        </v-btn>
+        </v-btn> -->
+        <NextButton
+          :style="'color:white;margin-left:1050px'"
+          :disabled="true"
+          @clicked="nextReport"
+          :title="$t('optimizedSummary.btn[1]')"
+        />
       </div>
     </div>
   </div>
@@ -176,6 +182,7 @@ import {
   onActivated,
 } from 'vue'
 import Card from '@/components/card/index.vue'
+import NextButton from '@/components/next/next.vue'
 import * as echarts from 'echarts'
 import { useRouter } from 'vue-router'
 import ecStat from 'echarts-stat'

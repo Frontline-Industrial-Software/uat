@@ -89,8 +89,7 @@ const beforeUpload = async (file) => {
 
   store.file.size = modifiedFile.size // 使用修改后的文件对象的 size 属性
   let a = await api.sendFile(modifiedFile) // 使用修改后的文件对象进行上传
-
-  console.log(store.isVip)
+  store.loginAndauthRequired = a.data.loginAndauthRequired
   if (a.data.loginAndauthRequired === false) {
     console.log('文件满足要求')
     ElMessage({

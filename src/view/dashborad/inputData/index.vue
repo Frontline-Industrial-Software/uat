@@ -261,7 +261,7 @@
           </v-col>
           <v-col>
             <v-sheet class="pa-2 ma-2">
-              <div style="display: flex; justify-content: end">
+              <!-- <div style="display: flex; justify-content: end">
                 <v-btn
                   :disabled="!store.file.name"
                   @click="Port"
@@ -270,7 +270,13 @@
                 >
                   {{ $t('next') }}
                 </v-btn>
-              </div>
+              </div> -->
+              <NextButton
+                :style="'color:white'"
+                :disabled="store.file.name"
+                @clicked="Port"
+                :title="'next'"
+              />
             </v-sheet>
           </v-col>
         </v-row>
@@ -286,6 +292,7 @@
 </template>
 
 <script setup>
+import NextButton from '@/components/next/next.vue'
 import { useCounterStore } from '@/store'
 import { reactive, ref, onMounted, onActivated } from 'vue'
 import Upload from './upload.vue'
@@ -338,6 +345,8 @@ async function Port() {
     store.dataArray[key].cost = []
   })
   // clear()
+  console.log(store.loginAndauthRequired, store.isVip.auth)
+
   store.selectedData = null
   store.wss = await store.connectWebsocket()
   router.push({ name: 'BaselineSummary' })
@@ -359,6 +368,7 @@ async function uploadDemo() {
         a.data.originalDurationDaysWithCalendar
       store.originalplan.newCriticalTasksLen = a.data.newCriticalTasksLen
       store.originalplan.maxResourceUnitAgg = a.data.maxResourceUnitAgg
+      store.loginAndauthRequired = a.data.loginAndauthRequired
     })
 }
 let TemplateUrl = ref('')

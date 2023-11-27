@@ -1,14 +1,13 @@
 <template>
-  <div class="fd">
-    <el-icon
-      :size="20"
-      class="feedBtn"
-      @click="
-        () => {
-          dialogVisible = true
-        }
-      "
-    >
+  <div
+    @click="
+      () => {
+        dialogVisible = true
+      }
+    "
+    class="fd hover-effect"
+  >
+    <el-icon :size="20" class="feedBtn">
       <Edit />
     </el-icon>
     <div class="text">FeedBack</div>
@@ -77,10 +76,18 @@ function getCurrentFormattedDateTime() {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin-left: 4px;
   margin-top: 10px;
 }
 .text {
   font-size: 13px;
+}
+.hover-effect {
+  transition: background-color 0.3s; /* 添加过渡效果 */
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.hover-effect:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 </style>

@@ -18,21 +18,39 @@
           />
         </div>
 
-        <div v-else>
-          <el-icon
-            @click="
-              () => {
-                dialogVisible = true
-              }
-            "
-            style="vertical-align: middle; margin-right: 30px"
-          >
-            <Avatar />
+        <div
+          class="fd hover-effect"
+          @click="
+            () => {
+              dialogVisible = true
+            }
+          "
+          v-else
+        >
+          <el-icon :size="20" class="feedBtn">
+            <User />
           </el-icon>
+          <div class="text">Login</div>
         </div>
+        <div
+          class="logout hover-effect"
+          v-if="store.email"
+          style="margin-left: 10px; margin-top: 10px"
+          @click="logout"
+        >
+          <el-icon :size="20"><SwitchButton /></el-icon>
+          <span class="text">Log out</span>
+        </div>
+        <FeedBack />
+        <LanguageButton style="margin-left: 30px" />
+
         <v-menu>
           <template v-slot:activator="{ props }">
-            <v-btn color="rgb(240, 241, 243)" v-bind="props">
+            <v-btn
+              style="height: 40px"
+              color="rgb(240, 241, 243)"
+              v-bind="props"
+            >
               <v-icon size="large" icon="mdi-format-list-bulleted"></v-icon>
             </v-btn>
           </template>
@@ -61,17 +79,6 @@
             </v-list-item>
           </v-list>
         </v-menu>
-        <LanguageButton style="margin-left: 30px" />
-        <FeedBack />
-        <div
-          class="logout"
-          v-if="store.email"
-          style="margin-left: 10px; margin-top: 10px"
-          @click="logout"
-        >
-          <el-icon :size="20"><SwitchButton /></el-icon>
-          <span class="text">Log out</span>
-        </div>
       </div>
     </div>
   </div>
@@ -115,9 +122,30 @@ function logout() {
 </script>
 
 <style lang="scss" scoped>
-// .avatar {
-//   width: 50px;
-// }
+.hover-effect {
+  transition: background-color 0.3s; /* 添加过渡效果 */
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.hover-effect:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+.avatar {
+  vertical-align: text-bottom;
+}
+.fd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-right: 10px;
+  margin-top: 10px;
+}
+.text {
+  font-size: 13px;
+}
 .logout {
   display: flex;
   flex-wrap: wrap;

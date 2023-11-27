@@ -108,8 +108,9 @@ const handleSignOut = async () => {
 }
 function logout() {
   handleSignOut()
-  localStorage.clear()
   store.loginStatus = false
+  localStorage.clear()
+
   store.isVip = ''
   store.email = ''
   ElMessage({
@@ -117,6 +118,7 @@ function logout() {
     message: 'SignOut Success',
     type: 'success',
   })
+  console.log(store.loginStatus)
   // router.push(`/login`);
 }
 </script>

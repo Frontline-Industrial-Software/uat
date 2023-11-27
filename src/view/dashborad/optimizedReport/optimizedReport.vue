@@ -115,7 +115,7 @@
     </div>
     <!-- exportReport -->
     <!-- 弹出确认框 -->
-    <v-dialog v-model="dialog" width="auto">
+    <v-dialog @close="closeDialog" v-model="dialog" width="auto">
       <v-card style="border-radius: 50px; width: 400px">
         <v-card-text style="text-align: center">
           Export Optimized File
@@ -177,6 +177,9 @@ function closeDialogVisible() {
 let inviteVisible = ref(false)
 function closeinviteVisible() {
   inviteVisible.value = false
+}
+function closeDialog() {
+  dialog.value = false
 }
 const store = useCounterStore()
 function openSheet() {

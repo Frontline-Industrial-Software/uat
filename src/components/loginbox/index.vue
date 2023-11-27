@@ -2,8 +2,10 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router'
 import { Authenticator, useAuthenticator } from '@aws-amplify/ui-vue'
-import '@aws-amplify/ui-vue/styles.css'
+
 import { Amplify, Auth } from 'aws-amplify'
+import '@aws-amplify/ui-vue/styles.css'
+
 import awsconfig from '@/utils/aws-exports'
 import { useCounterStore } from '@/store'
 import api from '@/api/index.js'
@@ -18,18 +20,22 @@ function handleCancel() {
   emit('close')
 }
 watch(
-  auth,
+  () => auth, // 使用一个函数返回 auth，确保它是响应式的
   async (newdata) => {
-    const userInfo = await Auth.currentAuthenticatedUser()
-    // console.log(userInfo);
-    store.email = userInfo.attributes.email
-    let bol = await api.checkUser(userInfo.attributes.email)
-    store.isVip = bol
-    store.loginStatus = true
-    emit('close')
-    // if (auth.value.authStatus === 'authenticated') {
-    //   router.push('/dashboard/inputdata')
-    // }
+    try {
+      const userInfo = await Auth.currentAuthenticatedUser()
+      store.email = userInfo.attributes.email
+      let bol = await api.checkUser(userInfo.attributes.email)
+      store.isVip = bol
+      store.loginStatus = true
+      if (!store.email) {
+        store.loginStatus = false
+      }
+      emit('close')
+    } catch (error) {
+      // console.error('发生错误:', error);
+      store.loginStatus = false
+    }
   },
   { deep: true },
 )

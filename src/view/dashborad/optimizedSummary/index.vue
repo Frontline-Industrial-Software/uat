@@ -950,7 +950,6 @@ function groupBy(objectArray, property) {
 }
 
 let types = computed(() => {
-  console.log(store.selectedData)
   let data = store.selectedData.baselineResources.map((e) => {
     return { id: e.id, name: e.name, type: e.type }
   })

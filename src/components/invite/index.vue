@@ -10,9 +10,10 @@
     >
       <div class="upgrade-content">
         <p>
-          When the file size exceeds the limit, we invite you to upgrade to
-          become an authorized user for access to greater storage space and
-          additional advanced features.
+          This account is not authorized. Please contact us for authorization or
+          try our
+          <a href="https://app.frontline-optimizer.com/freemium">trial</a>
+          .
         </p>
         <p>
           As an authorized user, you will benefit from the enhanced capabilities

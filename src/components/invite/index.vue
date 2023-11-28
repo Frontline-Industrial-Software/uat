@@ -11,7 +11,6 @@
       <div class="upgrade-content">
         <p>
           This account is not authorized. Please contact us for authorization or
-          try our
           <a href="https://app.frontline-optimizer.com/freemium">free trial</a>
           .
         </p>

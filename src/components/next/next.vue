@@ -31,21 +31,11 @@ function closeinviteVisible() {
 function click() {
   if (store.loginAndauthRequired === false) {
     // console.log('文件满足要求')
-    ElMessage({
-      showClose: true,
-      message: 'Success',
-      type: 'success',
-    })
   } else {
     if (store.loginStatus === true) {
       //   console.log('用户已登录')
       if (store.isVip.auth === true) {
         // console.log('用户为付费用户')
-        ElMessage({
-          showClose: true,
-          message: 'Success',
-          type: 'success',
-        })
       } else {
         // console.log('用户未付费')
         ElMessage({

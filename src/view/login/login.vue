@@ -3,24 +3,53 @@ import { onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router'
 import { Authenticator, useAuthenticator } from '@aws-amplify/ui-vue'
 import '@aws-amplify/ui-vue/styles.css'
-import { Amplify } from 'aws-amplify'
+import { Amplify, Auth } from 'aws-amplify'
 import awsconfig from '@/utils/aws-exports'
 import { useCounterStore } from '@/store'
+import api from '@/api/index.js'
+import Invite from '@/components/invite/index.vue'
 const store = useCounterStore()
 let auth = ref(null)
 const router = useRouter()
 auth.value = useAuthenticator()
 Amplify.configure(awsconfig)
-
+let inviteVisible = ref(false)
+function closeinviteVisible() {
+  inviteVisible.value = false
+  location.reload()
+}
 watch(
   auth,
-  (newdata) => {
+  async (newdata) => {
     if (auth.value.authStatus === 'authenticated') {
-      router.push('/dashboard/inputdata')
+      store.email = auth.value.user.attributes.email
+      let bol = await api.checkUser(store.email)
+      if (bol.auth) {
+        router.push('/dashboard/inputdata')
+      } else {
+        inviteVisible.value = true
+        logout()
+        return
+      }
     }
   },
   { deep: true },
 )
+
+const handleSignOut = async () => {
+  try {
+    await Auth.signOut()
+  } catch (error) {
+    console.error('Error signing out', error)
+  }
+}
+function logout() {
+  handleSignOut()
+  store.loginStatus = false
+  localStorage.clear()
+  store.isVip = ''
+  store.email = ''
+}
 let formFields = {
   confirmResetPassword: {
     confirmation_code: {
@@ -59,6 +88,7 @@ let formFields = {
       <Authenticator :form-fields="formFields"></Authenticator>
     </div>
   </div>
+  <Invite @close="closeinviteVisible" :dialogVisible="inviteVisible" />
 </template>
 
 <style lang="scss" scoped>

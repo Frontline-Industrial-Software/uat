@@ -124,16 +124,20 @@ export default {
           response.data.predecessorSummaryInfo &&
           response.data.predecessorSummaryInfo.length != 0
         ) {
-          str2 = `❗${response.data.predecessorSummaryInfo.length} predecessors are Summary, this may affect the optimization results, please modify it to predecessor of non Summary type:
-          <p></p>
-          `
+          str2 = ``
           response.data.predecessorSummaryInfo.map((e, index) => {
             str2 += `<p style="line-height:30px;color:black">${
               index + 1
-            }.&nbsp  taskID::${e.taskCode} &nbsp predecessorID:${
+            }.&nbsp  taskID:${e.taskCode} &nbsp predecessorID:${
               e.predecessorCode
-            } </p>`
+            } &nbsp taskName:${e.predecessorName} </p>`
           })
+          let header = `❗${response.data.predecessorSummaryInfo.length} predecessors are Summary, this may affect the optimization results, please modify it to predecessor of non Summary type:`
+          str2 =
+            ` ${header} <div style="max-height: 500px;overflow-y: auto;margin-top:20px;>` +
+            str2 +
+            `</div>`
+          console.log(str2)
           ElMessage({
             showClose: true,
             message: str2,

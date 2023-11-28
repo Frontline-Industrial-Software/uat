@@ -118,6 +118,32 @@ export default {
             center: true,
           })
         }
+        let str2
+        // response.data.predecessorSummaryInfo=[{taskCode:1,predecessorCode:1}]
+        if (
+          response.data.predecessorSummaryInfo &&
+          response.data.predecessorSummaryInfo.length != 0
+        ) {
+          str2 = `❗${response.data.predecessorSummaryInfo.length} predecessors are Summary, this may affect the optimization results, please modify it to predecessor of non Summary type:
+          <p></p>
+          `
+          response.data.predecessorSummaryInfo.map((e, index) => {
+            str2 += `<p style="line-height:30px;color:black">${
+              index + 1
+            }.&nbsp  taskID::${e.taskCode} &nbsp predecessorID:${
+              e.predecessorCode
+            } </p>`
+          })
+          ElMessage({
+            showClose: true,
+            message: str2,
+            type: 'warning',
+            duration: 0,
+            dangerouslyUseHTMLString: true,
+            customClass: 'warn',
+            center: true,
+          })
+        }
       }
       return response
     } catch (error) {

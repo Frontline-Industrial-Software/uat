@@ -87,30 +87,24 @@ const router = createRouter({
   // history: createWebHistory(),
   routes, //使用上方定义的路由配置
 })
-//设置跳转购物车页时给页面的body属性
-// router.afterEach((to, from, next) => {
-//   if (to.path == "/shoppingManagement") {
-//     document.querySelector("body").setAttribute("style", "overflow: auto !important;")
-//   }
-// });
+
 // 创建 beforeEach 导航守卫
 router.beforeEach(async (to, from, next) => {
   // console.log(to);
-  // if (to.fullPath.includes('dashboard')) {
-  //   try {
-  //     const userInfo = await Auth.currentAuthenticatedUser()
-  //     if (!to.fullPath.includes('inputdata')) {
-  //     }
-  //     next()
-  //   } catch (error) {
-  //     next({ name: 'login' })
-  //   }
-  // } else if (to.name === 'login') {
-  //   next()
-  // } else {
-  //   next()
-  // }
-  next()
+  if (to.fullPath.includes('dashboard')) {
+    try {
+      const userInfo = await Auth.currentAuthenticatedUser()
+      if (!to.fullPath.includes('inputdata')) {
+      }
+      next()
+    } catch (error) {
+      next({ name: 'login' })
+    }
+  } else if (to.name === 'login') {
+    next()
+  } else {
+    next()
+  }
   // console.log(userInfo);
   // 获取当前认证状态的用户信息
 })

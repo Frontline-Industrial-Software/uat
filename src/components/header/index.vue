@@ -118,8 +118,7 @@ function logout() {
     message: 'SignOut Success',
     type: 'success',
   })
-  console.log(store.loginStatus)
-  // router.push(`/login`);
+  router.push(`/login`)
 }
 </script>
 

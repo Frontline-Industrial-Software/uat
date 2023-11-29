@@ -137,7 +137,6 @@ export default {
             ` ${header} <div style="max-height: 500px;overflow-y: auto;margin-top:20px;>` +
             str2 +
             `</div>`
-          console.log(str2)
           ElMessage({
             showClose: true,
             message: str2,
@@ -341,11 +340,22 @@ export default {
     )
 
     link.style.display = 'none'
-    link.download = `${name.split('.')[0]}_FrontlineExport.${
-      name.split('.')[1]
-    }`
+    link.download = this.addFrontlineExportToFilename(name)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+  },
+  addFrontlineExportToFilename(filename) {
+    // Extract the file extension
+    var fileExtension = filename.split('.').pop()
+
+    // Remove the file extension from the original filename
+    var filenameWithoutExtension = filename.replace('.' + fileExtension, '')
+
+    // Add "FrontlineExport" to the filename
+    var modifiedFilename =
+      filenameWithoutExtension + '_FrontlineExport.' + fileExtension
+
+    return modifiedFilename
   },
 }

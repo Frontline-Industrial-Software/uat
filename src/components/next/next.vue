@@ -29,6 +29,9 @@ function closeinviteVisible() {
   inviteVisible.value = false
 }
 function click() {
+  if (!props.disabled) {
+    return
+  }
   if (store.loginAndauthRequired === false) {
     // console.log('文件满足要求')
   } else {

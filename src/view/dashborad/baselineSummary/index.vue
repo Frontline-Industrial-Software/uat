@@ -16,6 +16,18 @@
           }}
         </span>
       </div>
+      <el-icon
+        @click="changeStyle"
+        :class="{ active: activeColor, normal: !activeColor }"
+      >
+        <Menu />
+      </el-icon>
+      <el-icon
+        @click="changeStyle"
+        :class="{ active: !activeColor, normal: activeColor }"
+      >
+        <Expand />
+      </el-icon>
     </h2>
     <div class="main">
       <div class="left">
@@ -24,116 +36,123 @@
         </div>
         <div class="chartContent">
           <Echarts
-            style="width: 720px; height: 610px"
+            :class="{ chartCanvasList: !activeColor, chartCanvas: activeColor }"
             id="costEcharts"
           ></Echarts>
-          <Echarts style="width: 720px; height: 610px" id="myEcharts"></Echarts>
           <Echarts
-            style="width: 720px; height: 610px"
+            :class="{ chartCanvasList: !activeColor, chartCanvas: activeColor }"
+            id="myEcharts"
+          ></Echarts>
+          <Echarts
+            :class="{ chartCanvasList: !activeColor, chartCanvas: activeColor }"
             id="twoEcharts"
           ></Echarts>
-
-          <div class="right echarts-box">
-            <div class="righttop">
-              <div>
-                <Card
-                  :title="$t('baselineSummary.Tsidebar[0]')"
-                  :height="150"
-                  :precent="
-                    toPercent(
-                      SummaryData.changedDuration - SummaryData.baseDuration,
-                      SummaryData.baseDuration,
-                    )
-                  "
-                  :isPositive="true"
-                  :body="[
-                    SummaryData.changedDuration + ' ' + 'days',
-                    SummaryData.baseDuration + ' ' + 'days',
-                    SummaryData.planDurationDays + ' ' + 'days',
-                  ]"
-                />
-                <Card
-                  :title="$t('baselineSummary.Tsidebar[1]')"
-                  :height="150"
-                  :precent="
-                    toPercent(
-                      SummaryData.maxResourceUnit -
-                        SummaryData.BasemaxResourceUnit,
+        </div>
+        <div class="right echarts-box">
+          <div class="righttop">
+            <div>
+              <Card
+                :title="$t('baselineSummary.Tsidebar[0]')"
+                :height="138"
+                :precent="
+                  toPercent(
+                    SummaryData.changedDuration - SummaryData.baseDuration,
+                    SummaryData.baseDuration,
+                  )
+                "
+                :isPositive="true"
+                :body="[
+                  SummaryData.changedDuration + ' ' + 'days',
+                  SummaryData.baseDuration + ' ' + 'days',
+                  SummaryData.planDurationDays + ' ' + 'days',
+                ]"
+              />
+              <Card
+                :title="$t('baselineSummary.Tsidebar[1]')"
+                :height="138"
+                :precent="
+                  toPercent(
+                    SummaryData.maxResourceUnit -
                       SummaryData.BasemaxResourceUnit,
-                    )
-                  "
-                  :isPositive="true"
-                  :body="[
-                    SummaryData.maxResourceUnit,
                     SummaryData.BasemaxResourceUnit,
-                    // store.SummaryData.changedDuration + 'days',
-                  ]"
-                />
-              </div>
-              <div>
-                <Card
-                  :title="$t('baselineSummary.Tsidebar[2]')"
-                  :height="150"
-                  :body="[
-                    SummaryData.changgedTasks,
-                    SummaryData.TotalTasks,
-                    // store.SummaryData.changedDuration + 'days',
-                  ]"
-                />
-                <Card
-                  :title="$t('baselineSummary.Tsidebar[3]')"
-                  :height="150"
-                  :body="[
-                    SummaryData.changedCriticalPath,
-                    SummaryData.changedCriticalPath,
-                    SummaryData.baseCriticalPath,
-                    // store.SummaryData.changedDuration + 'days',
-                  ]"
-                />
-              </div>
+                  )
+                "
+                :isPositive="true"
+                :body="[
+                  SummaryData.maxResourceUnit,
+                  SummaryData.BasemaxResourceUnit,
+                  // store.SummaryData.changedDuration + 'days',
+                ]"
+              />
             </div>
+            <div>
+              <Card
+                :title="$t('baselineSummary.Tsidebar[2]')"
+                :height="138"
+                :body="[
+                  SummaryData.changgedTasks,
+                  SummaryData.TotalTasks,
+                  // store.SummaryData.changedDuration + 'days',
+                ]"
+              />
+              <Card
+                :title="$t('baselineSummary.Tsidebar[3]')"
+                :height="138"
+                :body="[
+                  SummaryData.changedCriticalPath,
+                  SummaryData.changedCriticalPath,
+                  SummaryData.baseCriticalPath,
+                  // store.SummaryData.changedDuration + 'days',
+                ]"
+              />
+            </div>
+          </div>
 
-            <div class="rightbutton">
-              <h1>{{ $t('baselineSummary.Bsidebar[0]') }}</h1>
-              <!-- <div>
+          <div class="rightbutton">
+            <h1 style="font-size: 18px; width: 202px; font-weight: 700">
+              {{ $t('baselineSummary.Bsidebar[0]') }}
+            </h1>
+            <!-- <div>
             {{ $t('baselineSummary.Bsidebar[1]') }}
           </div> -->
-              <el-radio-group v-model="radio" class="radiobox">
-                <el-radio
-                  @click="
-                    () => {
-                      sideClcik(1)
-                    }
-                  "
-                  :label="0"
-                >
-                  {{ $t('types.typeShow[1]') }}
-                  <span>{{ $t('types.msg[0]') }}</span>
-                </el-radio>
-                <el-radio @click="sideClcik(2)" :label="1">
-                  {{ $t('types.typeShow[2]') }}
-                  <span>{{ $t('types.msg[1]') }}</span>
-                </el-radio>
-                <el-radio :label="2" @click="sideClcik(3)">
-                  {{ $t('types.typeShow[3]') }}
-                  <span>{{ $t('types.msg[2]') }}</span>
-                </el-radio>
-                <el-radio :label="3" @click="sideClcik(4)">
-                  {{ $t('types.typeShow[4]') }}
-                  <span>{{ $t('types.msg[3]') }}</span>
-                </el-radio>
-                <el-radio :label="4" @click="sideClcik(5)">
-                  Minimum Costs
-                  <span>Least amount of required costs</span>
-                </el-radio>
+            <el-radio-group v-model="radio" class="radiobox">
+              <el-radio
+                @click="
+                  () => {
+                    sideClcik(1)
+                  }
+                "
+                :label="0"
+              >
+                <span>{{ $t('types.typeShow[1]') }}</span>
+                <!-- <span>{{ $t('types.msg[0]') }}</span> -->
+              </el-radio>
+              <el-radio @click="sideClcik(2)" :label="1">
+                <span>{{ $t('types.typeShow[2]') }}</span>
 
-                <!-- <el-radio :label="3" @click="sideClcik(4)">
+                <!-- <span>{{ $t('types.msg[1]') }}</span> -->
+              </el-radio>
+              <el-radio :label="2" @click="sideClcik(3)">
+                <span>{{ $t('types.typeShow[3]') }}</span>
+                <!-- <span>{{ $t('types.msg[2]') }}</span> -->
+              </el-radio>
+              <el-radio :label="3" @click="sideClcik(4)">
+                <span>{{ $t('types.typeShow[4]') }}</span>
+                <!-- <span>{{ $t('types.msg[3]') }}</span> -->
+              </el-radio>
+              <el-radio :label="4" @click="sideClcik(5)">
+                <span>Minimum Costs</span>
+
+                <!-- <span>Least amount of required costs</span> -->
+              </el-radio>
+
+              <!-- <el-radio :label="3" @click="sideClcik(4)">
               Constraint Compliance
               <span>Satisfies all constraints</span>
             </el-radio> -->
-              </el-radio-group>
-            </div>
-            <!-- <v-btn
+            </el-radio-group>
+          </div>
+          <!-- <v-btn
               style="outline:none;!important"
               :disabled="!store.end.data"
               @click="nextOptimized"
@@ -142,13 +161,12 @@
             >
               {{ $t('next') }}
             </v-btn> -->
-            <NextButton
-              :style="'color:white;width:1000px'"
-              :disabled="store.end.data"
-              @clicked="nextOptimized"
-              :title="'next'"
-            />
-          </div>
+          <NextButton
+            :style="'color:white;width:262px;'"
+            :disabled="store.end.data"
+            @clicked="nextOptimized"
+            :title="'Generate'"
+          />
         </div>
       </div>
     </div>
@@ -180,7 +198,18 @@ import { log } from 'logrocket'
 import NextButton from '@/components/next/next.vue'
 /* -----------------------------------变量--------------------------------------- */
 let activeIndex = ref('Balanced1')
+// 颜色样式控制
+let activeColor = ref(true)
+function changeStyle() {
+  activeColor.value == false
+    ? (activeColor.value = true)
+    : (activeColor.value = false)
+  setTimeout(() => {
+    changeSize()
+  }, 0)
+}
 
+/* -------------------------------------------------------------------------- */
 let selectData = reactive({
   preset: 'Balanced',
   fileName: store.file.name,
@@ -521,7 +550,7 @@ var option = computed(() => {
     ],
     grid: {
       // left: 120
-      top: 70,
+      top: 90,
       height: '75%',
     },
     xAxis: {
@@ -547,7 +576,7 @@ var option = computed(() => {
       nameLocation: 'end',
       nameTextStyle: {
         align: 'center',
-        padding: [0, 0, 0, 100],
+        padding: [0, 0, 0, 130],
         fontWeight: 'lighter',
         fontSize: 16,
         color: 'black',
@@ -597,6 +626,9 @@ var option = computed(() => {
       x: 'left',
       itemWidth: 15,
       itemHeight: 15,
+      textStyle: {
+        fontSize: 10,
+      },
     },
     series: [
       seriesData('Baseline', 'rgb(204, 204, 204)', 'rgba(138, 24, 116)'),
@@ -664,7 +696,7 @@ var spanOption = computed(() => {
     ],
     grid: {
       // left: 120
-      top: 70,
+      top: 90,
       height: '75%',
     },
     xAxis: {
@@ -690,7 +722,7 @@ var spanOption = computed(() => {
       nameLocation: 'end',
       nameTextStyle: {
         align: 'center',
-        padding: [0, 0, 0, 100],
+        padding: [0, 0, 0, 130],
         fontWeight: 'lighter',
         fontSize: 16,
         color: 'black',
@@ -738,6 +770,9 @@ var spanOption = computed(() => {
       x: 'left',
       itemWidth: 15,
       itemHeight: 15,
+      textStyle: {
+        fontSize: 10,
+      },
     },
     series: [
       seriesSpanData('Baseline', 'rgb(204, 204, 204)', 'rgba(138, 24, 116)'),
@@ -813,7 +848,7 @@ var costOption = computed(() => {
     ],
     grid: {
       // left: 120
-      top: 70,
+      top: 90,
       height: '75%',
     },
     xAxis: {
@@ -839,9 +874,9 @@ var costOption = computed(() => {
       nameLocation: 'end',
       nameTextStyle: {
         align: 'left',
-        padding: [0, 0, 0, -55],
+        padding: [0, 0, 0, -27],
         fontWeight: 'lighter',
-        fontSize: 16,
+        fontSize: 14,
         color: 'black',
       },
     },
@@ -887,6 +922,9 @@ var costOption = computed(() => {
       x: 'left',
       itemWidth: 15,
       itemHeight: 15,
+      textStyle: {
+        fontSize: 10,
+      },
     },
     series: [
       seriesCostData('Baseline', 'rgb(204, 204, 204)', 'rgba(138, 24, 116)'),
@@ -1143,6 +1181,13 @@ function sideClcik(num) {
   selectData.step = DefaultData.value[num][0].value[2].result.step
   updateData(DefaultData.value[num][0].value[2].result)
 }
+
+// 切换显示方式，更改size
+function changeSize() {
+  chart.resize()
+  spanChart.resize()
+  costChart.resize()
+}
 </script>
 
 <style lang="scss" scoped>
@@ -1176,9 +1221,11 @@ h2 {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
+  // 是否弹性
+  // width: 100%;
   .chartContent {
-    width: 100%;
-    min-width: 1600px;
+    width: 1200px;
+    // min-width: 1600px;
 
     // display: flex;
     justify-content: space-around;
@@ -1192,7 +1239,7 @@ h2 {
 
   .left {
     padding: 20px;
-    background-color: #fff;
+    // background-color: #fff;
     border-radius: 15px;
     display: flex;
     flex-wrap: wrap;
@@ -1202,7 +1249,7 @@ h2 {
     .lefttop {
       display: flex;
       justify-content: space-between;
-      width: 100%;
+      width: 1600px;
     }
     .choosebox {
       display: flex;
@@ -1222,29 +1269,29 @@ h2 {
     }
   }
   .right {
-    width: 720px;
+    width: 270px;
     padding-left: 16px;
+
     .righttop {
       display: flex;
       flex-wrap: wrap;
 
       > div {
-        display: flex;
-        width: 100%;
+        width: 258px;
       }
     }
     .rightbutton {
-      height: 220px;
-      padding: 20px;
-      margin: 16px 0px;
+      height: 210px;
+      padding: 16px;
+      margin: 16px 0;
+
       background-color: #fff;
       border-radius: 15px;
-      div {
-        font-size: 15px;
-        color: #545454;
-      }
-      h1 {
-        font-size: 28px;
+      width: 255px;
+      border-radius: 16px;
+      span {
+        font-size: 16px !important;
+        font-weight: 700 !important;
       }
       .radiobox {
         align-items: flex-start;
@@ -1252,6 +1299,10 @@ h2 {
         flex-direction: column;
         justify-content: start;
         margin-top: 10px;
+        div {
+          font-size: 16px;
+          font-weight: 700;
+        }
         span {
           color: #828787;
           font-size: 10px;
@@ -1289,5 +1340,37 @@ h2 {
   // >div{
   //   min-width: 200px;
   // }
+}
+.active {
+  color: #40a795;
+}
+normal {
+  color: #545454;
+}
+.chartCanvas {
+  width: 521px;
+  height: 450px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 1px 1px 20px 5px rgba(205.06, 205.06, 205.06, 0.25);
+  padding: 10px;
+}
+.chartCanvasList {
+  width: 1041px;
+  height: 750px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 1px 1px 20px 5px rgba(205.06, 205.06, 205.06, 0.25);
+  padding: 10px;
+}
+:deep(.el-radio__input.is-checked .el-radio__inner) {
+  background-color: #40aa97 !important;
+  border-color: #40aa97 !important; // #4e8fd0
+  color: #40aa97;
+}
+
+/* 使用深度选择器修改选中状态的颜色 */
+:deep(.el-radio__input.is-checked + .el-radio__label) {
+  color: #40aa97;
 }
 </style>

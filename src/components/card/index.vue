@@ -126,6 +126,7 @@ const props = defineProps(['title', 'body', 'precent', 'height', 'isPositive'])
     height: 15%;
     color: #b5b5b5;
     padding: 8px 16px;
+    font-size: 14px;
   }
   .content {
     display: flex;

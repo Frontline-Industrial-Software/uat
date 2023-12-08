@@ -32,7 +32,7 @@
           </el-icon>
           <div class="text">Login</div>
         </div>
-        <div
+        <!-- <div
           class="logout hover-effect"
           v-if="store.email"
           style="margin-left: 10px; margin-top: 10px"
@@ -40,23 +40,18 @@
         >
           <el-icon :size="20"><SwitchButton /></el-icon>
           <span class="text">Log out</span>
-        </div>
+        </div> -->
         <FeedBack />
         <LanguageButton style="margin-left: 30px" />
 
         <v-menu>
           <template v-slot:activator="{ props }">
-            <v-btn
-              style="height: 40px"
-              color="rgb(240, 241, 243)"
-              v-bind="props"
-            >
-              <v-icon size="large" icon="mdi-format-list-bulleted"></v-icon>
-            </v-btn>
+            <img v-bind="props" src="/menu.svg" alt="" />
+            <!-- <v-icon size="large" icon="mdi-format-list-bulleted"></v-icon> -->
           </template>
-          <v-list>
-            <v-list-item>
-              <div>
+          <v-list style="font-size: 12px; font-weight: 600">
+            <v-list-item @click="">
+              <!-- <div>
                 <div>
                   <v-btn elevation="0">
                     <a
@@ -69,14 +64,19 @@
                     </a>
                   </v-btn>
                 </div>
-                <div>
-                  <v-btn elevation="0" @click="logout">
-                    <v-icon start icon="mdi-arrow-left"></v-icon>
-                    Log out &nbsp &nbsp &nbsp &nbsp &nbsp&nbsp
-                  </v-btn>
-                </div>
-              </div>
+           
+              </div> -->
+              <a
+                style="text-decoration: none; color: black"
+                href="https://app.frontline-optimizer.com/v1.0.0/"
+                target="_blank"
+              >
+                Back to v1.0.0
+              </a>
             </v-list-item>
+            <v-list-item @click="">Youtube Tutorials</v-list-item>
+            <v-list-item @click="">Upgrade Features</v-list-item>
+            <v-list-item @click="logout">Log out</v-list-item>
           </v-list>
         </v-menu>
       </div>

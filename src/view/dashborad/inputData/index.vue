@@ -149,7 +149,7 @@
                   are no existing resource or role definitions or when no tasks
                   are explicitly assigned to resources or roles.
                 </template>
-                <label>Consider Default Resource Type</label>
+                <label>How To Handle Tasks Without Resources?</label>
               </el-tooltip>
 
               <el-select
@@ -199,7 +199,7 @@
                   constraints.
                   <br />
                 </template>
-                <label>Resource Constraint Adjust Type</label>
+                <label>Method To Satisfy Resource Constraints</label>
               </el-tooltip>
               <el-select
                 v-model="store.setting.resourceConstraint"

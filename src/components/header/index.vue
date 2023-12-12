@@ -12,10 +12,11 @@
       <div class="right">
         <div v-if="store.email">
           <span class="email">{{ store.email }}</span>
-          <el-avatar
+          <!-- <el-avatar
             class="avatar"
             src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-          />
+          /> -->
+          <el-avatar>user</el-avatar>
         </div>
 
         <div
@@ -41,7 +42,7 @@
           <el-icon :size="20"><SwitchButton /></el-icon>
           <span class="text">Log out</span>
         </div> -->
-        <FeedBack />
+        <FeedBack @close="closefeedback" :feedback="feeddialogVisible" />
         <LanguageButton style="margin-left: 30px" />
 
         <v-menu>
@@ -74,6 +75,15 @@
                 Back to v1.0.0
               </a>
             </v-list-item>
+            <v-list-item
+              @click="
+                () => {
+                  feeddialogVisible = true
+                }
+              "
+            >
+              Feed Back
+            </v-list-item>
             <v-list-item @click="">Youtube Tutorials</v-list-item>
             <v-list-item @click="">Upgrade Features</v-list-item>
             <v-list-item @click="logout">Log out</v-list-item>
@@ -93,6 +103,10 @@ import { useRouter } from 'vue-router'
 import { useCounterStore } from '@/store'
 import { Authenticator } from '@aws-amplify/ui-vue'
 import { Amplify, Auth } from 'aws-amplify'
+let feeddialogVisible = ref(false)
+function closefeedback() {
+  feeddialogVisible.value = false
+}
 let dialogVisible = ref(false)
 function closeDialogVisible() {
   dialogVisible.value = false

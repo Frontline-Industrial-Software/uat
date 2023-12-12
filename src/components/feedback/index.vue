@@ -1,20 +1,7 @@
 <template>
-  <div
-    @click="
-      () => {
-        dialogVisible = true
-      }
-    "
-    class="fd hover-effect"
-  >
-    <el-icon :size="20" class="feedBtn">
-      <Edit />
-    </el-icon>
-    <div class="text">FeedBack</div>
-  </div>
   <el-dialog
     @close="close"
-    v-model="dialogVisible"
+    v-model="props.feedback"
     class="upgrade-dialog"
     title="Share Your Thoughts"
   >
@@ -37,21 +24,21 @@
 import { ref } from 'vue'
 import api from '@/api/index.js'
 import { useCounterStore } from '@/store'
+const props = defineProps(['feedback'])
+const emits = defineEmits(['close'])
 const store = useCounterStore()
 const textarea = ref('')
 let dialogVisible = ref(false)
 function close() {
-  dialogVisible.value = false
+  emits('close')
 }
 async function sendFeedback() {
-  console.log(store.email, getCurrentFormattedDateTime(), textarea.value)
-
   let res = await api.feedBack(
     store.email,
     getCurrentFormattedDateTime(),
     textarea.value,
   )
-  dialogVisible.value = false
+  emits('close')
   textarea.value = ''
 }
 

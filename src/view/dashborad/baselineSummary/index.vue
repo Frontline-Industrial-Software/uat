@@ -17,12 +17,14 @@
         </span>
       </div>
       <el-icon
+        style="margin-top: 3px"
         @click="changeStyle"
         :class="{ active: activeColor, normal: !activeColor }"
       >
         <Menu />
       </el-icon>
       <el-icon
+        style="margin-top: 3px"
         @click="changeStyle"
         :class="{ active: !activeColor, normal: activeColor }"
       >

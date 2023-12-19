@@ -223,11 +223,12 @@
               {{
                 `${$t('inputData.fourData[0]')}(${Math.floor(
                   store.setting.Ratio[0] * 100,
-                )}% -${Math.floor(store.setting.Ratio[1] * 100)}%)`
+                )}% - ${Math.floor(store.setting.Ratio[1] * 100)}%)`
               }}
+
               <v-range-slider
                 :disabled="!store.file.name"
-                :max="2"
+                :max="10"
                 :min="0.1"
                 :step="0.1"
                 v-model="store.setting.Ratio"

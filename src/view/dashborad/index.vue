@@ -33,7 +33,12 @@ import Navigate from '@/components/navigate/index.vue'
   margin: 0px;
   min-height: 100vh;
   // min-width: 1600px;
-  display: flex;
-  flex-direction: column;
+  // display: flex;
+  // flex-direction: column;
+}
+.header {
+  height: 90px;
+  width: 100%;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px;
 }
 </style>

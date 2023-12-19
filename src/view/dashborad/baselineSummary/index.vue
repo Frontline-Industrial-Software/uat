@@ -1241,7 +1241,7 @@ h2 {
 
   .left {
     padding: 20px;
-    // background-color: #fff;
+    background-color: rgb(240, 241, 243);
     border-radius: 15px;
     display: flex;
     flex-wrap: wrap;

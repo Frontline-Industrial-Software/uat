@@ -9,6 +9,7 @@ html {
   color: #545454;
   overflow: auto !important;
   height: 100vh;
+  background-color: rgb(240, 241, 243);
 }
 .warn {
   min-width: 45vw !important;

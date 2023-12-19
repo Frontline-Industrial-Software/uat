@@ -85,7 +85,15 @@
               Feed Back
             </v-list-item>
             <v-list-item @click="">Youtube Tutorials</v-list-item>
-            <v-list-item @click="">Upgrade Features</v-list-item>
+            <v-list-item
+              @click="
+                () => {
+                  inviteVisible = true
+                }
+              "
+            >
+              Upgrade Features
+            </v-list-item>
             <v-list-item @click="logout">Log out</v-list-item>
           </v-list>
         </v-menu>
@@ -93,11 +101,13 @@
     </div>
   </div>
   <Login @close="closeDialogVisible" :dialogVisible="dialogVisible" />
+  <Invite @close="closeinviteVisible" :dialogVisible="inviteVisible" />
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import Login from '@/components/loginbox/index.vue'
+import Invite from '@/components/invite/index.vue'
 import FeedBack from '@/components/feedback/index.vue'
 import { useRouter } from 'vue-router'
 import { useCounterStore } from '@/store'
@@ -110,6 +120,10 @@ function closefeedback() {
 let dialogVisible = ref(false)
 function closeDialogVisible() {
   dialogVisible.value = false
+}
+let inviteVisible = ref(false)
+function closeinviteVisible() {
+  inviteVisible.value = false
 }
 const store = useCounterStore()
 const router = useRouter()

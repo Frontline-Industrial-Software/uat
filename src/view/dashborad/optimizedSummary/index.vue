@@ -81,15 +81,26 @@
       <div class="mainEchar1">
         <div class="Echar1top">
           <div>{{ $t('optimizedSummary.chartName[0]') }}</div>
-          <el-select
-            v-model="selectMode"
-            class="m-2"
-            placeholder="Select"
-            size="large"
-          >
-            <el-option label="Compare Mode" value="Compare" />
-            <el-option label="Separate Mode" value="Separate" />
-          </el-select>
+          <div>
+            <el-select
+              v-model="selectSortMode"
+              class="m-2"
+              placeholder="Select"
+              size="large"
+            >
+              <el-option label="Sort by Date" value="Date" />
+              <el-option label="Original Order" value="Original" />
+            </el-select>
+            <el-select
+              v-model="selectMode"
+              class="m-2"
+              placeholder="Select"
+              size="large"
+            >
+              <el-option label="Compare Mode" value="Compare" />
+              <el-option label="Separate Mode" value="Separate" />
+            </el-select>
+          </div>
         </div>
         <span>{{ $t('optimizedSummary.chartName[1]') }}</span>
         <div class="choosebox">
@@ -195,7 +206,7 @@ import Dialog from '@/components/dialog/dialog.vue'
 
 // 选择框
 let selectMode = ref('Compare')
-
+let selectSortMode = ref('Date')
 // 弹出框
 let dialogVisible = ref(false)
 
@@ -283,6 +294,8 @@ function baseItem(data) {
 }
 var changedlineTasks
 var baselineTasks
+let DatebaselineTasks, DatechangedlineTasks
+
 function initChart() {
   selectMode.value = 'Compare'
   changedlineTasks = []
@@ -365,6 +378,25 @@ function initChart() {
       },
     }
   })
+  let baseSort = JSON.parse(JSON.stringify(baselineTasks))
+  let changeSort = JSON.parse(JSON.stringify(changedlineTasks))
+  DatebaselineTasks = baseSort.sort(function (a, b) {
+    return a.value[3].plannedFinish - b.value[3].plannedFinish
+  })
+  DatebaselineTasks.map((e, index) => {
+    let newObject = { ...e }
+    newObject.value[0] = calculateIdx(baselineTasks.length - index + 1)
+    return newObject
+  })
+  DatechangedlineTasks = changeSort.sort(function (a, b) {
+    return a.value[3].plannedStart - b.value[3].plannedStart
+  })
+  DatechangedlineTasks.map((e, index) => {
+    let newObject = { ...e }
+    newObject.value[0] = calculateIdx(changedlineTasks.length - index + 1)
+    return newObject
+  })
+
   //！甘特图
 
   let chart = myEcharts.init(
@@ -497,7 +529,7 @@ function initChart() {
       {
         name: 'Baseline',
         type: 'custom',
-        data: baselineTasks,
+        data: DatebaselineTasks,
         large: true,
         renderItem: renderItem,
         encode: {
@@ -522,7 +554,7 @@ function initChart() {
       {
         name: 'New',
         type: 'custom',
-        data: changedlineTasks,
+        data: DatechangedlineTasks,
         large: true,
         renderItem: renderItem,
         encode: {
@@ -633,14 +665,30 @@ function initChart() {
   chart.on('datazoom', function (param) {
     zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
   })
+
+  function calculateIdx(inputNumber) {
+    if (inputNumber === 2) {
+      return 2
+    } else {
+      return inputNumber + (inputNumber - 2) * 2
+    }
+  }
   watch(selectMode, (newval, oldval) => {
+    let base, change
+    if (selectSortMode.value == 'Date') {
+      base = DatebaselineTasks
+      change = DatechangedlineTasks
+    } else {
+      base = baselineTasks
+      change = changedlineTasks
+    }
     if (newval === 'Compare') {
       let Compareoption = {
         series: [
           {
             name: 'Baseline',
             type: 'custom',
-            data: baselineTasks,
+            data: base,
             large: true,
             renderItem: renderItem,
             encode: {
@@ -665,7 +713,7 @@ function initChart() {
           {
             name: 'New',
             type: 'custom',
-            data: changedlineTasks,
+            data: change,
             large: true,
             renderItem: renderItem,
             encode: {
@@ -694,7 +742,7 @@ function initChart() {
         zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
       })
     } else {
-      let SeparatebaselineTasks = JSON.parse(JSON.stringify(baselineTasks)).map(
+      let SeparatebaselineTasks = JSON.parse(JSON.stringify(base)).map(
         (e, index) => {
           // console.log(e);
           let newObject = { ...e } // 创建一个新对象副本
@@ -702,13 +750,13 @@ function initChart() {
           return newObject // 返回新的对象
         },
       )
-      let SeparatechangedlineTasks = JSON.parse(
-        JSON.stringify(changedlineTasks),
-      ).map((e, index) => {
-        let newObject = { ...e }
-        newObject.value[0] = baselineTasks.length - index
-        return newObject
-      })
+      let SeparatechangedlineTasks = JSON.parse(JSON.stringify(change)).map(
+        (e, index) => {
+          let newObject = { ...e }
+          newObject.value[0] = baselineTasks.length - index
+          return newObject
+        },
+      )
       let Separateoption = {
         series: [
           {
@@ -774,7 +822,128 @@ function initChart() {
       })
     }
   })
+  watch(selectSortMode, (newval, oldval) => {
+    if (newval === 'Date') {
+      let Dateeoption = {
+        series: [
+          {
+            name: 'Baseline',
+            type: 'custom',
+            data: DatebaselineTasks,
+            large: true,
+            renderItem: renderItem,
+            encode: {
+              x: [1, 2],
+              y: 0,
+              labal: 11,
+            },
+            label: {
+              normal: {
+                show: isLabel, // 启用标签显示
+                color: 'black', // 标签的文本颜色
+                position: 'inside', // 标签的文本位置
+                formatter: function (params) {
+                  // 自定义标签内容
 
+                  return params.data.name
+                },
+                fontSize: 12,
+              },
+            },
+          },
+          {
+            name: 'New',
+            type: 'custom',
+            data: DatechangedlineTasks,
+            large: true,
+            renderItem: renderItem,
+            encode: {
+              x: [1, 2],
+              y: 0,
+            },
+            label: {
+              normal: {
+                show: isLabel, // 启用标签显示
+                color: 'black', // 标签的文本颜色
+                position: 'inside', // 标签的文本位置
+                formatter: function (params) {
+                  // 自定义标签内容
+                  // console.log(params);
+                  return params.data.name
+                },
+                fontSize: 12,
+              },
+            },
+          },
+        ],
+      }
+      chart.setOption(Dateeoption)
+      chart.off('datazoom')
+      chart.on('datazoom', function (param) {
+        zoomEvent(param, DatebaselineTasks, DatechangedlineTasks, isLabel)
+      })
+      console.log('成功')
+    } else {
+      let Compareoption = {
+        series: [
+          {
+            name: 'Baseline',
+            type: 'custom',
+            data: baselineTasks,
+            large: true,
+            renderItem: renderItem,
+            encode: {
+              x: [1, 2],
+              y: 0,
+              labal: 11,
+            },
+            label: {
+              normal: {
+                show: isLabel, // 启用标签显示
+                color: 'black', // 标签的文本颜色
+                position: 'inside', // 标签的文本位置
+                formatter: function (params) {
+                  // 自定义标签内容
+
+                  return params.data.name
+                },
+                fontSize: 12,
+              },
+            },
+          },
+          {
+            name: 'New',
+            type: 'custom',
+            data: changedlineTasks,
+            large: true,
+            renderItem: renderItem,
+            encode: {
+              x: [1, 2],
+              y: 0,
+            },
+            label: {
+              normal: {
+                show: isLabel, // 启用标签显示
+                color: 'black', // 标签的文本颜色
+                position: 'inside', // 标签的文本位置
+                formatter: function (params) {
+                  // 自定义标签内容
+                  // console.log(params);
+                  return params.data.name
+                },
+                fontSize: 12,
+              },
+            },
+          },
+        ],
+      }
+      chart.setOption(Compareoption)
+      chart.off('datazoom')
+      chart.on('datazoom', function (param) {
+        zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
+      })
+    }
+  })
   function zoomEvent(param, baselineTasks, changedlineTasks, isLabel) {
     if (!isLabel) {
       if (

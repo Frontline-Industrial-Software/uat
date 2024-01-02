@@ -144,8 +144,6 @@
               </el-radio>
               <el-radio :label="4" @click="sideClcik(5)">
                 <span>Minimum Costs</span>
-
-                <!-- <span>Least amount of required costs</span> -->
               </el-radio>
 
               <!-- <el-radio :label="3" @click="sideClcik(4)">
@@ -552,6 +550,7 @@ var option = computed(() => {
     ],
     grid: {
       // left: 120
+      right: 10,
       top: 90,
       height: '75%',
     },
@@ -698,6 +697,7 @@ var spanOption = computed(() => {
     ],
     grid: {
       // left: 120
+      right: 10,
       top: 90,
       height: '75%',
     },
@@ -722,6 +722,7 @@ var spanOption = computed(() => {
       min: yMinValue,
       padding: [10],
       nameLocation: 'end',
+
       nameTextStyle: {
         align: 'center',
         padding: [0, 0, 0, 130],
@@ -825,6 +826,8 @@ var costOption = computed(() => {
 
   const yMinValue = parseFloat((Math.min(...yValues) * 0.95).toFixed(2))
   const yMaxValue = parseFloat((Math.max(...yValues) * 1.05).toFixed(2))
+  const xlabelWidth = costChart.getWidth()
+  console.log(xlabelWidth)
   return {
     tooltip: { show: true },
     toolbox: {
@@ -850,6 +853,7 @@ var costOption = computed(() => {
     ],
     grid: {
       // left: 120
+      right: 10,
       top: 90,
       height: '75%',
     },
@@ -874,6 +878,13 @@ var costOption = computed(() => {
       min: yMinValue,
       padding: [10],
       nameLocation: 'end',
+      axisLabel: {
+        //**该项配置重点关注**
+        show: true,
+        interval: 0,
+        width: 40,
+        overflow: 'breakAll',
+      },
       nameTextStyle: {
         align: 'left',
         padding: [0, 0, 0, -27],
@@ -1186,6 +1197,34 @@ function sideClcik(num) {
 
 // 切换显示方式，更改size
 function changeSize() {
+  const xlabelWidth = costChart.getWidth()
+  console.log(xlabelWidth)
+  if (xlabelWidth < 1000) {
+    costChart.setOption({
+      yAxis: {
+        axisLabel: {
+          //**该项配置重点关注**
+          show: true,
+          interval: 0,
+          width: 100,
+          overflow: 'breakAll',
+        },
+      },
+    })
+  } else {
+    costChart.setOption({
+      yAxis: {
+        axisLabel: {
+          //**该项配置重点关注**
+          show: true,
+          interval: 0,
+          width: 40,
+          overflow: 'breakAll',
+        },
+      },
+    })
+  }
+
   chart.resize()
   spanChart.resize()
   costChart.resize()

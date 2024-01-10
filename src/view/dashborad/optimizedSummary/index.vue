@@ -204,6 +204,19 @@ import api from '@/api/index.js'
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
 import Dialog from '@/components/dialog/dialog.vue'
 
+// 简单的防抖函数实现
+function debounce(func, delay) {
+  let timer
+  return function () {
+    const context = this
+    const args = arguments
+    clearTimeout(timer)
+    timer = setTimeout(function () {
+      func.apply(context, args)
+    }, delay)
+  }
+}
+
 // 选择框
 let selectMode = ref('Compare')
 let selectSortMode = ref('Date')
@@ -535,7 +548,6 @@ function initChart() {
         encode: {
           x: [1, 2],
           y: 0,
-          labal: 11,
         },
         label: {
           normal: {
@@ -662,10 +674,15 @@ function initChart() {
   }
   option && chart.setOption(option)
   chart.off('datazoom')
-  chart.on('datazoom', function (param) {
-    zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
-  })
-
+  // chart.on('datazoom', function (param) {
+  //   zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
+  // })
+  chart.on(
+    'datazoom',
+    debounce(function (param) {
+      zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
+    }, 700),
+  ) // 这里的300是防抖延迟的毫秒数，可以根据需要调整
   function calculateIdx(inputNumber) {
     if (inputNumber === 2) {
       return 2
@@ -694,7 +711,6 @@ function initChart() {
             encode: {
               x: [1, 2],
               y: 0,
-              labal: 11,
             },
             label: {
               normal: {
@@ -709,8 +725,10 @@ function initChart() {
                 fontSize: 12,
               },
             },
+            large: true,
           },
           {
+            large: true,
             name: 'New',
             type: 'custom',
             data: change,
@@ -738,9 +756,15 @@ function initChart() {
       }
       chart.setOption(Compareoption)
       chart.off('datazoom')
-      chart.on('datazoom', function (param) {
-        zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
-      })
+      // chart.on('datazoom', function (param) {
+      //   zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
+      // })
+      chart.on(
+        'datazoom',
+        debounce(function (param) {
+          zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
+        }, 700),
+      ) // 这里的300是防抖延迟的毫秒数，可以根据需要调整
     } else {
       let SeparatebaselineTasks = JSON.parse(JSON.stringify(base)).map(
         (e, index) => {
@@ -760,6 +784,7 @@ function initChart() {
       let Separateoption = {
         series: [
           {
+            large: true,
             name: 'Baseline',
             type: 'custom',
             data: SeparatebaselineTasks,
@@ -768,7 +793,7 @@ function initChart() {
             encode: {
               x: [1, 2],
               y: 0,
-              labal: 11,
+              label: 11,
             },
             label: {
               normal: {
@@ -785,6 +810,7 @@ function initChart() {
             },
           },
           {
+            large: true,
             name: 'New',
             type: 'custom',
             data: SeparatechangedlineTasks,
@@ -812,14 +838,25 @@ function initChart() {
       }
       chart.setOption(Separateoption)
       chart.off('datazoom')
-      chart.on('datazoom', function (param) {
-        zoomEvent(
-          param,
-          SeparatebaselineTasks,
-          SeparatechangedlineTasks,
-          isLabel,
-        )
-      })
+      // chart.on('datazoom', function (param) {
+      //   zoomEvent(
+      //     param,
+      //     SeparatebaselineTasks,
+      //     SeparatechangedlineTasks,
+      //     isLabel,
+      //   )
+      // })
+      chart.on(
+        'datazoom',
+        debounce(function (param) {
+          zoomEvent(
+            param,
+            SeparatebaselineTasks,
+            SeparatechangedlineTasks,
+            isLabel,
+          )
+        }, 700),
+      ) // 这里的300是防抖延迟的毫秒数，可以根据需要调整
     }
   })
   watch(selectSortMode, (newval, oldval) => {
@@ -835,7 +872,7 @@ function initChart() {
             encode: {
               x: [1, 2],
               y: 0,
-              labal: 11,
+              label: 11,
             },
             label: {
               normal: {
@@ -879,9 +916,15 @@ function initChart() {
       }
       chart.setOption(Dateeoption)
       chart.off('datazoom')
-      chart.on('datazoom', function (param) {
-        zoomEvent(param, DatebaselineTasks, DatechangedlineTasks, isLabel)
-      })
+      // chart.on('datazoom', function (param) {
+      //   zoomEvent(param, DatebaselineTasks, DatechangedlineTasks, isLabel)
+      // })
+      chart.on(
+        'datazoom',
+        debounce(function (param) {
+          zoomEvent(param, DatebaselineTasks, DatechangedlineTasks, isLabel)
+        }, 700),
+      ) // 这里的300是防抖延迟的毫秒数，可以根据需要调整
       console.log('成功')
     } else {
       let Compareoption = {
@@ -895,7 +938,7 @@ function initChart() {
             encode: {
               x: [1, 2],
               y: 0,
-              labal: 11,
+              label: 11,
             },
             label: {
               normal: {
@@ -939,9 +982,15 @@ function initChart() {
       }
       chart.setOption(Compareoption)
       chart.off('datazoom')
-      chart.on('datazoom', function (param) {
-        zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
-      })
+      // chart.on('datazoom', function (param) {
+      //   zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
+      // })
+      chart.on(
+        'datazoom',
+        debounce(function (param) {
+          zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
+        }, 700),
+      ) // 这里的300是防抖延迟的毫秒数，可以根据需要调整
     }
   })
   function zoomEvent(param, baselineTasks, changedlineTasks, isLabel) {
@@ -951,6 +1000,9 @@ function initChart() {
         (30 / changedlineTasks.length) * 100
       ) {
         chart.setOption({
+          legend: {
+            data: ['Baseline', 'New'],
+          },
           series: [
             {
               name: 'Baseline',
@@ -961,7 +1013,6 @@ function initChart() {
               encode: {
                 x: [1, 2],
                 y: 0,
-                labal: 11,
               },
               label: {
                 normal: {
@@ -1005,9 +1056,12 @@ function initChart() {
         })
       } else {
         chart.setOption({
+          legend: {
+            data: ['Baseline', 'New'],
+          },
           series: [
             {
-              name: 'baseline',
+              name: 'Baseline',
               type: 'custom',
               data: baselineTasks,
               large: true,
@@ -1015,7 +1069,6 @@ function initChart() {
               encode: {
                 x: [1, 2],
                 y: 0,
-                labal: 11,
               },
               label: {
                 normal: {
@@ -1032,7 +1085,7 @@ function initChart() {
               },
             },
             {
-              name: 'new',
+              name: 'New',
               type: 'custom',
               data: changedlineTasks,
               large: true,

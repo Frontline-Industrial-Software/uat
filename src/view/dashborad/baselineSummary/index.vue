@@ -827,7 +827,6 @@ var costOption = computed(() => {
   const yMinValue = parseFloat((Math.min(...yValues) * 0.95).toFixed(2))
   const yMaxValue = parseFloat((Math.max(...yValues) * 1.05).toFixed(2))
   const xlabelWidth = costChart.getWidth()
-  console.log(xlabelWidth)
   return {
     tooltip: { show: true },
     toolbox: {

@@ -680,7 +680,7 @@ function initChart() {
   chart.on(
     'datazoom',
     debounce(function (param) {
-      zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
+      zoomEvent(param, DatebaselineTasks, DatechangedlineTasks, isLabel)
     }, 700),
   ) // 这里的300是防抖延迟的毫秒数，可以根据需要调整
   function calculateIdx(inputNumber) {
@@ -762,7 +762,7 @@ function initChart() {
       chart.on(
         'datazoom',
         debounce(function (param) {
-          zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
+          zoomEvent(param, DatebaselineTasks, DatechangedlineTasks, isLabel)
         }, 700),
       ) // 这里的300是防抖延迟的毫秒数，可以根据需要调整
     } else {
@@ -994,20 +994,26 @@ function initChart() {
     }
   })
   function zoomEvent(param, baselineTasks, changedlineTasks, isLabel) {
+    let option = chart.getOption()
+    // 在配置中找到你需要的系列数据
+    var baselineSeriesData = option.series.find(
+      (series) => series.name === 'Baseline',
+    ).data
+    var newSeriesData = option.series.find(
+      (series) => series.name === 'New',
+    ).data
+    // 现在 baselineSeriesData 和 newSeriesData 包含了对应系列的数据
     if (!isLabel) {
       if (
         param.batch[0].end - param.batch[0].start <
         (30 / changedlineTasks.length) * 100
       ) {
         chart.setOption({
-          legend: {
-            data: ['Baseline', 'New'],
-          },
           series: [
             {
               name: 'Baseline',
               type: 'custom',
-              data: baselineTasks,
+              data: baselineSeriesData,
               large: true,
               renderItem: renderItem,
               encode: {
@@ -1031,7 +1037,7 @@ function initChart() {
             {
               name: 'New',
               type: 'custom',
-              data: changedlineTasks,
+              data: newSeriesData,
               large: true,
               renderItem: renderItem,
               encode: {
@@ -1056,14 +1062,11 @@ function initChart() {
         })
       } else {
         chart.setOption({
-          legend: {
-            data: ['Baseline', 'New'],
-          },
           series: [
             {
               name: 'Baseline',
               type: 'custom',
-              data: baselineTasks,
+              data: baselineSeriesData,
               large: true,
               renderItem: renderItem,
               encode: {
@@ -1087,7 +1090,7 @@ function initChart() {
             {
               name: 'New',
               type: 'custom',
-              data: changedlineTasks,
+              data: newSeriesData,
               large: true,
               renderItem: renderItem,
               encode: {

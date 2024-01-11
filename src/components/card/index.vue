@@ -99,8 +99,6 @@ const props = defineProps(['title', 'body', 'precent', 'height', 'isPositive'])
   flex-wrap: wrap;
   width: 100%;
   .t-content {
-    display: flex;
-    justify-content: flex-start;
     padding-left: 16px;
     align-items: center;
     .f {

@@ -162,7 +162,7 @@
               {{ $t('next') }}
             </v-btn> -->
           <NextButton
-            :style="'color:white;width:262px;'"
+            :style="'color:white;width:300px;'"
             :disabled="store.end.data"
             @clicked="nextOptimized"
             :title="'Generate'"
@@ -1309,7 +1309,7 @@ h2 {
     }
   }
   .right {
-    width: 270px;
+    width: 300px;
     padding-left: 16px;
 
     .righttop {
@@ -1317,17 +1317,17 @@ h2 {
       flex-wrap: wrap;
 
       > div {
-        width: 258px;
+        width: 300px;
       }
     }
     .rightbutton {
       height: 210px;
       padding: 16px;
       margin: 16px 0;
-
+      margin-left: 5px;
       background-color: #fff;
       border-radius: 15px;
-      width: 255px;
+      width: 275px;
       border-radius: 16px;
       span {
         font-size: 16px !important;

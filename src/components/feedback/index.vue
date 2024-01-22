@@ -24,9 +24,10 @@
 import { ref } from 'vue'
 import api from '@/api/index.js'
 import { useCounterStore } from '@/store'
+const store = useCounterStore()
 const props = defineProps(['feedback'])
 const emits = defineEmits(['close'])
-const store = useCounterStore()
+
 const textarea = ref('')
 let dialogVisible = ref(false)
 function close() {

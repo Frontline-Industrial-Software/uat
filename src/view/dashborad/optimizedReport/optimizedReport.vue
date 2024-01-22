@@ -31,7 +31,7 @@
     <div class="content-box">
       <h3>Online Excel</h3>
       <div class="sheet">
-        <Lucksheettable :url="excelUrl"></Lucksheettable>
+        <Lucksheettable @getUrl="getexcelUrl" :url="excelUrl"></Lucksheettable>
       </div>
       <!-- <div class="md" ref="mDom"></div> -->
     </div>
@@ -224,7 +224,7 @@ onUnmounted(() => {
   // console.log('销毁');
 })
 onMounted(() => {
-  getexcelUrl()
+  // getexcelUrl()
   // initMd(mDom.value);
   // console.log('缓存');
 })
@@ -257,15 +257,18 @@ function exportProjectReport() {
   api.getProjectReport(Url, store.truefile)
 }
 let excelUrl = ref({})
+
 async function getexcelUrl() {
+  console.log(111)
   if (store.SummaryData.group == 'baseline') {
     store.SummaryData.group = 'Balanced'
   }
   let Url = `${store.SummaryData.group}-${
     store.file.name.split('.')[0]
   }_FrontlineExport.${store.file.name.split('.')[1]}`
-  excelUrl.value = await api.getUrl(Url, store.truefile)
-  console.log(excelUrl.value)
+  // excelUrl.value = await api.getUrl(Url, store.truefile)
+  let a = await api.getUrl(Url, store.truefile)
+  return a
 }
 
 // console.log(excelUrl.value);

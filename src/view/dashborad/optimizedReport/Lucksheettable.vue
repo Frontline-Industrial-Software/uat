@@ -10,47 +10,60 @@ import { ref, onMounted } from 'vue'
 import { exportExcel } from '@/utils/exportSheet'
 import { isFunction } from '@/utils/is'
 import LuckyExcel from 'luckyexcel'
+import { useCounterStore } from '@/store'
+import api from '@/api/index.js'
+
+const store = useCounterStore()
 const props = defineProps({
   url: Object,
 })
-// console.log(props.url);
-// const emit = defineEmits(['close'])
+
+async function getexcelUrl() {
+  if (store.SummaryData.group == 'baseline') {
+    store.SummaryData.group = 'Balanced'
+  }
+  let Url = `${store.SummaryData.group}-${
+    store.file.name.split('.')[0]
+  }_FrontlineExport.${store.file.name.split('.')[1]}`
+  // excelUrl.value = await api.getUrl(Url, store.truefile)
+  let a = await api.getUrl(Url, store.truefile)
+  return a
+}
+
 onMounted(async () => {
-  setTimeout(async () => {
-    const value = props.url
+  const value = await getexcelUrl()
 
-    const name = 'test'
-    isMaskShow.value = true
-    setTimeout(() => {
-      LuckyExcel.transformExcelToLuckyByUrl(
-        value,
-        name,
-        (exportJson, luckysheetfile) => {
-          if (exportJson.sheets == null || exportJson.sheets.length == 0) {
-            alert(
-              'Failed to read the content of the excel file, currently does not support xls files!',
-            )
-            return
-          }
-          // console.log('exportJson', exportJson)
-          jsonData.value = exportJson
+  const name = 'test'
+  isMaskShow.value = true
+  setTimeout(() => {
+    LuckyExcel.transformExcelToLuckyByUrl(
+      value,
+      name,
+      (exportJson, luckysheetfile) => {
+        if (exportJson.sheets == null || exportJson.sheets.length == 0) {
+          alert(
+            'Failed to read the content of the excel file, currently does not support xls files!',
+          )
+          return
+        }
+        // console.log('exportJson', exportJson)
+        jsonData.value = exportJson
 
-          isMaskShow.value = false
+        isMaskShow.value = false
 
-          isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy()
+        isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy()
 
-          window.luckysheet.create({
-            container: 'luckysheet', //luckysheet is the container id
-            showinfobar: false,
-            data: exportJson.sheets,
-            title: exportJson.info.name,
-            userInfo: exportJson.info.name.creator,
-            editable: false,
-          })
-        },
-      )
-    }, 0)
-  }, 1500)
+        window.luckysheet.create({
+          container: 'luckysheet', //luckysheet is the container id
+          showinfobar: false,
+          data: exportJson.sheets,
+          title: exportJson.info.name,
+          userInfo: exportJson.info.name.creator,
+          editable: false,
+        })
+      },
+    )
+  }, 0)
 })
 const isMaskShow = ref(false)
 const selected = ref('')

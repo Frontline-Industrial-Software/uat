@@ -1176,12 +1176,47 @@ function getlog() {
     datetime: getCurrentFormattedTime(),
     user: store.email,
     projectInfo: `filename:${store.truefile},tasks: ${SummaryData.TotalTasks}, resources: ${SummaryData.maxResourceUnit}`,
-    settings: `Ignore Actual tart / Actual finish: ${store.setting.IgnoreProject},Learning Rate:${store.setting.Rate}., How To Handle Tasks Without Resources: ${store.setting.considerDefaultResourceType}, Method To Satisfy Resource Constraints: ${store.setting.resourceConstraint},Optimization Ratio:${store.setting.Ratio},Optimization Steps:${store.setting.Steps}`,
-    baselinelnfo: `duration:${store.dataArray.Baseline.all[0].result.baselineDurationDaysWithCalendar}, maxResources: ${store.dataArray.Baseline.all[0].result.maxResourceUnitAgg}, resourcesSpread: ${store.dataArray.Baseline.all[0].result.spanResourceUnitAgg},totalCost: ${store.dataArray.Baseline.all[0].result.totalCost}, criticalTasks: ${store.dataArray.Baseline.all[0].result.baselineCriticalTasksLen}`,
-    userAction: `preset: ${selectData.preset}, step:${store.setting.Steps}, duration: ${SummaryData.changedDuration} days, maxResources: ${SummaryData.maxResourceUnit}, resourcesSpread: ${selectData.resourcesSpread}, totalCost: ${selectData.totalCost}, criticalTasks: ${selectData.criticalTasks}`,
+    settings: `Ignore Actual Start / Actual Finish: ${
+      store.setting.IgnoreProject
+    },Learning Rate:${
+      store.setting.Rate
+    }, How To Handle Tasks Without Resources: ${
+      store.setting.considerDefaultResourceType
+    }, Method To Satisfy Resource Constraints: ${
+      store.setting.resourceConstraint
+    },Optimization Ratio:${setRatio(store.setting.Ratio)},Optimization Steps:${
+      store.setting.Steps
+    }`,
+    baselineInfo: `duration:${
+      store.dataArray.Baseline.all[0].result.baselineDurationDaysWithCalendar
+    }, maxResources: ${
+      store.dataArray.Baseline.all[0].result.maxResourceUnitAgg
+    }, resourcesSpread: ${
+      store.dataArray.Baseline.all[0].result.spanResourceUnitAgg
+    },totalCost: ${currSymbol(
+      store.dataArray.Baseline.all[0].result.totalCost,
+    )}, criticalTasks: ${
+      store.dataArray.Baseline.all[0].result.baselineCriticalTasksLen
+    }`,
+    userAction: `preset: ${selectData.preset}, step:${
+      store.setting.Steps
+    }, duration: ${SummaryData.changedDuration} days, maxResources: ${
+      SummaryData.maxResourceUnit
+    }, resourcesSpread: ${selectData.resourcesSpread}, totalCost: ${currSymbol(
+      selectData.totalCost,
+    )}, criticalTasks: ${selectData.criticalTasks}`,
   }
-  console.log(log)
   return log
+}
+function currSymbol(numbers) {
+  return store.dataArray.Balanced.all[0].result.currSymbol + numbers
+}
+function setRatio(numbers) {
+  // 遍历数组，将每个元素乘以 100 并添加百分号，然后使用短横线连接
+  const percentageString = numbers
+    .map((number) => (number * 100).toFixed(0) + '%')
+    .join(' - ')
+  return percentageString
 }
 // 按钮点击跳转
 async function nextOptimized() {
@@ -1198,15 +1233,6 @@ async function nextOptimized() {
   // console.log(store.selectedData);
   store.active = 2
   store.selectChange = true
-  // console.log(store.setting,selectData);
-  // let log = {
-  //   datetime: getCurrentFormattedTime(),
-  //   user: store.email,
-  //   projectInfo: `filename:${store.truefile},tasks: ${SummaryData.TotalTasks}, resources: ${SummaryData.TotalResources}`,
-  //   settings: `Ignore Actual tart / Actual finish: ${store.setting.IgnoreProject},Learning Rate:${store.setting.Rate}., How To Handle Tasks Without Resources: ${store.setting.considerDefaultResourceType}, Method To Satisfy Resource Constraints: ${store.setting.resourceConstraint},Optimization Ratio:${store.setting.Ratio},Optimization Steps:${store.setting.Steps}`,
-  //   baselinelnfo: `duration:${store.dataArray.Baseline.all[0].result.baselineDurationDaysWithCalendar}, maxResources: ${store.dataArray.Baseline.all[0].result.maxResourceUnitAgg}, resourcesSpread: ${store.dataArray.Baseline.all[0].result.spanResourceUnitAgg},totalCost: ${store.dataArray.Baseline.all[0].result.totalCost}, criticalTasks: ${store.dataArray.Baseline.all[0].result.baselineCriticalTasksLen}`,
-  //   userAction: `preset: ${selectData.preset}, step:${store.setting.Steps}, duration: ${SummaryData.changedDuration} days, maxResources: ${SummaryData.TotalResources}, resourcesSpread: ${selectData.resourcesSpread}, totalCost: ${selectData.totalCost}, criticalTasks: ${selectData.criticalTasks}`,
-  // }
 
   let logsData = await api.UploadUserlog(getlog())
   // console.log(getlog())

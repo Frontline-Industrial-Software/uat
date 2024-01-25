@@ -142,7 +142,7 @@ export const useCounterStore = defineStore(
           data = JSON.parse(JSON.parse(e?.data))
         } catch (error) {
           // console.log('Begin')
-          // resCode = JSON.parse(e?.data)
+          resCode = JSON.parse(e?.data)
 
           if (resCode.code != 0) {
             // socket.close()

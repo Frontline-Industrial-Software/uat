@@ -4,7 +4,7 @@ import { ref, computed, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
-
+import { ElMessage } from 'element-plus'
 const router = useRouter()
 // 组合式写法
 export const useCounterStore = defineStore(
@@ -62,6 +62,13 @@ export const useCounterStore = defineStore(
     let SummaryData = ref(null)
 
     let wss = ref(null)
+
+    //!报错回到首页控制
+    let codeControl = reactive({
+      data: null,
+      isBol: true,
+    })
+
     // size大小转换函数
     function formatBytes(size) {
       if (!size) return ''
@@ -123,16 +130,33 @@ export const useCounterStore = defineStore(
         NProgress.done()
       }
       // 发送
-
+      // let resCode = {
+      //   code: 7,
+      //   message: 'Balanced error',
+      //   error: 'Invalid taskResources constraints! - taskId: 3207',
+      // }
+      let resCode
       socket.onmessage = function (e) {
         let data
         try {
           data = JSON.parse(JSON.parse(e?.data))
         } catch (error) {
-          console.log('Begin')
+          // console.log('Begin')
+          // resCode = JSON.parse(e?.data)
+
+          if (resCode.code != 0) {
+            // socket.close()
+            // console.log(codeControl);
+            codeControl.data = resCode
+            codeControl.isBol = false
+            NProgress.done()
+            // router.push(`/dashboard/inputdata`)
+            // // console.log('error')
+            // ElMessage.error(resCode.error)
+          }
           return
         }
-
+        // console.log(data)
         if (data.name == 'Minimum_Resources') {
           data.name = 'Minimum Resources'
         } else if (data.name == 'Levelled_Resources') {
@@ -354,6 +378,7 @@ export const useCounterStore = defineStore(
       loginStatus,
       isVip,
       loginAndauthRequired,
+      codeControl,
     }
   },
   {},

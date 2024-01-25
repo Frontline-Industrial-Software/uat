@@ -12,6 +12,7 @@
       <div class="right">
         <div v-if="store.email">
           <span class="email">{{ store.email }}</span>
+
           <!-- <el-avatar
             class="avatar"
             src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
@@ -33,6 +34,22 @@
           </el-icon>
           <div class="text">Login</div>
         </div>
+        <el-avatar style="background-color: rgb(240, 241, 243)">
+          <span>
+            <el-icon
+              :size="30"
+              color="#409EFC"
+              v-if="store.email.indexOf('@frontlinec.com') !== -1"
+              @click="
+                () => {
+                  api.userlogs()
+                }
+              "
+            >
+              <Document />
+            </el-icon>
+          </span>
+        </el-avatar>
         <!-- <div
           class="logout hover-effect"
           v-if="store.email"
@@ -106,6 +123,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import api from '@/api/index.js'
 import Login from '@/components/loginbox/index.vue'
 import Invite from '@/components/invite/index.vue'
 import FeedBack from '@/components/feedback/index.vue'

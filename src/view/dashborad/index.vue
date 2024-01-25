@@ -16,6 +16,32 @@
 import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router'
 import Header from '@/components/header/index.vue'
 import Navigate from '@/components/navigate/index.vue'
+import { useCounterStore } from '@/store'
+import { ElMessage } from 'element-plus'
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+  onBeforeUnmount,
+  watch,
+  reactive,
+  computed,
+  onActivated,
+  watchEffect,
+} from 'vue'
+const router = useRouter()
+const store = useCounterStore()
+watch(store.codeControl, () => {
+  console.log(store.codeControl)
+  if (!store.codeControl.isBol) {
+    router.push(`/dashboard/inputdata`)
+    ElMessage.error({
+      message: store.codeControl.data.error,
+      duration: 0,
+      showClose: true,
+    })
+  }
+})
 </script>
 
 <style lang="scss" scoped>

@@ -187,7 +187,7 @@ import {
 import * as echarts from 'echarts'
 import { useRouter } from 'vue-router'
 import { useCounterStore } from '@/store'
-const store = useCounterStore()
+
 import ecStat from 'echarts-stat'
 import api from '@/api/index.js'
 import { onBeforeRouteLeave } from 'vue-router'
@@ -196,6 +196,7 @@ import { toRaw } from '@vue/reactivity'
 import Card from '@/components/card/index.vue'
 import { log } from 'logrocket'
 import NextButton from '@/components/next/next.vue'
+const store = useCounterStore()
 /* -----------------------------------变量--------------------------------------- */
 let activeIndex = ref('Balanced1')
 // 颜色样式控制
@@ -275,14 +276,7 @@ watch(
   store.end,
   async () => {
     if (store.end.data) {
-      // spanChart.setOption({
-      //   series: [],
-      // })
-      // chart.setOption({
-      //   series: [],
-      // })
       DefaultData.value = getDefault()
-      // console.log(DefaultData.value);
       radio.value = 0
       setTimeout(() => {
         chart.dispatchAction({
@@ -314,6 +308,11 @@ watch(
         updateData(DefaultData.value[1][0].value[2].result)
         selectData.preset = 'Balanced'
         selectData.step = DefaultData.value[1][0].value[2].result.step
+        selectData.totalCost = DefaultData.value[1][0].value[2].result.totalCost
+        selectData.resourcesSpread =
+          DefaultData.value[1][0].value[2].result.spanResourceUnitAgg
+        selectData.criticalTasks =
+          DefaultData.value[1][0].value[2].result.newCriticalTasksLen
       }, 0)
     } else {
       activeIndex = ref('')
@@ -1002,6 +1001,9 @@ function initChart() {
     // activeIndex.value = param.name;
     selectData.preset = param.seriesName
     selectData.step = datas.step
+    selectData.totalCost = datas.totalCost
+    selectData.resourcesSpread = datas.spanResourceUnitAgg
+    selectData.criticalTasks = datas.newCriticalTasksLen
     if (param.seriesName == 'Baseline') {
       selectData.preset = 'Balanced'
     } else {
@@ -1044,6 +1046,11 @@ function initChart() {
     // activeIndex.value = param.name;
     selectData.preset = param.seriesName
     selectData.step = datas.step
+    selectData.preset = param.seriesName
+    selectData.step = datas.step
+    selectData.totalCost = datas.totalCost
+    selectData.resourcesSpread = datas.spanResourceUnitAgg
+    selectData.criticalTasks = datas.newCriticalTasksLen
     if (param.seriesName == 'Baseline') {
       selectData.preset = 'Balanced'
     } else {
@@ -1086,6 +1093,11 @@ function initChart() {
     // activeIndex.value = param.name;
     selectData.preset = param.seriesName
     selectData.step = datas.step
+    selectData.preset = param.seriesName
+    selectData.step = datas.step
+    selectData.totalCost = datas.totalCost
+    selectData.resourcesSpread = datas.spanResourceUnitAgg
+    selectData.criticalTasks = datas.newCriticalTasksLen
     if (param.seriesName == 'Baseline') {
       selectData.preset = 'Balanced'
     } else {
@@ -1140,7 +1152,37 @@ function updateData(data) {
     store.dataArray.Baseline.all[0].result.maxResourceUnitAgg,
   )
 }
+// date
+function getCurrentFormattedTime() {
+  // 创建一个Date对象，表示当前时间
+  var currentDate = new Date()
 
+  // 获取年、月、日、小时、分钟和秒
+  var year = currentDate.getFullYear()
+  var month = (currentDate.getMonth() + 1).toString().padStart(2, '0') // 月份从0开始，需要加1
+  var day = currentDate.getDate().toString().padStart(2, '0')
+  var hours = currentDate.getHours().toString().padStart(2, '0')
+  var minutes = currentDate.getMinutes().toString().padStart(2, '0')
+  var seconds = currentDate.getSeconds().toString().padStart(2, '0')
+
+  // 格式化输出
+  var formattedDate =
+    year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds
+
+  return formattedDate
+}
+function getlog() {
+  let log = {
+    datetime: getCurrentFormattedTime(),
+    user: store.email,
+    projectInfo: `filename:${store.truefile},tasks: ${SummaryData.TotalTasks}, resources: ${SummaryData.maxResourceUnit}`,
+    settings: `Ignore Actual tart / Actual finish: ${store.setting.IgnoreProject},Learning Rate:${store.setting.Rate}., How To Handle Tasks Without Resources: ${store.setting.considerDefaultResourceType}, Method To Satisfy Resource Constraints: ${store.setting.resourceConstraint},Optimization Ratio:${store.setting.Ratio},Optimization Steps:${store.setting.Steps}`,
+    baselinelnfo: `duration:${store.dataArray.Baseline.all[0].result.baselineDurationDaysWithCalendar}, maxResources: ${store.dataArray.Baseline.all[0].result.maxResourceUnitAgg}, resourcesSpread: ${store.dataArray.Baseline.all[0].result.spanResourceUnitAgg},totalCost: ${store.dataArray.Baseline.all[0].result.totalCost}, criticalTasks: ${store.dataArray.Baseline.all[0].result.baselineCriticalTasksLen}`,
+    userAction: `preset: ${selectData.preset}, step:${store.setting.Steps}, duration: ${SummaryData.changedDuration} days, maxResources: ${SummaryData.maxResourceUnit}, resourcesSpread: ${selectData.resourcesSpread}, totalCost: ${selectData.totalCost}, criticalTasks: ${selectData.criticalTasks}`,
+  }
+  console.log(log)
+  return log
+}
 // 按钮点击跳转
 async function nextOptimized() {
   store.wss.close()
@@ -1152,11 +1194,22 @@ async function nextOptimized() {
   let data = await api.getOptimized({ ...selectData }, store.file.size)
   store.SummaryData = { ...SummaryData }
   store.selectedData = null
-
   store.selectedData = data.data
   // console.log(store.selectedData);
   store.active = 2
   store.selectChange = true
+  // console.log(store.setting,selectData);
+  // let log = {
+  //   datetime: getCurrentFormattedTime(),
+  //   user: store.email,
+  //   projectInfo: `filename:${store.truefile},tasks: ${SummaryData.TotalTasks}, resources: ${SummaryData.TotalResources}`,
+  //   settings: `Ignore Actual tart / Actual finish: ${store.setting.IgnoreProject},Learning Rate:${store.setting.Rate}., How To Handle Tasks Without Resources: ${store.setting.considerDefaultResourceType}, Method To Satisfy Resource Constraints: ${store.setting.resourceConstraint},Optimization Ratio:${store.setting.Ratio},Optimization Steps:${store.setting.Steps}`,
+  //   baselinelnfo: `duration:${store.dataArray.Baseline.all[0].result.baselineDurationDaysWithCalendar}, maxResources: ${store.dataArray.Baseline.all[0].result.maxResourceUnitAgg}, resourcesSpread: ${store.dataArray.Baseline.all[0].result.spanResourceUnitAgg},totalCost: ${store.dataArray.Baseline.all[0].result.totalCost}, criticalTasks: ${store.dataArray.Baseline.all[0].result.baselineCriticalTasksLen}`,
+  //   userAction: `preset: ${selectData.preset}, step:${store.setting.Steps}, duration: ${SummaryData.changedDuration} days, maxResources: ${SummaryData.TotalResources}, resourcesSpread: ${selectData.resourcesSpread}, totalCost: ${selectData.totalCost}, criticalTasks: ${selectData.criticalTasks}`,
+  // }
+
+  let logsData = await api.UploadUserlog(getlog())
+  // console.log(getlog())
   router.push({ name: 'optimizedSummary' })
 }
 
@@ -1321,7 +1374,8 @@ h2 {
       }
     }
     .rightbutton {
-      height: 210px;
+      display: flex;
+      flex-wrap: wrap;
       padding: 16px;
       margin: 16px 0;
       margin-left: 5px;

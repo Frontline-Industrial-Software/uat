@@ -36,6 +36,15 @@ instance.interceptors.response.use(
   },
 )
 export default {
+  // !上传用户日志
+  async UploadUserlog(log) {
+    const response = await instance.post(`userlogs`, {
+      ...log,
+    })
+    // console.log(response);
+    return response.data
+  },
+
   // !inputDATA
   // 验证是否为付费用户
   async checkUser(userName) {
@@ -46,6 +55,33 @@ export default {
     })
     return response.data
   },
+
+  // !历史记录
+  async userlogs() {
+    const response = await instance.get(`fileDownload/userlogs/userlogs.csv`, {
+      responseType: 'arraybuffer',
+    })
+    ElMessage({
+      showClose: true,
+      message: 'Success',
+      type: 'success',
+    })
+    const compressedData = new Uint8Array(response.data)
+    const pakoArr = pako.ungzip(compressedData)
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(
+      new Blob([pakoArr], {
+        type: 'text/csv',
+      }),
+    )
+    // console.log(link.href);
+    link.style.display = 'none'
+    link.download = `userlogs.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  },
+
   // !反馈接口
   async feedBack(user, datetime, feedback) {
     const response = await instance.post(`feedback`, {

@@ -32,7 +32,6 @@ import {
 const router = useRouter()
 const store = useCounterStore()
 watch(store.codeControl, () => {
-  console.log(store.codeControl)
   if (!store.codeControl.isBol) {
     router.push(`/dashboard/inputdata`)
     ElMessage.error({

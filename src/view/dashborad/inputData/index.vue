@@ -346,8 +346,6 @@ async function Port() {
     store.dataArray[key].cost = []
   })
   // clear()
-  console.log(store.loginAndauthRequired, store.isVip.auth)
-
   store.selectedData = null
   store.wss = await store.connectWebsocket()
   router.push({ name: 'BaselineSummary' })

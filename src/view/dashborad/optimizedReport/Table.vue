@@ -42,6 +42,8 @@ onActivated(() => {
     :manualRowMove="true"
     :readOnly="true"
     licenseKey="non-commercial-and-evaluation"
+    :viewportRowRenderingOffset="5"
+    :viewportColumnRenderingOffset="5"
   >
     <template v-if="tableOptions.tableName == 'one'">
       <HotColumn

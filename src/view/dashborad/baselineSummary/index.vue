@@ -187,7 +187,7 @@ import {
 import * as echarts from 'echarts'
 import { useRouter } from 'vue-router'
 import { useCounterStore } from '@/store'
-
+import NProgress from 'nprogress'
 import ecStat from 'echarts-stat'
 import api from '@/api/index.js'
 import { onBeforeRouteLeave } from 'vue-router'

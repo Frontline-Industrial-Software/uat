@@ -30,6 +30,7 @@
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import { useCounterStore } from '../../store'
+import NProgress from 'nprogress'
 const store = useCounterStore()
 const text = [
   'dashboard/inputData',
@@ -41,6 +42,7 @@ const text = [
 const router = useRouter()
 function navigate(pathname, number) {
   // console.log(pathname);
+  NProgress.start()
   switch (pathname) {
     case 'dashboard/inputData':
       router.push(`/${pathname}`)
@@ -69,18 +71,7 @@ function navigate(pathname, number) {
     default:
       break
   }
-  // if (store.taskData.length != 0) {
-  //   if (
-  //     pathname != "dashboard/baselineSummary" ||
-  //     pathname != "dashboard/inputData"
-  //   ) {
-  //     if (!store.selectedData) {
-  //       return;
-  //     }
-  //   }
-  //   router.push(`/${pathname}`);
-  //   store.active = number;
-  // }
+  NProgress.done()
 }
 </script>
 

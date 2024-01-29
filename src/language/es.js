@@ -8,10 +8,10 @@ export default {
     optimized_report: 'Informe optimizado',
   },
   inputData: {
-    title: 'Subir horario e ingresar configuraciones de optimización',
+    title: 'Subir cronograma e Introducir configuraciones de optimización',
     oneData: [
-      'Horario',
-      'Sube tu horario (.xer o .xml)',
+      'Cronograma',
+      'Sube tu cronograma (.xer o .xml)',
       'subir',
       'Ningún archivo seleccionado',
       'o',
@@ -97,4 +97,8 @@ export default {
       'Tarea-Recursos',
     ],
   },
+  'How To Handle Tasks Without Resources?': 'Cómo Manejar Tareas Sin Recursos',
+  'Method To Satisfy Resource Constraints':
+    'Método Para Satisfacer Restricciones de Recursos',
+  'Online editing': 'Edición en línea',
 }

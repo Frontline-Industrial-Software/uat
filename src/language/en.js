@@ -93,4 +93,9 @@ export default {
     btn: ['back', 'Export Report'],
     tableName: ['Changed Tasks (Overview)', 'All Resources', 'Task-Resources'],
   },
+  'How To Handle Tasks Without Resources?':
+    'How To Handle Tasks Without Resources?',
+  'Method To Satisfy Resource Constraints':
+    'Method To Satisfy Resource Constraints',
+  'Online editing': 'Online editing',
 }

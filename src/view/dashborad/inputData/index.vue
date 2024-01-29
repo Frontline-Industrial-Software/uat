@@ -76,7 +76,7 @@
                   }
                 "
               >
-                Online editing
+                {{ $t('Online editing') }}
               </div>
             </v-sheet>
           </v-col>
@@ -149,7 +149,9 @@
                   are no existing resource or role definitions or when no tasks
                   are explicitly assigned to resources or roles.
                 </template>
-                <label>How To Handle Tasks Without Resources?</label>
+                <label>
+                  {{ $t('How To Handle Tasks Without Resources?') }}
+                </label>
               </el-tooltip>
 
               <el-select
@@ -199,7 +201,9 @@
                   constraints.
                   <br />
                 </template>
-                <label>Method To Satisfy Resource Constraints</label>
+                <label>
+                  {{ $t('Method To Satisfy Resource Constraints') }}
+                </label>
               </el-tooltip>
               <el-select
                 v-model="store.setting.resourceConstraint"

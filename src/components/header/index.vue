@@ -1,5 +1,5 @@
 <template>
-  <div class="content-head">
+  <div v-if="store.loginStatus" class="content-head">
     <div class="main">
       <div class="left">
         <img

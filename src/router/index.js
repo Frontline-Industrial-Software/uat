@@ -30,6 +30,11 @@ const routes = [
     redirect: '/NotFound',
   },
   {
+    path: '/compare',
+    component: () => import('@/view/compare/compare.vue'),
+    name: 'compare',
+  },
+  {
     path: '/dashboard',
     component: Dashboard,
     name: 'dashboard',

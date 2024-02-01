@@ -1,6 +1,5 @@
 <template>
   <div class="content">
-    <Header />
     <Navigate />
     <div class="subject">
       <router-view v-slot="{ Component }">

@@ -305,34 +305,56 @@ function baseItem(data) {
   // style="color:#8c8c8c"
   return `<span >${data}</span>`
 }
-var changedlineTasks
-var baselineTasks
+let baselineTasks = []
+let changedlineTasks = []
 let DatebaselineTasks, DatechangedlineTasks
-
+function splitArrayIntoGroups(arr, groupSize) {
+  const result = []
+  for (let i = 0; i < arr.length; i += groupSize) {
+    result.push(arr.slice(i, i + groupSize))
+  }
+  return result
+}
+function calculateIdx(inputNumber) {
+  if (inputNumber === 1) {
+    return 1
+  } else {
+    return inputNumber + (inputNumber - 1) * 2
+  }
+}
+function calculateIdx2(inputNumber) {
+  if (inputNumber === 2) {
+    return 2
+  } else {
+    return inputNumber + (inputNumber - 2) * 2
+  }
+}
 function initChart() {
+  console.log('start')
+  let num = 1
+  let combinedBaselineTasks = []
+  let combinedChangedlineTasks = []
   selectMode.value = 'Compare'
   changedlineTasks = []
   // 基础任务
   // console.log(store.selectedData);
-  baselineTasks = store.selectedData.baselineTasks.map((baselineTask, idx) => {
-    let newBaselineTask = store.selectedData.tasks.find(
-      (task) => task.id === baselineTask.id,
-    )
+  const tasksMap = {}
+  store.selectedData.tasks.forEach((task) => {
+    tasksMap[task.id] = task
+  })
 
+  store.selectedData.baselineTasks.forEach((baselineTask, idx) => {
+    const newBaselineTask = tasksMap[baselineTask.id]
     newBaselineTask.old = baselineTask
     changedlineTasks.push(newBaselineTask)
-    function calculateIdx(inputNumber) {
-      if (inputNumber === 1) {
-        return 1
-      } else {
-        return inputNumber + (inputNumber - 1) * 2
-      }
-    }
-    idx = calculateIdx(store.selectedData.baselineTasks.length - idx)
-    return {
+
+    const calculatedIdx = calculateIdx(
+      store.selectedData.baselineTasks.length - idx,
+    )
+    baselineTasks.push({
       name: baselineTask.name,
       value: [
-        idx,
+        calculatedIdx,
         utcTime(baselineTask.newStart),
         utcTime(baselineTask.newFinish),
         baselineTask,
@@ -352,24 +374,24 @@ function initChart() {
       itemStyle: {
         color: baselineTask.critical ? 'pink' : undefined,
       },
-    }
+    })
   })
   // console.log(baselineTasks);
   // 优化任务
   changedlineTasks = changedlineTasks.map((changedlineTask, idx) => {
-    function calculateIdx(inputNumber) {
-      if (inputNumber === 2) {
-        return 2
-      } else {
-        return inputNumber + (inputNumber - 2) * 2
-      }
+    function calculateIdx(inputNumber, offset) {
+      return inputNumber === offset
+        ? offset
+        : inputNumber + (inputNumber - offset) * 2
     }
-    idx = calculateIdx(changedlineTasks.length - idx + 1)
+
+    const calculatedIdx = calculateIdx(changedlineTasks.length - idx + 1, 2)
+
     return {
       id: changedlineTask.id,
       name: changedlineTask.name,
       value: [
-        idx,
+        calculatedIdx,
         utcTime(changedlineTask.newStart),
         utcTime(changedlineTask.newFinish),
         changedlineTask,
@@ -391,6 +413,7 @@ function initChart() {
       },
     }
   })
+
   let baseSort = JSON.parse(JSON.stringify(baselineTasks))
   let changeSort = JSON.parse(JSON.stringify(changedlineTasks))
   DatebaselineTasks = baseSort.sort(function (a, b) {
@@ -409,9 +432,12 @@ function initChart() {
     newObject.value[0] = calculateIdx(changedlineTasks.length - index + 1)
     return newObject
   })
-
+  combinedBaselineTasks = splitArrayIntoGroups(DatebaselineTasks, 10000)
+  combinedChangedlineTasks = splitArrayIntoGroups(DatechangedlineTasks, 10000)
+  DatebaselineTasks = combinedBaselineTasks[0]
+  DatechangedlineTasks = combinedChangedlineTasks[0]
+  // console.log(combinedBaselineTasks,DatebaselineTasks);
   //！甘特图
-
   let chart = myEcharts.init(
     document.getElementById('myEcharts'),
     'purple-passion',
@@ -672,7 +698,242 @@ function initChart() {
       },
     },
   }
-  option && chart.setOption(option)
+  // option && chart.setOption(option)
+  let times = setInterval(() => {
+    chart.setOption(option)
+
+    DatebaselineTasks = DatebaselineTasks.concat(
+      combinedBaselineTasks[num] || [],
+    )
+    DatechangedlineTasks = DatechangedlineTasks.concat(
+      combinedChangedlineTasks[num] || [],
+    )
+    if (num == combinedBaselineTasks.length) {
+      clearInterval(times)
+    } else {
+      num = num + 1
+    }
+    option = {
+      // useUTC:true,
+      toolbox: {
+        show: true,
+        feature: {
+          dataView: { show: true, readOnly: false },
+          saveAsImage: { show: true },
+        },
+      },
+
+      // 选中状态
+      // select: {scale: 2},
+
+      dataZoom: [
+        {
+          type: 'slider',
+          filterMode: 'weakFilter',
+          xAxisIndex: [0],
+          labelFormatter: function (value) {
+            return convertUTCToCustomFormat(value)
+          },
+          moveHandleSize: 15,
+          height: 15,
+          moveHandleStyle: {},
+          // minSpan:5,
+        },
+        {
+          type: 'slider',
+          filterMode: 'weakFilter',
+          yAxisIndex: [0],
+          // minSpan:5,
+        },
+        {
+          type: 'inside',
+          filterMode: 'weakFilter',
+          xAxisIndex: [0],
+        },
+        {
+          type: 'inside',
+          filterMode: 'weakFilter',
+          yAxisIndex: [0],
+        },
+      ],
+      legend: {
+        data: ['Baseline', 'New'],
+      },
+      xAxis: {
+        name: 'date',
+        type: 'time',
+        splitNumber: 5,
+        boundaryGap: [0, 0], // 设置boundaryGap为['data', 'data']
+        // splitNumber:10,
+        // minInterval: 10,
+        // maxInterval: 3600 * 1000,
+        axisTick: {
+          show: true, // 显示刻度
+          alignWithLabel: true, // 与标签对齐
+        },
+        minInterval: 24 * 3600, // 设置最小刻度间隔为1小时 (3600秒 * 1000毫秒)
+        // maxInterval: 24 * 3600 * 1000 * 360 , // 设置最大刻度间隔为1天 (24小时 * 3600秒 * 1000毫秒)
+        max: function (value) {
+          // console.log(value);
+          return value.max + (value.max - value.min) * 0.01
+        },
+        min: function (value) {
+          // console.log(value);
+          return value.min - (value.max - value.min) * 0.01
+        },
+        axisLabel: {
+          // width: '80',
+          // overflow: 'breakAll',
+          showMaxLabel: 'true',
+          showMinLabel: 'true',
+          formatter: function (value, index) {
+            // 格式化成您需要的日期格式
+            const customFormattedTime = convertUTCToCustomFormat(value)
+            return customFormattedTime
+          },
+        },
+      },
+
+      yAxis: {
+        name: 'tasks',
+      },
+      selectedMode: 'single',
+
+      series: [
+        {
+          name: 'Baseline',
+          type: 'custom',
+          data: DatebaselineTasks,
+          large: true,
+          renderItem: renderItem,
+          encode: {
+            x: [1, 2],
+            y: 0,
+          },
+          label: {
+            normal: {
+              show: isLabel, // 启用标签显示
+              color: 'black', // 标签的文本颜色
+              position: 'inside', // 标签的文本位置
+              formatter: function (params) {
+                // 自定义标签内容
+
+                return params.data.name
+              },
+              fontSize: 12,
+            },
+          },
+        },
+        {
+          name: 'New',
+          type: 'custom',
+          data: DatechangedlineTasks,
+          large: true,
+          renderItem: renderItem,
+          encode: {
+            x: [1, 2],
+            y: 0,
+          },
+          label: {
+            normal: {
+              show: isLabel, // 启用标签显示
+              color: 'black', // 标签的文本颜色
+              position: 'inside', // 标签的文本位置
+              formatter: function (params) {
+                // 自定义标签内容
+                // console.log(params);
+                return params.data.name
+              },
+              fontSize: 12,
+            },
+          },
+        },
+      ],
+      tooltip: {
+        axisPointer: {
+          //坐标轴指示器，坐标轴触发有效，
+          // type: 'cross', //默认为line，line直线，cross十字准星，shadow阴影
+        },
+
+        formatter: (p) => {
+          // console.log(p.value)
+          let resData = 'Resources: <br/>'
+          if (p.value[3].resources) {
+            for (const key in p.value[3].resources) {
+              let res = p.value[3].resources
+              let name = store.selectedData.newResources.find((resource) => {
+                return resource.id == key
+              })
+              if (!name) {
+                name = ''
+              }
+              // console.log(name)
+              resData += ` &nbsp&nbspResource &nbsp  ${
+                name?.name
+              } &nbsp id: ${key}  <br/>&nbsp&nbsp&nbsp&nbspunits/hour:${returnFloat(
+                res[key].plannedUnitsPerHour,
+              )}=> ${returnFloat(res[key].newUnitsPerHour)}<br/>`
+              // console.log(res[key]);
+            }
+          }
+          // console.log( p.value[3].plannedStart,utcTime(p.value[3].plannedStart));
+          function marker(str) {
+            let color
+            switch (str) {
+              case 'New':
+                if (!p.value[3].critical) {
+                  color = '#b0e054'
+                } else {
+                  color = 'red'
+                }
+                break
+              case 'Old':
+                if (!p.value[3].critical) {
+                  color = '#5474c4'
+                } else {
+                  color = 'pink'
+                }
+
+              default:
+                break
+            }
+
+            return `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`
+          }
+          return `${p.name}<br/>
+        <div style='margin-top:20px'>
+         ${marker('New')} New: ${baseItem(
+           utcTime(p.value[4].changeNew.start)
+             .replace('T', ' ')
+             .replace('Z', '')
+             .slice(0, 16),
+         )} -> ${baseItem(
+           utcTime(p.value[4].changeNew.finish)
+             .replace('T', ' ')
+             .replace('Z', '')
+             .slice(0, 16),
+         )}
+         (${p.value[4].changeNew.duration})
+        <br/>
+         ${marker('Old')} Old: ${baseItem(
+           utcTime(p.value[4].baseNew.start)
+             .replace('T', ' ')
+             .replace('Z', '')
+             .slice(0, 16),
+         )} -> ${baseItem(
+           utcTime(p.value[4].baseNew.finish)
+             .replace('T', ' ')
+             .replace('Z', '')
+             .slice(0, 16),
+         )}
+       (${p.value[4].baseNew.duration})
+         <br/>
+         ${resData}
+        </div>`
+        },
+      },
+    }
+  }, 1000)
   chart.off('datazoom')
   // chart.on('datazoom', function (param) {
   //   zoomEvent(param, baselineTasks, changedlineTasks, isLabel)
@@ -1175,6 +1436,7 @@ function groupBy(objectArray, property) {
 }
 
 let types = computed(() => {
+  console.log(store.selectedData)
   let data = store.selectedData.baselineResources.map((e) => {
     return { id: e.id, name: e.name, type: e.type }
   })

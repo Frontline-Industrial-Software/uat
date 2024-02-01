@@ -29,7 +29,38 @@ async function getexcelUrl() {
   let a = await api.getUrl(Url, store.truefile)
   return a
 }
+// function splitArrayIntoGroups(arr, groupSize) {
+//   const result = []
+//   for (let i = 0; i < arr.length; i += groupSize) {
+//     result.push(arr.slice(i, i + groupSize))
+//   }
+//   return result
+// }
+function splitArrayIntoGroups(arr, elementsPerGroup) {
+  const result = []
 
+  for (let i = 0; i < arr.length; i += elementsPerGroup) {
+    // 将每个小数组添加到结果数组中
+    result.push(arr.slice(i, i + elementsPerGroup))
+  }
+
+  return result
+}
+
+// 定义一个函数，用于依次渲染数据
+function renderDataSequentially(invideData, index) {
+  if (index < invideData.length) {
+    let data = [...invideData[index]]
+    let updateRange = `A${index * data.length + 1}:BH${
+      (index + 1) * data.length
+    }`
+    luckysheet.setRangeValue(data, { range: updateRange })
+    // 延迟0.3秒后执行下一次渲染
+    setTimeout(() => {
+      renderDataSequentially(invideData, index + 1)
+    }, 300)
+  }
+}
 onMounted(async () => {
   const value = await getexcelUrl()
 
@@ -52,8 +83,12 @@ onMounted(async () => {
         isMaskShow.value = false
 
         isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy()
-
-        window.luckysheet.create({
+        let allData = exportJson.sheets[0].celldata
+        allData = window.luckysheet.transToData(allData)
+        let invideData = splitArrayIntoGroups(allData, 1000)
+        exportJson.sheets[0].celldata = []
+        exportJson.sheets[0].row = allData.length
+        luckysheet.create({
           container: 'luckysheet', //luckysheet is the container id
           showinfobar: false,
           data: exportJson.sheets,
@@ -61,6 +96,7 @@ onMounted(async () => {
           userInfo: exportJson.info.name.creator,
           editable: false,
         })
+        renderDataSequentially(invideData, 0)
       },
     )
   }, 0)

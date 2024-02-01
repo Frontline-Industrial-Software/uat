@@ -1,7 +1,7 @@
 <template>
   <div class="content">
-    <div id="luckysheet"></div>
-    <div v-show="isMaskShow" id="tip">Downloading</div>
+    <div id="luckysheets"></div>
+    <div v-show="isMaskShow" id="tip">Waiting</div>
   </div>
 </template>
 
@@ -81,7 +81,8 @@ onMounted(async () => {
         jsonData.value = exportJson
 
         isMaskShow.value = false
-
+        console.log(window.luckysheet)
+        console.log(luckysheet)
         isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy()
         let allData = exportJson.sheets[0].celldata
         allData = window.luckysheet.transToData(allData)
@@ -89,7 +90,7 @@ onMounted(async () => {
         exportJson.sheets[0].celldata = []
         exportJson.sheets[0].row = allData.length
         luckysheet.create({
-          container: 'luckysheet', //luckysheet is the container id
+          container: 'luckysheets', //luckysheet is the container id
           showinfobar: false,
           data: exportJson.sheets,
           title: exportJson.info.name,
@@ -233,7 +234,7 @@ const downloadExcel = () => {
   margin-top: 20px;
   position: relative;
 }
-#luckysheet {
+#luckysheets {
   height: 95vh;
 }
 

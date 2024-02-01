@@ -1364,11 +1364,9 @@
                           1 < u && gt(h),
                           1 < u &&
                             N(
-                              e
-                                .slice(0, u - 1)
-                                .concat({
-                                  value: ' ' === e[u - 2].type ? '*' : '',
-                                }),
+                              e.slice(0, u - 1).concat({
+                                value: ' ' === e[u - 2].type ? '*' : '',
+                              }),
                             ).replace(A, '$1'),
                           n,
                           u < i && t(e.slice(u, i)),

@@ -1,4 +1,8 @@
 export default {
+  year: '年',
+  week: '週',
+  day: '日',
+  month: '月',
   next: '次へ',
   navigator: {
     input_data: 'データ入力',

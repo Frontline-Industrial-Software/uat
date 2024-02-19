@@ -1,5 +1,9 @@
 // en.js
 export default {
+  year: 'Year',
+  week: 'Week',
+  day: 'Day',
+  month: 'Month',
   next: 'next',
   navigator: {
     input_data: 'Input Data',

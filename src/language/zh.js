@@ -1,4 +1,8 @@
 export default {
+  year: '年',
+  week: '周',
+  day: '日',
+  month: '月',
   next: '下一步',
   navigator: {
     input_data: '输入数据',

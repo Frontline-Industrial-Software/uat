@@ -155,6 +155,54 @@
             </div>
           </div>
         </div>
+
+        <div class="DateContent">
+          <span
+            :class="{ activeDate: DateBtn === 'day' }"
+            @click="
+              () => {
+                chooseDate('day')
+                clickDateBtn('day')
+              }
+            "
+          >
+            {{ $t('day') }}
+          </span>
+          <span
+            :class="{ activeDate: DateBtn === 'week' }"
+            @click="
+              () => {
+                chooseDate('week')
+                clickDateBtn('week')
+              }
+            "
+          >
+            {{ $t('week') }}
+          </span>
+          <span
+            :class="{ activeDate: DateBtn === 'month' }"
+            @click="
+              () => {
+                chooseDate('month')
+                clickDateBtn('month')
+              }
+            "
+          >
+            {{ $t('month') }}
+          </span>
+          <span
+            :class="{ activeDate: DateBtn === 'year' }"
+            @click="
+              () => {
+                chooseDate('year')
+                clickDateBtn('year')
+              }
+            "
+          >
+            {{ $t('year') }}
+          </span>
+        </div>
+
         <div
           ref="main01"
           style="width: 1350px; height: 610px"
@@ -203,6 +251,12 @@ const router = useRouter()
 import api from '@/api/index.js'
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
 import Dialog from '@/components/dialog/dialog.vue'
+// 按钮
+
+let DateBtn = ref('day')
+function clickDateBtn(value) {
+  DateBtn.value = value
+}
 
 // 简单的防抖函数实现
 function debounce(func, delay) {
@@ -283,6 +337,161 @@ const toArray = (distribution) => {
     }
   })
 }
+/* 数据聚合 -------------------------------------------------------------------------- */
+
+// 处理数据的函数，根据时间间隔进行聚合
+function processData(data, interval, type) {
+  var aggregatedData = []
+  if (interval === 'day') {
+    return data // 不需要处理，直接返回原始数据
+  } else if (interval === 'week') {
+    aggregatedData = aggregateData(data, 'week', type)
+  } else if (interval === 'month') {
+    aggregatedData = aggregateData(data, 'month', type)
+  } else if (interval === 'year') {
+    aggregatedData = aggregateData(data, 'year', type)
+  }
+  return aggregatedData
+}
+
+// 聚合数据的辅助函数
+function aggregateData(data, interval, type) {
+  var result = []
+  var groupedData = groupDataByInterval(data, interval)
+  for (var group in groupedData) {
+    if (groupedData.hasOwnProperty(group)) {
+      var groupValues = groupedData[group].map((item) => item.value[1]) // 获取每个对象的第二个值
+      var sumValue = calculateSum(groupValues)
+      // 使用该组的第一个日期作为代表日期
+      result.push({
+        name: group + type,
+        value: [group, sumValue],
+      })
+    }
+  }
+
+  return result
+}
+
+// 将数据按照指定的时间间隔分组
+function groupDataByInterval(data, interval) {
+  return data.reduce(function (acc, curr) {
+    var key
+    let dates = new Date(curr.value[0])
+
+    if (interval == 'week') {
+      // 使用 ISO week date作为周的标识
+      key = dates.getFullYear() + '-W' + getISOWeek(dates)
+    } else if (interval === 'month') {
+      key = dates.getFullYear() + '-' + (dates.getMonth() + 1)
+    } else if (interval === 'year') {
+      key = dates.getFullYear().toString()
+    }
+
+    if (!acc[key]) {
+      acc[key] = []
+    }
+    acc[key].push(curr)
+
+    return acc
+  }, {})
+}
+
+// 计算数组的平均值
+function calculateAverage(arr) {
+  var sum = arr.reduce(function (acc, val) {
+    return acc + val
+  }, 0)
+
+  return sum / arr.length
+}
+
+// 计算数组的总和
+function calculateSum(arr) {
+  return arr.reduce(function (acc, val) {
+    return acc + val
+  }, 0)
+}
+
+// 获取日期的 ISO week
+function getISOWeek(date) {
+  var january4th = new Date(date.getFullYear(), 0, 4)
+  var differenceInDays = (date - january4th) / (24 * 60 * 60 * 1000)
+  return Math.ceil((differenceInDays + january4th.getDay() + 1) / 7)
+}
+
+function chooseDate(interval) {
+  let newData = processData(toArray(newResources.value), interval, 'new')
+  let baseData = processData(toArray(baselineResources.value), interval, 'base')
+  let xType
+  if (interval == 'day') {
+    xType = 'time'
+  } else {
+    xType = 'category'
+  }
+
+  resourcesChart.setOption({
+    xAxis: {
+      name: 'date',
+      type: xType,
+      axisLabel:
+        interval == 'day'
+          ? {
+              // width: '80',
+              // overflow: 'breakAll',
+              showMaxLabel: 'true',
+              showMinLabel: 'true',
+              formatter: function (value, index) {
+                // 格式化成您需要的日期格式
+                const customFormattedTime = convertUTCToCustomFormat(value)
+                return customFormattedTime
+              },
+            }
+          : {},
+    },
+    yAxis: {
+      name: `units / ${interval}`,
+    },
+    series: [
+      {
+        name: 'Baseline',
+        type: 'bar',
+        data: baseData,
+        large: true,
+        selectedMode: 'single',
+        select: {
+          itemStyle: {
+            color: 'red',
+            borderWidth: '5px',
+          },
+        },
+        emphasis: {
+          focus: 'self',
+          blurScope: 'coordinateSystem',
+        },
+      },
+      {
+        name: 'New',
+        type: 'bar',
+        data: newData,
+        large: true,
+        selectedMode: 'single',
+        select: {
+          itemStyle: {
+            color: 'red',
+            borderWidth: '5px',
+          },
+        },
+        emphasis: {
+          focus: 'series',
+          blurScope: 'coordinateSystem',
+        },
+      },
+    ],
+  })
+}
+/* -------------------------------------------------------------------------- */
+
 /* -------------------------------------------------------------------------- */
 
 /* --------------------------------------入口函数------------------------------------ */
@@ -438,13 +647,19 @@ function initChart() {
   DatechangedlineTasks = combinedChangedlineTasks[0]
   // console.log(combinedBaselineTasks,DatebaselineTasks);
   //！甘特图
+
   let chart = myEcharts.init(
     document.getElementById('myEcharts'),
     'purple-passion',
   )
   chart.on('click', function (param) {
+    const matchedItem = baselineTasks.find(
+      (item2) => item2.name === param.data.value[3].name,
+    )
+    param.data.value[3].plannedStart = matchedItem.value[1]
+    param.data.value[3].plannedFinish = matchedItem.value[2]
     tableData.value = param.data.value[3]
-
+    console.log(tableData.value)
     dialogVisible.value = true
   })
   var option
@@ -1436,7 +1651,6 @@ function groupBy(objectArray, property) {
 }
 
 let types = computed(() => {
-  console.log(store.selectedData)
   let data = store.selectedData.baselineResources.map((e) => {
     return { id: e.id, name: e.name, type: e.type }
   })
@@ -1610,6 +1824,7 @@ function back() {
 }
 function chooseType(name) {
   typeActive.value = name
+  DateBtn.value = 'day'
 }
 watch(typeActive, () => {
   renderChart()
@@ -1936,5 +2151,29 @@ h2 {
 }
 .type {
   padding-left: 5px;
+}
+.DateContent {
+  display: flex;
+  width: 100%;
+  justify-content: right;
+  span {
+    width: 60px;
+    color: black;
+    text-align: center;
+  }
+  /* 悬停状态 */
+  span:hover {
+    background-color: #f0f0f0;
+  }
+
+  // /* 点击状态 */
+  // span:active {
+  //   background-color: #e0e0e0;
+  //   color: #40a795;
+  // }
+}
+.activeDate {
+  color: #40a795 !important;
+  background-color: #f0f0f0 !important;
 }
 </style>

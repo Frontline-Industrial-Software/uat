@@ -68,30 +68,6 @@
             <!-- <v-icon size="large" icon="mdi-format-list-bulleted"></v-icon> -->
           </template>
           <v-list style="font-size: 12px; font-weight: 600">
-            <v-list-item @click="">
-              <!-- <div>
-                <div>
-                  <v-btn elevation="0">
-                    <a
-                      style="text-decoration: none; color: black"
-                      href="https://app.frontline-optimizer.com/v1.0.0/"
-                      target="_blank"
-                    >
-                      <v-icon start icon="mdi-laptop"></v-icon>
-                      Back to v1.0.0
-                    </a>
-                  </v-btn>
-                </div>
-           
-              </div> -->
-              <a
-                style="text-decoration: none; color: black"
-                href="https://app.frontline-optimizer.com/v1.0.0/"
-                target="_blank"
-              >
-                Back to v1.0.0
-              </a>
-            </v-list-item>
             <v-list-item
               @click="
                 () => {

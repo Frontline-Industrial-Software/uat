@@ -221,15 +221,12 @@ watch(
   isMaskShow,
   () => {
     if (isMaskShow.value === true) {
-      // 这里进行修改
-      console.log(11)
       loading = ElLoading.service({
         lock: true,
         text: '加载中', // Loading in Chinese
         background: 'rgba(0, 0, 0, 0.7)',
       })
     } else {
-      console.log(22)
       loading.close()
     }
   },

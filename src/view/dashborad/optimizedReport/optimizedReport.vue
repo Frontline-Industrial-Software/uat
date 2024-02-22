@@ -248,7 +248,6 @@ const router = useRouter()
 function exportProjectReport() {
   // console.log(store.SummaryData.group);
   if (store.SummaryData.group == 'baseline') {
-    console.log('触发')
     store.SummaryData.group = 'Balanced'
   }
   let Url = `${store.SummaryData.group}-${
@@ -259,7 +258,6 @@ function exportProjectReport() {
 let excelUrl = ref({})
 
 async function getexcelUrl() {
-  console.log(111)
   if (store.SummaryData.group == 'baseline') {
     store.SummaryData.group = 'Balanced'
   }

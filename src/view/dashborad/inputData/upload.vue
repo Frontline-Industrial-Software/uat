@@ -69,7 +69,6 @@ setTimeout(async () => {
   let bol = await api.checkUser(userInfo.attributes.email)
   checkData.value = bol
   store.isVip = checkData
-  console.log(store.isVip.auth)
 }, 0)
 
 async function check() {

@@ -1229,7 +1229,6 @@ async function nextOptimized() {
   let data = await api.getOptimized({ ...selectData }, store.file.size)
   store.SummaryData = { ...SummaryData }
   store.selectedData = null
-  console.log(data.data)
   store.selectedData = data.data
   // console.log(store.selectedData);
   store.active = 2

@@ -306,16 +306,14 @@ function toPercent(num, total) {
 
 // iso86Time
 function utcTime(time) {
-  // console.log(utcString);
   const utcDate = new Date(time)
   const utcString = utcDate.toISOString()
-  // console.log(utcString);
-  // console.log(utcString);
+
   return utcString
 }
 function convertUTCToCustomFormat(utcTimeString) {
   const date = new Date(utcTimeString)
-  // console.log(date.toISOString());
+
   // 自定义您希望的日期格式
   const customFormattedString = `${date.getUTCFullYear()}/${
     date.getUTCMonth() + 1
@@ -546,7 +544,7 @@ function initChart() {
   changedlineTasks = []
   baselineTasks = []
   // 基础任务
-  // console.log(store.selectedData);
+
   const tasksMap = {}
   store.selectedData.tasks.forEach((task) => {
     tasksMap[task.id] = task
@@ -585,7 +583,7 @@ function initChart() {
       },
     })
   })
-  // console.log(baselineTasks);
+
   // 优化任务
   changedlineTasks = changedlineTasks.map((changedlineTask, idx) => {
     function calculateIdx(inputNumber, offset) {
@@ -645,7 +643,6 @@ function initChart() {
   combinedChangedlineTasks = splitArrayIntoGroups(DatechangedlineTasks, 10000)
   DatebaselineTasks = combinedBaselineTasks[0]
   DatechangedlineTasks = combinedChangedlineTasks[0]
-  // console.log(combinedBaselineTasks,DatebaselineTasks);
   //！甘特图
 
   let chart = myEcharts.init(
@@ -659,7 +656,6 @@ function initChart() {
     param.data.value[3].plannedStart = matchedItem.value[1]
     param.data.value[3].plannedFinish = matchedItem.value[2]
     tableData.value = param.data.value[3]
-    console.log(tableData.value)
     dialogVisible.value = true
   })
   var option
@@ -754,11 +750,9 @@ function initChart() {
       minInterval: 24 * 3600, // 设置最小刻度间隔为1小时 (3600秒 * 1000毫秒)
       // maxInterval: 24 * 3600 * 1000 * 360 , // 设置最大刻度间隔为1天 (24小时 * 3600秒 * 1000毫秒)
       max: function (value) {
-        // console.log(value);
         return value.max + (value.max - value.min) * 0.01
       },
       min: function (value) {
-        // console.log(value);
         return value.min - (value.max - value.min) * 0.01
       },
       axisLabel: {
@@ -821,7 +815,6 @@ function initChart() {
             position: 'inside', // 标签的文本位置
             formatter: function (params) {
               // 自定义标签内容
-              // console.log(params);
               return params.data.name
             },
             fontSize: 12,
@@ -836,7 +829,6 @@ function initChart() {
       },
 
       formatter: (p) => {
-        // console.log(p.value)
         let resData = 'Resources: <br/>'
         if (p.value[3].resources) {
           for (const key in p.value[3].resources) {
@@ -847,16 +839,15 @@ function initChart() {
             if (!name) {
               name = ''
             }
-            // console.log(name)
+
             resData += ` &nbsp&nbspResource &nbsp  ${
               name?.name
             } &nbsp id: ${key}  <br/>&nbsp&nbsp&nbsp&nbspunits/hour:${returnFloat(
               res[key].plannedUnitsPerHour,
             )}=> ${returnFloat(res[key].newUnitsPerHour)}<br/>`
-            // console.log(res[key]);
           }
         }
-        // console.log( p.value[3].plannedStart,utcTime(p.value[3].plannedStart));
+
         function marker(str) {
           let color
           switch (str) {
@@ -989,11 +980,9 @@ function initChart() {
         minInterval: 24 * 3600, // 设置最小刻度间隔为1小时 (3600秒 * 1000毫秒)
         // maxInterval: 24 * 3600 * 1000 * 360 , // 设置最大刻度间隔为1天 (24小时 * 3600秒 * 1000毫秒)
         max: function (value) {
-          // console.log(value);
           return value.max + (value.max - value.min) * 0.01
         },
         min: function (value) {
-          // console.log(value);
           return value.min - (value.max - value.min) * 0.01
         },
         axisLabel: {
@@ -1056,7 +1045,7 @@ function initChart() {
               position: 'inside', // 标签的文本位置
               formatter: function (params) {
                 // 自定义标签内容
-                // console.log(params);
+
                 return params.data.name
               },
               fontSize: 12,
@@ -1071,7 +1060,6 @@ function initChart() {
         },
 
         formatter: (p) => {
-          // console.log(p.value)
           let resData = 'Resources: <br/>'
           if (p.value[3].resources) {
             for (const key in p.value[3].resources) {
@@ -1082,16 +1070,15 @@ function initChart() {
               if (!name) {
                 name = ''
               }
-              // console.log(name)
+
               resData += ` &nbsp&nbspResource &nbsp  ${
                 name?.name
               } &nbsp id: ${key}  <br/>&nbsp&nbsp&nbsp&nbspunits/hour:${returnFloat(
                 res[key].plannedUnitsPerHour,
               )}=> ${returnFloat(res[key].newUnitsPerHour)}<br/>`
-              // console.log(res[key]);
             }
           }
-          // console.log( p.value[3].plannedStart,utcTime(p.value[3].plannedStart));
+
           function marker(str) {
             let color
             switch (str) {
@@ -1221,7 +1208,7 @@ function initChart() {
                 position: 'inside', // 标签的文本位置
                 formatter: function (params) {
                   // 自定义标签内容
-                  // console.log(params);
+
                   return params.data.name
                 },
                 fontSize: 12,
@@ -1401,7 +1388,6 @@ function initChart() {
           zoomEvent(param, DatebaselineTasks, DatechangedlineTasks, isLabel)
         }, 700),
       ) // 这里的300是防抖延迟的毫秒数，可以根据需要调整
-      console.log('成功')
     } else {
       let Compareoption = {
         series: [
@@ -1742,7 +1728,7 @@ let resourcesOption = computed(() => {
     tooltip: {
       trigger: 'axis',
       // formatter: '{a0}{c0}<br/>{a0}{c1}',
-      // valueFormatter:(value)=>{console.log('form',value);},
+
       axisPointer: {
         type: 'cross', // 设置坐标轴指示器的样式为十字准星
       },

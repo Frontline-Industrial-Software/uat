@@ -53,7 +53,7 @@ onActivated(() => {
       ></HotColumn>
       <HotColumn data="Code" />
       <HotColumn data="Name" />
-      <HotColumn data="Duration(Baseline)" />
+      <HotColumn data="Duration(Old)" />
       <HotColumn data="Duration(New)" />
       <HotColumn data="Ratio" />
     </template>

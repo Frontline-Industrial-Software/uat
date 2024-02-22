@@ -311,7 +311,7 @@ export default {
     } else {
       res.data = this.arrayBufferToJson(res.data)
     }
-    console.log(res)
+
     return res
   },
   /**

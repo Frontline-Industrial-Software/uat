@@ -1,6 +1,9 @@
 <template>
   <el-dropdown size="large">
-    <span class="el-dropdown-link" style="margin-top: 10px; margin-right: 10px">
+    <span
+      class="el-dropdown-link"
+      style="margin-top: 10px; margin-right: 10px; width: 50px; height: 40px"
+    >
       <v-icon size="30" icon="mdi-translate"></v-icon>
       <el-icon class="el-icon--right">
         <arrow-down />

@@ -539,12 +539,12 @@ function calculateIdx2(inputNumber) {
   }
 }
 function initChart() {
-  console.log('start')
   let num = 1
   let combinedBaselineTasks = []
   let combinedChangedlineTasks = []
   selectMode.value = 'Compare'
   changedlineTasks = []
+  baselineTasks = []
   // 基础任务
   // console.log(store.selectedData);
   const tasksMap = {}
@@ -634,7 +634,7 @@ function initChart() {
     return newObject
   })
   DatechangedlineTasks = changeSort.sort(function (a, b) {
-    return a.value[3].plannedStart - b.value[3].plannedStart
+    return a.value[3].newFinish - b.value[3].newFinish
   })
   DatechangedlineTasks.map((e, index) => {
     let newObject = { ...e }

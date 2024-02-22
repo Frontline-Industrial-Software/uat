@@ -344,7 +344,7 @@ let changedTask = store.selectedData.tasks
       Critical: e.critical,
       Code: e.ID,
       Name: e.name,
-      'Duration(Baseline)': returnFloatOneDecimal(e.remainingDuration),
+      'Duration(Old)': returnFloatOneDecimal(e.remainingDuration),
       'Duration(New)': returnFloatOneDecimal(e.newDuration),
       Ratio: returnFloat(e.durationRatio),
     }
@@ -406,7 +406,7 @@ const tableOptions = reactive({
     'Critical',
     'Code',
     'Name',
-    'Duration(Baseline)',
+    'Duration(Old)',
     'Duration(New)',
     'Ratio',
   ],

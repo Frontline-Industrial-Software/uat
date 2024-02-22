@@ -1,18 +1,18 @@
 <template>
   <div class="content">
     <div id="luckysheets"></div>
-    <div v-show="isMaskShow" id="tip">Waiting</div>
+    <div v-show="isMaskShow" id="tip">Loading...</div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { exportExcel } from '@/utils/exportSheet'
 import { isFunction } from '@/utils/is'
 import LuckyExcel from 'luckyexcel'
 import { useCounterStore } from '@/store'
 import api from '@/api/index.js'
-
+import { ElLoading } from 'element-plus'
 const store = useCounterStore()
 const props = defineProps({
   url: Object,
@@ -56,6 +56,7 @@ function renderDataSequentially(invideData, index) {
     }`
     luckysheet.setRangeValue(data, { range: updateRange })
     // 延迟0.3秒后执行下一次渲染
+    isMaskShow.value = false
     setTimeout(() => {
       renderDataSequentially(invideData, index + 1)
     }, 300)
@@ -80,9 +81,6 @@ onMounted(async () => {
         // console.log('exportJson', exportJson)
         jsonData.value = exportJson
 
-        isMaskShow.value = false
-        console.log(window.luckysheet)
-        console.log(luckysheet)
         isFunction(window?.luckysheet?.destroy) && window.luckysheet.destroy()
         let allData = exportJson.sheets[0].celldata
         allData = window.luckysheet.transToData(allData)
@@ -148,11 +146,12 @@ const loadExcel = (evt) => {
 const selectExcel = (evt) => {
   const value = selected.value
   const name = evt.target.options[evt.target.selectedIndex].innerText
+  isMaskShow.value = true
   // console.log(value, name)
   if (value == '') {
     return
   }
-  isMaskShow.value = true
+
   LuckyExcel.transformExcelToLucky(
     value,
     function (exportJson, luckysheetfile) {
@@ -217,6 +216,25 @@ const downloadExcel = () => {
   // elemIF.src = value;
   exportExcel(luckysheet.getAllSheets(), '下载')
 }
+let loading
+watch(
+  isMaskShow,
+  () => {
+    if (isMaskShow.value === true) {
+      // 这里进行修改
+      console.log(11)
+      loading = ElLoading.service({
+        lock: true,
+        text: '加载中', // Loading in Chinese
+        background: 'rgba(0, 0, 0, 0.7)',
+      })
+    } else {
+      console.log(22)
+      loading.close()
+    }
+  },
+  { deep: true },
+)
 
 // !!! create luckysheet after mounted
 // onMounted(() => {

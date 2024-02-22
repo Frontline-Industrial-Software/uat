@@ -561,7 +561,7 @@ function initChart() {
       store.selectedData.baselineTasks.length - idx,
     )
     baselineTasks.push({
-      name: baselineTask.name,
+      name: baselineTask.name + baselineTask.id,
       value: [
         calculatedIdx,
         utcTime(baselineTask.newStart),
@@ -598,7 +598,7 @@ function initChart() {
 
     return {
       id: changedlineTask.id,
-      name: changedlineTask.name,
+      name: changedlineTask.name + +changedlineTask.id,
       value: [
         calculatedIdx,
         utcTime(changedlineTask.newStart),
@@ -1596,7 +1596,8 @@ function initChart() {
   chart.on('mousemove', function (param) {
     chart.dispatchAction({
       type: 'highlight',
-      dataIndex: param.dataIndex,
+      // dataIndex: param.dataIndex,
+      name: param.name,
     })
   })
   resourcesChart = myEcharts.init(

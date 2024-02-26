@@ -559,7 +559,7 @@ function initChart() {
       store.selectedData.baselineTasks.length - idx,
     )
     baselineTasks.push({
-      name: baselineTask.name + baselineTask.id,
+      name: baselineTask.name,
       value: [
         calculatedIdx,
         utcTime(baselineTask.newStart),
@@ -596,7 +596,7 @@ function initChart() {
 
     return {
       id: changedlineTask.id,
-      name: changedlineTask.name + +changedlineTask.id,
+      name: changedlineTask.name,
       value: [
         calculatedIdx,
         utcTime(changedlineTask.newStart),
@@ -631,14 +631,31 @@ function initChart() {
     newObject.value[0] = calculateIdx(baselineTasks.length - index + 1)
     return newObject
   })
-  DatechangedlineTasks = changeSort.sort(function (a, b) {
-    return a.value[3].newFinish - b.value[3].newFinish
+  // DatechangedlineTasks = changeSort.sort(function (a, b) {
+  //   return a.value[3].newFinish - b.value[3].newFinish
+  // })// 直接利用 baseSort 的顺序对 DatechangedlineTasks 进行映射
+  let changeSortMapping = new Map(
+    changeSort.map((task) => [task.value[3].id, task]),
+  )
+  DatechangedlineTasks = DatebaselineTasks.map((baseTask) => {
+    let correspondingTask = changeSortMapping.get(baseTask.value[3].id)
+    if (correspondingTask) {
+      let newObject = { ...correspondingTask }
+      newObject.value[0] = baseTask.value[0]
+      return newObject
+    }
+    return {} // 处理未找到对应任务的情况，根据实际需求进行修改
   })
   DatechangedlineTasks.map((e, index) => {
     let newObject = { ...e }
     newObject.value[0] = calculateIdx(changedlineTasks.length - index + 1)
     return newObject
   })
+  // DatechangedlineTasks.map((e, index) => {
+  //   let newObject = { ...e }
+  //   newObject.value[0] = calculateIdx(changedlineTasks.length - index + 1)
+  //   return newObject
+  // })
   combinedBaselineTasks = splitArrayIntoGroups(DatebaselineTasks, 10000)
   combinedChangedlineTasks = splitArrayIntoGroups(DatechangedlineTasks, 10000)
   DatebaselineTasks = combinedBaselineTasks[0]
@@ -1582,8 +1599,8 @@ function initChart() {
   chart.on('mousemove', function (param) {
     chart.dispatchAction({
       type: 'highlight',
-      // dataIndex: param.dataIndex,
-      name: param.name,
+      dataIndex: param.dataIndex,
+      // name: param.name,
     })
   })
   resourcesChart = myEcharts.init(
@@ -1594,7 +1611,8 @@ function initChart() {
     // console.log(param.name);
     resourcesChart.dispatchAction({
       type: 'highlight',
-      name: param.name,
+      dataIndex: param.dataIndex,
+      // name: param.name,
     })
   })
   resourcesChart.on('click', function (params) {

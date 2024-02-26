@@ -13,8 +13,8 @@
         <div v-if="store.email">
           <span class="email">{{ store.email }}</span>
 
-          <!-- <el-avatar
-            class="avatar"
+          <!-- <el-avatarasda sa 
+            class="avatarsa"
             src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
           /> -->
           <el-avatar>user</el-avatar>

@@ -212,8 +212,9 @@
                 size="large"
                 style="width: 300px"
               >
-                <el-option label="Adjust task duration" :value="false" />
-                <el-option label="Adjust task-task lag" :value="true" />
+                <el-option label="Adjust task duration" :value="`duration`" />
+                <el-option label="Adjust task-task lag" :value="`lag`" />
+                <el-option label="Adjust task-task logic " :value="`logic`" />
               </el-select>
             </v-sheet>
           </v-col>

@@ -19,7 +19,7 @@ export const useCounterStore = defineStore(
     let setting = reactive({
       IgnoreProject: false,
       considerDefaultResourceType: 'false',
-      resourceConstraint: `duration`,
+      resourceConstraint: false,
       Rate: 0.1,
       Ratio: [0.5, 2],
       Steps: 20,

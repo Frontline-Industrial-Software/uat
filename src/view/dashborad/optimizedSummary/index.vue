@@ -127,6 +127,7 @@
           style="width: 1350px; height: 610px"
           id="myEcharts"
         ></div>
+        <!-- <Gantt/> -->
       </div>
 
       <div class="mainEchar2">
@@ -240,6 +241,7 @@ import {
   computed,
   onActivated,
 } from 'vue'
+import Gantt from '@/components/gantt/gantt.vue'
 import Card from '@/components/card/index.vue'
 import NextButton from '@/components/next/next.vue'
 import * as echarts from 'echarts'

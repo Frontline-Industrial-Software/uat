@@ -70,7 +70,7 @@ const routes = [
       },
       {
         path: 'optimizedSummary',
-        component: () => import('@/view/dashborad/optimizedSummary/index.vue'),
+        component: () => import('@/view/dashborad/optimizedSummary/test.vue'),
         name: 'optimizedSummary',
         beforeEnter: (to, from, next) => {
           if (!from.name) {

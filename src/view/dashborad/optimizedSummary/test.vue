@@ -121,12 +121,19 @@
             <div>Critical Path(Baseline)</div>
           </div>
         </div>
-        <div id="main"></div>
-        <div
-          ref="main"
-          style="width: 1350px; height: 610px"
-          id="myEcharts"
-        ></div>
+        <div id="main">
+          <div
+            ref="main"
+            style="width: 1500px; height: 610px; display: none"
+            id="myEcharts"
+          ></div>
+          <TreeTable
+            :newData="store.selectedData.tasks"
+            :baseData="store.selectedData.baselineTasks"
+          />
+        </div>
+
+        <!-- <Gantt/> -->
       </div>
 
       <div class="mainEchar2">
@@ -212,8 +219,8 @@
       <div class="button">
         <v-btn @click="back" class="btnback">BACK</v-btn>
         <!-- <v-btn @click="nextReport" class="btngo">
-          {{ $t('optimizedSummary.btn[1]') }}
-        </v-btn> -->
+            {{ $t('optimizedSummary.btn[1]') }}
+          </v-btn> -->
         <NextButton
           :style="'color:white;margin-left:1050px'"
           :disabled="true"
@@ -891,35 +898,35 @@ function initChart() {
           return `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`
         }
         return `${p.name}<br/>
-        <div style='margin-top:20px'>
-         ${marker('New')} New: ${baseItem(
-           utcTime(p.value[4].changeNew.start)
-             .replace('T', ' ')
-             .replace('Z', '')
-             .slice(0, 16),
-         )} -> ${baseItem(
-           utcTime(p.value[4].changeNew.finish)
-             .replace('T', ' ')
-             .replace('Z', '')
-             .slice(0, 16),
-         )}
-         (${p.value[4].changeNew.duration})
-        <br/>
-         ${marker('Old')} Old: ${baseItem(
-           utcTime(p.value[4].baseNew.start)
-             .replace('T', ' ')
-             .replace('Z', '')
-             .slice(0, 16),
-         )} -> ${baseItem(
-           utcTime(p.value[4].baseNew.finish)
-             .replace('T', ' ')
-             .replace('Z', '')
-             .slice(0, 16),
-         )}
-       (${p.value[4].baseNew.duration})
-         <br/>
-         ${resData}
-        </div>`
+          <div style='margin-top:20px'>
+           ${marker('New')} New: ${baseItem(
+             utcTime(p.value[4].changeNew.start)
+               .replace('T', ' ')
+               .replace('Z', '')
+               .slice(0, 16),
+           )} -> ${baseItem(
+             utcTime(p.value[4].changeNew.finish)
+               .replace('T', ' ')
+               .replace('Z', '')
+               .slice(0, 16),
+           )}
+           (${p.value[4].changeNew.duration})
+          <br/>
+           ${marker('Old')} Old: ${baseItem(
+             utcTime(p.value[4].baseNew.start)
+               .replace('T', ' ')
+               .replace('Z', '')
+               .slice(0, 16),
+           )} -> ${baseItem(
+             utcTime(p.value[4].baseNew.finish)
+               .replace('T', ' ')
+               .replace('Z', '')
+               .slice(0, 16),
+           )}
+         (${p.value[4].baseNew.duration})
+           <br/>
+           ${resData}
+          </div>`
       },
     },
   }
@@ -1122,35 +1129,35 @@ function initChart() {
             return `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`
           }
           return `${p.name}<br/>
-        <div style='margin-top:20px'>
-         ${marker('New')} New: ${baseItem(
-           utcTime(p.value[4].changeNew.start)
-             .replace('T', ' ')
-             .replace('Z', '')
-             .slice(0, 16),
-         )} -> ${baseItem(
-           utcTime(p.value[4].changeNew.finish)
-             .replace('T', ' ')
-             .replace('Z', '')
-             .slice(0, 16),
-         )}
-         (${p.value[4].changeNew.duration})
-        <br/>
-         ${marker('Old')} Old: ${baseItem(
-           utcTime(p.value[4].baseNew.start)
-             .replace('T', ' ')
-             .replace('Z', '')
-             .slice(0, 16),
-         )} -> ${baseItem(
-           utcTime(p.value[4].baseNew.finish)
-             .replace('T', ' ')
-             .replace('Z', '')
-             .slice(0, 16),
-         )}
-       (${p.value[4].baseNew.duration})
-         <br/>
-         ${resData}
-        </div>`
+          <div style='margin-top:20px'>
+           ${marker('New')} New: ${baseItem(
+             utcTime(p.value[4].changeNew.start)
+               .replace('T', ' ')
+               .replace('Z', '')
+               .slice(0, 16),
+           )} -> ${baseItem(
+             utcTime(p.value[4].changeNew.finish)
+               .replace('T', ' ')
+               .replace('Z', '')
+               .slice(0, 16),
+           )}
+           (${p.value[4].changeNew.duration})
+          <br/>
+           ${marker('Old')} Old: ${baseItem(
+             utcTime(p.value[4].baseNew.start)
+               .replace('T', ' ')
+               .replace('Z', '')
+               .slice(0, 16),
+           )} -> ${baseItem(
+             utcTime(p.value[4].baseNew.finish)
+               .replace('T', ' ')
+               .replace('Z', '')
+               .slice(0, 16),
+           )}
+         (${p.value[4].baseNew.duration})
+           <br/>
+           ${resData}
+          </div>`
         },
       },
     }
@@ -1934,7 +1941,7 @@ watch(typeActive, () => {
 .box {
   margin: 0 auto;
   min-width: 1400px;
-  max-width: 1400px;
+  // max-width: 1400px;
 }
 h2 {
   width: 1200px;
@@ -1999,9 +2006,9 @@ h2 {
   }
 }
 .mainEchar1 {
-  width: 1400px;
+  // width: 1400px;
   border-radius: 16px;
-  height: 750px;
+  height: 800px;
   margin-bottom: 20px;
   background-color: #545454;
   padding: 20px;
@@ -2182,5 +2189,12 @@ h2 {
 .activeDate {
   color: #40a795 !important;
   background-color: #f0f0f0 !important;
+}
+#main {
+  display: flex;
+  justify-content: center;
+  flex-wrap: nowrap;
+  // flex-direction: row-reverse;
+  width: 2000px;
 }
 </style>

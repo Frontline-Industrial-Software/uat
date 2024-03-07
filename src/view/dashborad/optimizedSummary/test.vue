@@ -2008,7 +2008,7 @@ h2 {
 .mainEchar1 {
   // width: 1400px;
   border-radius: 16px;
-  height: 800px;
+  height: 1000px;
   margin-bottom: 20px;
   background-color: #545454;
   padding: 20px;

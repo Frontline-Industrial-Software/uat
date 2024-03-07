@@ -1,18 +1,23 @@
 <template>
-  <el-table-v2
-    :columns="columns"
-    :data="data"
-    :width="700"
-    :height="620"
-    :row-height="30"
-    :estimated-row-width="40"
-    :row-event-handlers="eventClick"
-    :scrollbar-always-on="true"
-    :catch="0"
-    fixed
-    @rows-rendered="getRenderData"
-  />
-  <div ref="GanttEcharts" style="margin-top: 0px" id="GanttEcharts"></div>
+  <div class="all-content">
+    <el-table-v2
+      :columns="columns"
+      :data="data"
+      :width="700"
+      :height="800"
+      :row-height="30"
+      :estimated-row-width="40"
+      :row-event-handlers="eventClick"
+      :scrollbar-always-on="true"
+      :catch="0"
+      fixed
+      @rows-rendered="getRenderData"
+    />
+    <div>
+      <TimeX class="time" :startTime="startTimeStamp" :endTime="endTimeStamp" />
+      <div ref="GanttEcharts" style="margin-top: 0px" id="GanttEcharts"></div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -20,12 +25,15 @@ import { computed, ref, reactive, onMounted } from 'vue'
 import * as echarts from 'echarts'
 import { useRouter } from 'vue-router'
 import { useCounterStore } from '@/store'
+import TimeX from '@/components/timeX/index.vue'
 import api from '@/api/index.js'
 const store = useCounterStore()
 const router = useRouter()
 const GanttEcharts = ref(null)
 let datas = ref()
 let ganttChart
+const startTimeStamp = ref(null)
+const endTimeStamp = ref(null)
 const props = defineProps({
   newData: Object,
   baseData: Object,
@@ -54,11 +62,16 @@ onMounted(() => {
 
 function initCharts() {
   ganttChart = echarts.init(GanttEcharts.value, 'purple-passion', {
-    width: 1400,
-    height: 690,
+    width: 1200,
+    height: 750,
   })
   datas.value = props.baseData.slice(0, 20)
   ganttChart.setOption(getOption(ganttData()))
+  ganttChart.on('dataZoom', function (params, a, b) {
+    let op = ganttChart.getOption()
+    startTimeStamp.value = op.dataZoom[0].startValue
+    endTimeStamp.value = op.dataZoom[0].endValue
+  })
 }
 function getRenderData(data) {
   if (!ganttChart) {
@@ -153,17 +166,17 @@ let ganttData = () => {
 let a = getMaxMin()
 let markLineData = a[0]
 // 计算当前日期
-const startTimeStamp = a[1]
+
+startTimeStamp.value = a[1]
 
 // 转换为 Date 对象
-const startDate = new Date(startTimeStamp)
-
+const startDate = new Date(startTimeStamp.value)
 // 计算三个月后的日期
-const endDate = new Date(startDate)
+let endDate = new Date(startDate)
 endDate.setMonth(startDate.getMonth() + 3)
 
 // 获取三个月后的时间戳
-const endTimeStamp = endDate.getTime()``
+endTimeStamp.value = endDate.getTime()
 // // 计算三个月前的日期
 // const threeMonthsAgo = new Date(currentDate);
 // threeMonthsAgo.setMonth(currentDate.getMonth() - 3);
@@ -178,6 +191,7 @@ function getOption(datas) {
       },
     },
     xAxis: {
+      show: false,
       name: 'date',
       type: 'time',
       splitNumber: 5,
@@ -245,7 +259,10 @@ function getOption(datas) {
       },
     ],
     grid: {
-      top: 50,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
     },
     toolbox: {
       show: true,
@@ -259,8 +276,8 @@ function getOption(datas) {
         type: 'slider',
         show: false,
         xAxisIndex: [0],
-        startValue: startTimeStamp,
-        endValue: endTimeStamp,
+        startValue: startTimeStamp.value,
+        endValue: endTimeStamp.value,
         zoomLock: true,
         showDetail: false,
         maxValueSpan: 3600 * 24 * 1000 * 90,
@@ -270,8 +287,8 @@ function getOption(datas) {
       {
         type: 'inside',
         xAxisIndex: [0],
-        startValue: startTimeStamp,
-        endValue: endTimeStamp,
+        startValue: startTimeStamp.value,
+        endValue: endTimeStamp.value,
         zoomLock: true,
       },
     ],
@@ -389,7 +406,7 @@ function getMaxMin() {
   for (
     let timestamp = startDate;
     timestamp <= endDate;
-    timestamp += 7 * 24 * 60 * 60 * 1000
+    timestamp += 1 * 24 * 60 * 60 * 1000
   ) {
     markLineData.push({ xAxis: new Date(timestamp).toISOString().slice(0, 10) })
   }
@@ -397,4 +414,15 @@ function getMaxMin() {
   return [markLineData, startDate, endDate]
 }
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.time {
+  margin-top: -30px;
+  width: 1200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.all-content {
+  display: flex;
+}
+</style>

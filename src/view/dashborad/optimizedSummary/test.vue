@@ -1,7 +1,7 @@
 <template>
   <div class="contain">
     <div class="box">
-      <h2>
+      <!-- <h2>
         {{ $t('optimizedSummary.title[0]') }}
         <span class="sp">
           {{
@@ -22,7 +22,7 @@
             }}
           </span>
         </div>
-      </h2>
+      </h2> -->
       <div class="maintop">
         <Card
           :title="$t('optimizedSummary.header[0]')"
@@ -79,7 +79,7 @@
         />
       </div>
       <div class="mainEchar1">
-        <div class="Echar1top">
+        <!-- <div class="Echar1top">
           <div>{{ $t('optimizedSummary.chartName[0]') }}</div>
           <div>
             <el-select
@@ -101,9 +101,9 @@
               <el-option label="Separate Mode" value="Separate" />
             </el-select>
           </div>
-        </div>
-        <span>{{ $t('optimizedSummary.chartName[1]') }}</span>
-        <div class="choosebox">
+        </div> -->
+        <!-- <span>{{ $t('optimizedSummary.chartName[1]') }}</span> -->
+        <!-- <div class="choosebox">
           <div class="choose">
             <div style="background-color: #b0e054" class="item"></div>
             <div>Optimized</div>
@@ -120,7 +120,7 @@
             <div style="background-color: pink" class="item"></div>
             <div>Critical Path(Baseline)</div>
           </div>
-        </div>
+        </div> -->
         <div id="main">
           <div
             ref="main"
@@ -2008,12 +2008,12 @@ h2 {
 .mainEchar1 {
   // width: 1400px;
   border-radius: 16px;
-  height: 1000px;
+  height: 1500px;
   margin-bottom: 20px;
-  background-color: #545454;
+
   padding: 20px;
   border-radius: 15px;
-  background-color: #fff;
+  // background-color: #fff;
   .Echar1top {
     display: flex;
     justify-content: space-between;

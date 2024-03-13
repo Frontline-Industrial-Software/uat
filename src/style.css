@@ -22,7 +22,14 @@ html {
 /* .luckysheet-cell-loading{
 display: none !important;
 } */
-
+.bg-red-100 {
+  --un-bg-opacity: 1;
+  background-color: rgba(254, 226, 226, var(--un-bg-opacity));
+}
+.bg-blue-200 {
+  --un-bg-opacity: 1;
+  background-color: rgba(191, 219, 254, var(--un-bg-opacity));
+}
 .el-overlay {
   z-index: 1000 !important;
 }

@@ -101,15 +101,36 @@ export default {
    * @function 上传初始工程文件
    * @param {*} file 文件内容
    */
-  async sendFile(file) {
-    const formData = new FormData()
-    formData.append('file', file)
+  async sendFile(file, detailReg) {
+    let formData = new FormData()
+    if (detailReg) {
+      formData.append('file', file[0])
+      formData.append('file', file[1])
+      formData.append('detailReq', detailReg)
+      let res = await instance.post('upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        responseType: 'arraybuffer',
+      })
+      if (res.headers['content-type'] == 'application/gzip') {
+        const byteArray = new Uint8Array(res.data) // 切换数据编码为Uint8Array
+        const pakoArr = pako.inflate(byteArray, { to: 'string' }) // 调用 pako 的方法解压数据
+        res.data = JSON.parse(pakoArr)
+      } else {
+        res.data = this.arrayBufferToJson(res.data)
+      }
+      return res
+    } else {
+      formData.append(`file`, file)
+    }
+    console.log(formData)
     // ElMessage({
     //   showClose: true,
     //   message: '正在上传文件，请等待',
     // })
     try {
-      const response = await instance.post('upload', formData, {
+      let response = await instance.post('upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

@@ -8,9 +8,9 @@
         :key="dataindex"
         :style="`width: ${dayWidth}px`"
       >
-        <span v-if="props.chosenDate === 'Day'">
+        <!-- <span v-if="props.chosenDate === 'Day'">
           {{ data.split('/')[2] }}
-        </span>
+        </span> -->
       </div>
       <div
         v-if="Range.label === 'Week Range'"
@@ -73,6 +73,9 @@ const props = defineProps({
   chosenDate: String,
 })
 setTimeout(() => {
+  if (props.startTime == null) {
+    return
+  }
   getDate(props.startTime, props.endTime, props.chosenDate)
 }, 0)
 watch(

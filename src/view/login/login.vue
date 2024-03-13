@@ -21,17 +21,17 @@ function closeinviteVisible() {
 watch(
   auth,
   async (newdata) => {
-    if (auth.value.authStatus === 'authenticated') {
-      store.email = auth.value.user.attributes.email
-      let bol = await api.checkUser(store.email)
-      if (bol.auth) {
-        router.push('/dashboard/inputdata')
-      } else {
-        inviteVisible.value = true
-        logout()
-        return
-      }
-    }
+    // if (auth.value.authStatus === 'authenticated') {
+    //   store.email = auth.value.user.attributes.email
+    //   let bol = await api.checkUser(store.email)
+    //   if (bol.auth) {
+    //     router.push('/dashboard/inputdata')
+    //   } else {
+    //     inviteVisible.value = true
+    //     logout()
+    //     return
+    //   }
+    // }
   },
   { deep: true },
 )
@@ -86,6 +86,23 @@ let formFields = {
     </div>
     <div class="auth">
       <Authenticator :form-fields="formFields"></Authenticator>
+      <div class="Entrance" v-if="auth.authStatus === 'authenticated'">
+        <v-btn
+          @click="router.push('/dashboard/inputdata')"
+          style="color: white"
+          color="rgb(64, 170, 151)"
+        >
+          Optimize your project
+        </v-btn>
+        <br />
+        <v-btn
+          @click="router.push('/compare')"
+          style="color: white"
+          color="rgb(64, 170, 151)"
+        >
+          Preview your historical
+        </v-btn>
+      </div>
     </div>
   </div>
   <Invite @close="closeinviteVisible" :dialogVisible="inviteVisible" />
@@ -115,5 +132,12 @@ let formFields = {
 }
 .auth {
   margin: 5rem;
+}
+.Entrance {
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  flex-direction: column;
 }
 </style>

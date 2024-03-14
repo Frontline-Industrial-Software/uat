@@ -17,10 +17,10 @@
           <div style="background-color: #b5b5b5" class="item"></div>
           <div>Baseline</div>
         </div>
-        <div class="choose">
+        <!-- <div class="choose">
           <div style="background-color: #00beae" class="item"></div>
           <div>WBS</div>
-        </div>
+        </div> -->
         <div class="choose">
           <div style="background-color: #ffb522" class="item"></div>
           <div>To-do</div>
@@ -41,7 +41,7 @@
       <el-divider />
       <div class="button">
         <div
-          style="display: flex; justify-content: space-between; width: 500px"
+          style="display: flex; justify-content: space-between; width: 280px"
         >
           <el-button @click="controlFilter = true" :icon="Filter">
             Filter
@@ -59,7 +59,7 @@
               Compare Projects
             </el-button>
           </el-upload>
-          <el-input
+          <!-- <el-input
             v-model="searchData"
             style="width: 240px; height: 32px"
             placeholder="Type something"
@@ -67,7 +67,7 @@
             <template #prefix>
               <el-icon class="el-input__icon"><search /></el-icon>
             </template>
-          </el-input>
+          </el-input> -->
         </div>
         <div>
           <el-radio-group v-model="chosenDate" size="large">
@@ -96,7 +96,7 @@
         </div>
         <el-table-v2
           :columns="columns"
-          :data="data"
+          :data="filterDatas"
           :width="700"
           :height="800"
           :row-height="30"
@@ -129,11 +129,18 @@
   <el-dialog v-model="controlFilter" title="Filter by" width="800">
     <el-tabs v-model="activeName" class="demo-tabs">
       <el-tab-pane label="Activity Status" name="Activity Status">
+        <div>Start Time</div>
         <el-checkbox v-model="isDelayed" label="Delayed activities" />
-        <el-checkbox v-model="isActivities" label="Optimized activities" />
-        <el-checkbox v-model="isCritical" label="Critical path" />
+        <el-checkbox v-model="isAhead" label="Ahead activities" />
+        <el-checkbox v-model="isOnschedule" label="Onschedule activities" />
+        <div>Status</div>
+        <el-checkbox v-model="isActive" label="Active Tasks" />
+        <el-checkbox v-model="isCompleted" label="Completed Tasks" />
+        <el-checkbox v-model="isNotStart" label="NotStart Tasks" />
+        <div>Other</div>
+        <el-checkbox v-model="isCritical" label="Critical Tasks" />
       </el-tab-pane>
-      <el-tab-pane label="Resources" name="Resources"></el-tab-pane>
+      <!-- <el-tab-pane label="Resources" name="Resources"></el-tab-pane> -->
     </el-tabs>
 
     <template #footer>
@@ -193,20 +200,41 @@ const props = defineProps({
 let activeName = ref('Activity Status')
 let controlFilter = ref(false)
 
+/* -------------------------------------------------------------------------- */
 let isDelayed = ref(true)
-let isActivities = ref(true)
+let isAhead = ref(true)
+let isOnschedule = ref(true)
+
+let isActive = ref(true)
+let isCompleted = ref(true)
+let isNotStart = ref(true)
+
 let isCritical = ref(true)
+/* -------------------------------------------------------------------------- */
+
+let filterDatas = computed(() => {
+  if (fileData.value.length > 0) {
+    let _file = fileData.value[3].filter((e) => {
+      return (
+        ((isDelayed.value && e.taskStatus === 'Delayed') ||
+          (isAhead.value && e.taskStatus === 'Ahead') ||
+          (isOnschedule.value && e.taskStatus === 'On Schedule')) &&
+        ((isActive.value && e.status === 'Active') ||
+          (isCompleted.value && e.status === 'Complete') ||
+          (isNotStart.value && e.status === 'NotStart')) &&
+        (isCritical.value || !e.critical)
+      )
+    })
+    return _file
+    console.log(_file)
+  } else {
+    return []
+  }
+})
 function datasFilter() {
   controlFilter.value = false
   if (datas.value) {
-    console.log(isCritical.value)
-    datas.value = datas.value.filter((e) => {
-      return e.critical != true
-    })
-    datas.value = datas.value.filter((e) => {
-      console.log(e)
-      return e
-    })
+    console.log(filterDatas.value)
     ganttChart.setOption(getOption(ganttData()))
   }
 }
@@ -242,13 +270,6 @@ const eventClick = {
     //   dataIndex: index,
     //   // name: e.rowData.name,
     // })
-  },
-  onMouseleave(e) {
-    ganttChart.dispatchAction({
-      type: 'downplay',
-
-      // name: param.name,
-    })
   },
 }
 onMounted(() => {
@@ -286,10 +307,17 @@ async function Uploads(filess) {
       let attrValue = a.data[attrName]
       fileData.value.push(attrValue)
     }
+
     let fileDatas = alternateInsert(
       fileData.value[1].tasks,
       fileData.value[2].tasks,
     )
+    fileDatas.map((e) => {
+      if (e.resources) {
+        e.resources = null
+      }
+      return
+    })
     fileData.value.push(fileDatas)
     initCharts()
   }
@@ -322,7 +350,14 @@ function initCharts() {
   startDate = new Date(startTimeStamp.value)
   endDate = new Date(startDate)
   endDate.setMonth(startDate.getMonth() + 3)
+
+  fileData.value[3] = fileData.value[3].map((e) => {
+    e.type = e.type.replace('TT_', '')
+    e.status = e.status.replace('TK_', '')
+    return e
+  })
   datas.value = fileData.value[3].slice(0, 24)
+
   /* -------------------------------------------------------------------------- */
   if (ganttChart) {
     ganttChart.setOption(getOption(ganttData()))
@@ -391,9 +426,7 @@ function getColumns(datas) {
         case 'name':
           name = 'Activity Name'
           break
-        case 'type':
-          name = 'Tasks'
-          break
+
         default:
           break
       }
@@ -407,7 +440,6 @@ function getColumns(datas) {
     })
     .filter((item) => {
       let bol = true
-      console.log(item)
       switch (item.dataKey) {
         case 'id':
           bol = false
@@ -488,7 +520,7 @@ let columns = computed(() => {
 
 let data = computed(() => {
   if (fileData.value.length > 0) {
-    fileData.value[3].map((e) => {
+    fileData.value[3].map((e, index) => {
       e.newFinish = timestampToUTC(e.newFinish)
       e.newStart = timestampToUTC(e.newStart)
       e.plannedFinish = timestampToUTC(e.plannedFinish)
@@ -501,13 +533,15 @@ let data = computed(() => {
   }
 })
 const pathSymbols = {
-  delayed: 'path://M0,0 L100,0 L80,50 L20,50 Z',
+  Ahead: 'path://M0,0 L100,0 L100,50 L80,30 L20,30 L0,50 Z',
+  'On Schedule': 'path://M0,0 L100,0 L80,50 L20,50 Z',
+  delayed: 'path://M0,50 L50,0 L100,50 L150,0 L200,50 L200,100 L0,100 ',
 }
 /* -------------------------------------------------------------------------- */
 let colors = {
-  TK_Complete: '#10be00',
-  TK_NotStart: '#ffb522',
-  TK_Active: '#4a8fe7',
+  Complete: '#10be00',
+  NotStart: '#ffb522',
+  Active: '#4a8fe7',
 }
 const renderItem = (type) => (params, api) => {
   let start = api.coord([api.value(1), api.value(0)])
@@ -702,9 +736,9 @@ const renderItem = (type) => (params, api) => {
 
 /* -------------------------------------------------------------------------- */
 let ganttData = () => {
-  let ganttDatas = datas.value.map((ganttItem, idx) => {
+  let ganttDatas = filterDatas.value.map((ganttItem, idx) => {
     // const calculatedIdx = calculateIdx(datas.value.length - idx)
-    const calculatedIdx = datas.value.length - idx
+    const calculatedIdx = filterDatas.value.length - idx
 
     return {
       name: ganttItem.name,
@@ -731,7 +765,8 @@ let ganttData = () => {
   secondProject = secondProject.map((secondTask) => {
     const correspondingFirstTask = firstProject.find((firstTask) => {
       return (
-        firstTask.id === secondTask.id && firstTask.name === secondTask.name
+        firstTask.value[3].id === secondTask.value[3].id &&
+        firstTask.value[3].name === secondTask.value[3].name
       )
     })
 
@@ -808,7 +843,7 @@ function getOption({ firstProject, secondProject }) {
           normal: {
             show: true, // 启用标签显示
             color: 'black', // 标签的文本颜色
-            position: 'inside', // 标签的文本位置
+            position: 'bottom', // 标签的文本位置
             formatter: function (params) {
               // 自定义标签内容
 
@@ -830,7 +865,7 @@ function getOption({ firstProject, secondProject }) {
         },
       },
       {
-        name: 'onTrackTasks',
+        name: 'aheadTasks',
         type: 'custom',
         data: aheadTasks,
         large: true,
@@ -841,7 +876,7 @@ function getOption({ firstProject, secondProject }) {
         },
       },
       {
-        name: 'delayedTasks',
+        name: 'onTrackTasks',
         type: 'custom',
         data: onTrackTasks,
         large: true,
@@ -865,7 +900,123 @@ function getOption({ firstProject, secondProject }) {
           data: getMaxMin()[0],
         },
       },
+      {
+        name: 'NotStart',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
+      {
+        name: 'Delayed',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
+      {
+        name: 'Active',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
+      {
+        name: 'Completed',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
+      {
+        name: 'Ahead of Schedule',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
+      {
+        name: 'On Schedule',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
+      {
+        name: 'delayed',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
     ],
+    legend: {
+      data: [
+        {
+          name: 'Base',
+          itemStyle: {
+            color: '#b5b5b5',
+          },
+        },
+        {
+          name: 'NotStart',
+          icon: 'rect',
+          itemStyle: {
+            color: '#ffb522',
+          },
+        },
+        {
+          name: 'Active',
+          icon: 'rect',
+          itemStyle: {
+            color: '#4a8fe7',
+          },
+        },
+        {
+          name: 'Ahead of Schedule',
+          icon: pathSymbols.Ahead,
+          itemStyle: {
+            color: '#b5b5b5',
+          },
+        },
+        {
+          name: 'On Schedule',
+          icon: pathSymbols['On Schedule'],
+          itemStyle: {
+            color: '#b5b5b5',
+          },
+        },
+        {
+          name: 'delayed',
+          icon: pathSymbols.delayed,
+          itemStyle: {
+            color: '#b5b5b5',
+          },
+        },
+      ],
+      type: 'scroll',
+    },
     grid: {
       top: 0,
       left: 0,
@@ -1141,12 +1292,35 @@ function alternateInsert(array1, array2) {
   })
   let result = []
   let maxLength = Math.max(array1.length, array2.length)
-
+  console.log(array1, array2)
   for (let i = 0; i < maxLength; i++) {
     if (i < array2.length) {
+      if (!array1[i].newStart) {
+        return
+      }
+      if (array1[i].plannedStart > array2[i].plannedStart) {
+        array1[i].taskStatus = 'Delayed'
+        array2[i].taskStatus = 'Delayed'
+      } else if (array1[i].plannedStart < array2[i].plannedStart) {
+        array1[i].taskStatus = 'Ahead'
+        array2[i].taskStatus = 'Ahead'
+      } else {
+        array1[i].taskStatus = 'On Schedule'
+        array2[i].taskStatus = 'On Schedule'
+      }
       result.push(array2[i]) // 先添加 array2 中的元素
     }
     if (i < array1.length) {
+      if (array1[i].plannedStart > array2[i].plannedStart) {
+        array1[i].taskStatus = 'Delayed'
+        array2[i].taskStatus = 'Delayed'
+      } else if (array1[i].plannedStart < array2[i].plannedStart) {
+        array1[i].taskStatus = 'Ahead'
+        array2[i].taskStatus = 'Ahead'
+      } else {
+        array1[i].taskStatus = 'On Schedule'
+        array2[i].taskStatus = 'On Schedule'
+      }
       result.push(array1[i]) // 再添加 array1 中的元素
     }
   }
@@ -1182,6 +1356,7 @@ function compareTasks(firstTask, secondTask) {
   const correspondingTaskStartDate = new Date(secondTask.value[1]) // 将 UTC 字符串转换为 Date 对象
   const correspondingTaskEndDate = new Date(secondTask.value[2]) // 将 UTC 字符串转换为 Date 对象
   // 比较开始时间和结束时间，并考虑任务所有者
+
   if (taskStartDate > correspondingTaskStartDate) {
     status = 'Delayed'
   } else if (taskStartDate < correspondingTaskStartDate) {

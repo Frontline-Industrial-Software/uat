@@ -226,7 +226,6 @@ let filterDatas = computed(() => {
       )
     })
     return _file
-    console.log(_file)
   } else {
     return []
   }
@@ -234,7 +233,6 @@ let filterDatas = computed(() => {
 function datasFilter() {
   controlFilter.value = false
   if (datas.value) {
-    console.log(filterDatas.value)
     ganttChart.setOption(getOption(ganttData()))
   }
 }
@@ -307,7 +305,6 @@ async function Uploads(filess) {
       let attrValue = a.data[attrName]
       fileData.value.push(attrValue)
     }
-
     let fileDatas = alternateInsert(
       fileData.value[1].tasks,
       fileData.value[2].tasks,
@@ -378,7 +375,7 @@ function getRenderData(data) {
   if (!ganttChart) {
     return
   }
-  datas.value = fileData.value[3].slice(
+  datas.value = filterDatas.value.slice(
     data.rowCacheStart === 0 ? 0 : data.rowCacheStart, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
     data.rowCacheStart === 0 ? 24 : data.rowCacheStart + 25, // 切片结束位置为 data.rowCacheStart + 25
   )
@@ -736,9 +733,9 @@ const renderItem = (type) => (params, api) => {
 
 /* -------------------------------------------------------------------------- */
 let ganttData = () => {
-  let ganttDatas = filterDatas.value.map((ganttItem, idx) => {
+  let ganttDatas = datas.value.map((ganttItem, idx) => {
     // const calculatedIdx = calculateIdx(datas.value.length - idx)
-    const calculatedIdx = filterDatas.value.length - idx
+    const calculatedIdx = datas.value.length - idx
 
     return {
       name: ganttItem.name,
@@ -1292,7 +1289,6 @@ function alternateInsert(array1, array2) {
   })
   let result = []
   let maxLength = Math.max(array1.length, array2.length)
-  console.log(array1, array2)
   for (let i = 0; i < maxLength; i++) {
     if (i < array2.length) {
       if (!array1[i].newStart) {

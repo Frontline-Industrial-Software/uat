@@ -18,7 +18,7 @@
         v-for="(data, dataindex) in Range.data"
         :style="`width: ${data.days * dayWidth}px`"
       >
-        <span v-if="props.chosenDate === 'Day' || props.chosenDate === 'Week'">
+        <span>
           <p>{{ formatDateStringRange(data.data)[0] }}</p>
           <p>{{ formatDateStringRange(data.data)[1] }}</p>
         </span>
@@ -30,13 +30,7 @@
         :style="`width: ${data.days * dayWidth}px`"
       >
         <!-- 默认处理方式 -->
-        <span
-          v-if="
-            props.chosenDate === 'Day' ||
-            props.chosenDate === 'Week' ||
-            props.chosenDate === 'Month'
-          "
-        >
+        <span>
           {{ getMonthFromDateRange(data.data) }}
         </span>
       </div>
@@ -46,14 +40,7 @@
         v-for="(data, dataindex) in Range.data"
         :style="`width: ${data.days * dayWidth}px`"
       >
-        <span
-          v-if="
-            props.chosenDate === 'Day' ||
-            props.chosenDate === 'Week' ||
-            props.chosenDate === 'Month' ||
-            props.chosenDate === 'Year'
-          "
-        >
+        <span>
           {{ data.data.split('/')[0] }}
         </span>
 

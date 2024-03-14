@@ -107,6 +107,8 @@
           fixed
           @rows-rendered="getRenderData"
           :row-class="rowClass"
+          @row-expand="onRowExpanded"
+          @expanded-rows-change="onExpandedRowsChange"
         >
           <template #row="props">
             <Row v-bind="props" />
@@ -348,7 +350,13 @@ function getRenderData(data) {
   ganttChart.setOption(getOption(ganttData()))
 }
 const rowSpanIndex = 0
+const onRowExpanded = ({ expanded }) => {
+  console.log('Expanded:', expanded)
+}
 
+const onExpandedRowsChange = (expandedKeys) => {
+  expandedRowKeys.value = expandedKeys // 更新 expandedRowKeys
+}
 function getColumns(datas) {
   let valuesArray = []
   if (datas.length > 0) {
@@ -383,6 +391,9 @@ function getColumns(datas) {
         case 'name':
           name = 'Activity Name'
           break
+        case 'type':
+          name = 'Tasks'
+          break
         default:
           break
       }
@@ -396,7 +407,7 @@ function getColumns(datas) {
     })
     .filter((item) => {
       let bol = true
-      // console.log(item);
+      console.log(item)
       switch (item.dataKey) {
         case 'id':
           bol = false
@@ -408,12 +419,21 @@ function getColumns(datas) {
           bol = false
           break
         case 'order':
+        case 'extra':
+          bol = false
+          break
           bol = false
           break
         case 'wbsId':
           bol = false
           break
         case 'extra':
+          bol = false
+          break
+        // case 'resources':
+        //   bol = false
+        //   break
+        case 'taskOwner':
           bol = false
           break
         default:
@@ -494,13 +514,20 @@ const renderItem = (type) => (params, api) => {
   let end = api.coord([api.value(2), api.value(0)])
   let height = api.size([0, 1])[1]
   let y
-
+  let span, basespan
+  if (datas.value.length < 24) {
+    span = 80
+    basespan = 40
+  } else {
+    span = 60
+    basespan = 30
+  }
   if (type == 'base') {
     height = 8
-    y = ((start[1] - 30) / 60) * 60 + 15
+    y = ((start[1] - basespan) / span) * 60 + 15
   } else {
     height = 13
-    y = (start[1] / 60) * 60
+    y = (start[1] / span) * 60
   }
   let shape = {
     x: start[0],

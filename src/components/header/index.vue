@@ -112,6 +112,13 @@
             >
               Upgrade Features
             </v-list-item>
+            <v-list-item @click="router.push('/dashboard/inputdata')">
+              Back Dashboard
+            </v-list-item>
+            <v-list-item @click="router.push('/compare')">
+              Compare(Beta)
+            </v-list-item>
+
             <v-list-item @click="logout">Log out</v-list-item>
           </v-list>
         </v-menu>

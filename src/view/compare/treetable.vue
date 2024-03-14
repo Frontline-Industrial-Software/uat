@@ -132,7 +132,7 @@
         <div>Start Time</div>
         <el-checkbox v-model="isDelayed" label="Delayed activities" />
         <el-checkbox v-model="isAhead" label="Ahead activities" />
-        <el-checkbox v-model="isOnschedule" label="Onschedule activities" />
+        <el-checkbox v-model="isOnschedule" label="On schedule activities" />
         <div>Status</div>
         <el-checkbox v-model="isActive" label="Active Tasks" />
         <el-checkbox v-model="isCompleted" label="Completed Tasks" />
@@ -353,7 +353,7 @@ function initCharts() {
     e.status = e.status.replace('TK_', '')
     return e
   })
-  datas.value = fileData.value[3].slice(0, 24)
+  datas.value = filterDatas.value.slice(0, 24)
 
   /* -------------------------------------------------------------------------- */
   if (ganttChart) {
@@ -375,10 +375,12 @@ function getRenderData(data) {
   if (!ganttChart) {
     return
   }
+  console.log(data.rowCacheStart, filterDatas.value)
   datas.value = filterDatas.value.slice(
     data.rowCacheStart === 0 ? 0 : data.rowCacheStart, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
     data.rowCacheStart === 0 ? 24 : data.rowCacheStart + 25, // 切片结束位置为 data.rowCacheStart + 25
   )
+  console.log(datas.value)
   ganttChart.setOption(getOption(ganttData()))
 }
 const rowSpanIndex = 0
@@ -530,9 +532,8 @@ let data = computed(() => {
   }
 })
 const pathSymbols = {
-  Ahead: 'path://M0,0 L100,0 L100,50 L80,30 L20,30 L0,50 Z',
-  'On Schedule': 'path://M0,0 L100,0 L80,50 L20,50 Z',
-  delayed: 'path://M0,50 L50,0 L100,50 L150,0 L200,50 L200,100 L0,100 ',
+  Ahead: 'path://M0,50 L50,0 L100,50 L150,0 L200,50 L200,100 L0,100 ',
+  delayed: 'path://M0,0 L100,0 L100,50 L80,30 L20,30 L0,50 Z',
 }
 /* -------------------------------------------------------------------------- */
 let colors = {
@@ -587,41 +588,39 @@ const renderItem = (type) => (params, api) => {
       }
       // 其他类型的渲染逻辑
       break
-    case 'Delayed':
-      const repeatInterval = Math.ceil(Math.max(end[0] - start[0], 1) / 5) /// 重复间隔
-      // 计算颜色点的数组
-      const colorStops = []
-      const intervalColor = '#FFFFFF'
-      const mainColor = '#1bb9cc'
-      const intervalCount = 2 // 间隔颜色的数量
-      for (let i = 0; i <= repeatInterval; i++) {
-        const offset = i / repeatInterval // 将 [0, repeatInterval] 映射到 [0, 0.5]
+    case 'Ahead ':
+      // const repeatInterval = Math.ceil(Math.max(end[0] - start[0], 1) / 5) /// 重复间隔
+      // // 计算颜色点的数组
+      // const colorStops = []
+      // const intervalColor = '#FFFFFF'
+      // const mainColor = '#1bb9cc'
+      // const intervalCount = 2 // 间隔颜色的数量
+      // for (let i = 0; i <= repeatInterval; i++) {
+      //   const offset = i / repeatInterval // 将 [0, repeatInterval] 映射到 [0, 0.5]
 
-        if (i % (intervalCount + 1) === 0) {
-          // 间隔颜色
-          colorStops.push({ offset, color: intervalColor })
-        } else {
-          // 主要颜色
-          colorStops.push({ offset, color: mainColor })
-        }
-      }
-      // 创建 Linear Gradient
-      const linearGradient = new echarts.graphic.LinearGradient(
-        0,
-        0,
-        1,
-        1.1,
-        colorStops,
-      )
+      //   if (i % (intervalCount + 1) === 0) {
+      //     // 间隔颜色
+      //     colorStops.push({ offset, color: intervalColor })
+      //   } else {
+      //     // 主要颜色
+      //     colorStops.push({ offset, color: mainColor })
+      //   }
+      // }
+      // // 创建 Linear Gradient
+      // const linearGradient = new echarts.graphic.LinearGradient(
+      //   0,
+      //   0,
+      //   1,
+      //   1.1,
+      //   colorStops,
+      // )
 
       result = {
         type: 'rect',
         shape,
         style: {
           ...api.style(),
-          radius: 10,
-          fill: linearGradient,
-          lineDash: [5, 5],
+          // radius: 10,
         },
         focus: 'self',
         blurScope: 'coordinateSystem',
@@ -643,7 +642,7 @@ const renderItem = (type) => (params, api) => {
       }
       // 其他类型的渲染逻辑
       break
-    case 'Ahead of Schedule':
+    case 'Delayed':
       let x = start[0] // 矩形左上角 x 坐标
       // let y = start[1] // 矩形左上角 y 坐标
       let width = Math.max(end[0] - start[0], 1) // 矩形宽度
@@ -733,6 +732,8 @@ const renderItem = (type) => (params, api) => {
 
 /* -------------------------------------------------------------------------- */
 let ganttData = () => {
+  console.log(datas.value)
+  datas.value = filterDatas.value
   let ganttDatas = datas.value.map((ganttItem, idx) => {
     // const calculatedIdx = calculateIdx(datas.value.length - idx)
     const calculatedIdx = datas.value.length - idx
@@ -908,6 +909,16 @@ function getOption({ firstProject, secondProject }) {
         },
       },
       {
+        name: 'Completed',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
+      {
         name: 'Delayed',
         type: 'line',
         smooth: 0.6,
@@ -977,6 +988,13 @@ function getOption({ firstProject, secondProject }) {
           },
         },
         {
+          name: 'Completed',
+          icon: 'rect',
+          itemStyle: {
+            color: '#10be00',
+          },
+        },
+        {
           name: 'NotStart',
           icon: 'rect',
           itemStyle: {
@@ -992,20 +1010,20 @@ function getOption({ firstProject, secondProject }) {
         },
         {
           name: 'Ahead of Schedule',
-          icon: pathSymbols.Ahead,
+          icon: 'roundRect',
           itemStyle: {
             color: '#b5b5b5',
           },
         },
         {
           name: 'On Schedule',
-          icon: pathSymbols['On Schedule'],
+          icon: 'rect',
           itemStyle: {
             color: '#b5b5b5',
           },
         },
         {
-          name: 'delayed',
+          name: 'Delayed',
           icon: pathSymbols.delayed,
           itemStyle: {
             color: '#b5b5b5',
@@ -1354,9 +1372,9 @@ function compareTasks(firstTask, secondTask) {
   // 比较开始时间和结束时间，并考虑任务所有者
 
   if (taskStartDate > correspondingTaskStartDate) {
-    status = 'Delayed'
-  } else if (taskStartDate < correspondingTaskStartDate) {
     status = 'Ahead of Schedule'
+  } else if (taskStartDate < correspondingTaskStartDate) {
+    status = 'Delayed'
   } else {
     status = 'On Track'
   }

@@ -247,7 +247,7 @@ watch(
 /* -------------------------------------------------------------------------- */
 
 let filterDatas = computed(() => {
-  if (fileData.value.length > 0) {
+  if (fileData.value?.length > 0) {
     let _file = fileData.value[3].filter((e) => {
       return (
         ((isDelayed.value && e.taskStatus === 'Delayed') ||
@@ -428,6 +428,7 @@ const onExpandedRowsChange = (expandedKeys) => {
 }
 function getColumns(datas) {
   let valuesArray = []
+
   if (datas.length > 0) {
     valuesArray = Object.keys(datas[0])
   } else {

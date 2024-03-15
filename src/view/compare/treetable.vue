@@ -59,15 +59,6 @@
               Compare Projects
             </el-button>
           </el-upload>
-          <!-- <el-input
-            v-model="searchData"
-            style="width: 240px; height: 32px"
-            placeholder="Type something"
-          >
-            <template #prefix>
-              <el-icon class="el-input__icon"><search /></el-icon>
-            </template>
-          </el-input> -->
         </div>
         <div>
           <el-radio-group v-model="chosenDate" size="large">
@@ -93,13 +84,38 @@
             Tasks
           </p>
           <p style="color: #b5b5b5">overview of all tasks over time</p>
+          <el-dropdown style="margin-right: 20px" split-button>
+            <span class="el-dropdown-link">
+              {{ searchType }}
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="searchType = 'name'">
+                  Name
+                </el-dropdown-item>
+                <el-dropdown-item @click="searchType = 'id'">
+                  ID
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <el-input
+            v-model="searchData"
+            style="width: 600px; height: 32px"
+            placeholder="Type something"
+          >
+            <template #prefix>
+              <el-icon class="el-input__icon"><search /></el-icon>
+            </template>
+          </el-input>
         </div>
         <el-table-v2
+          ref="tableRef"
           :columns="columns"
           :data="filterDatas"
           :width="700"
-          :height="800"
-          :row-height="30"
+          :height="900"
+          :row-height="25"
           :estimated-row-width="40"
           :row-event-handlers="eventClick"
           :scrollbar-always-on="true"
@@ -139,6 +155,7 @@
         <el-checkbox v-model="isNotStart" label="NotStart Tasks" />
         <div>Other</div>
         <el-checkbox v-model="isCritical" label="Critical Tasks" />
+        <el-checkbox v-model="isNocritical" label="Non-Critical Tasks" />
       </el-tab-pane>
       <!-- <el-tab-pane label="Resources" name="Resources"></el-tab-pane> -->
     </el-tabs>
@@ -189,7 +206,9 @@ const router = useRouter()
 const GanttEcharts = ref(null)
 const chosenDate = ref('Week')
 const searchData = ref()
+const searchType = ref('name')
 let datas = ref()
+const tableRef = ref()
 let ganttChart
 const startTimeStamp = ref(null)
 const endTimeStamp = ref(null)
@@ -210,6 +229,21 @@ let isCompleted = ref(true)
 let isNotStart = ref(true)
 
 let isCritical = ref(true)
+let isNocritical = ref(true)
+/* -------------------------------------------------------------------------- */
+watch(
+  searchData,
+  (newVal, oldVal) => {
+    if (filterDatas.value) {
+      let searchIndex = filterDatas.value.findIndex((item) => {
+        return item[searchType.value] === newVal
+      })
+      searchIndex = searchIndex === -1 ? 0 : searchIndex
+      tableRef.value?.scrollToRow(searchIndex, 'start')
+    }
+  },
+  { deep: true },
+)
 /* -------------------------------------------------------------------------- */
 
 let filterDatas = computed(() => {
@@ -222,7 +256,8 @@ let filterDatas = computed(() => {
         ((isActive.value && e.status === 'Active') ||
           (isCompleted.value && e.status === 'Complete') ||
           (isNotStart.value && e.status === 'NotStart')) &&
-        (isCritical.value || !e.critical)
+        ((isCritical.value && e.critical === true) ||
+          (isNocritical.value && e.critical === null))
       )
     })
     return _file
@@ -233,6 +268,7 @@ let filterDatas = computed(() => {
 function datasFilter() {
   controlFilter.value = false
   if (datas.value) {
+    datas.value = filterDatas.value.slice(0, 34)
     ganttChart.setOption(getOption(ganttData()))
   }
 }
@@ -243,7 +279,7 @@ const eventClick = {
     if (index == 0) {
       index = 0
     } else {
-      index = 30 * index
+      index = 25 * index
     }
     ganttChart.setOption({
       graphic: {
@@ -251,10 +287,10 @@ const eventClick = {
           {
             type: 'rect',
             left: 0, // 矩形左上角相对于 grid 的 x 坐标
-            top: index, // 矩形左上角相对于 grid 的 y 坐标
+            top: 40 + index, // 矩形左上角相对于 grid 的 y 坐标
             shape: {
               width: '1500', // 矩形的宽度
-              height: 60, // 矩形的高度
+              height: 50, // 矩形的高度
             },
             style: {
               fill: 'rgba(236,246,245,0.7)', // 矩形的填充颜色
@@ -353,7 +389,7 @@ function initCharts() {
     e.status = e.status.replace('TK_', '')
     return e
   })
-  datas.value = filterDatas.value.slice(0, 24)
+  datas.value = filterDatas.value.slice(0, 34)
 
   /* -------------------------------------------------------------------------- */
   if (ganttChart) {
@@ -361,7 +397,7 @@ function initCharts() {
   } else {
     ganttChart = echarts.init(GanttEcharts.value, 'purple-passion', {
       width: 1200,
-      height: 720,
+      height: 890,
     })
     ganttChart.setOption(getOption(ganttData()))
     ganttChart.on('dataZoom', function (params, a, b) {
@@ -375,12 +411,11 @@ function getRenderData(data) {
   if (!ganttChart) {
     return
   }
-  console.log(data.rowCacheStart, filterDatas.value)
   datas.value = filterDatas.value.slice(
-    data.rowCacheStart === 0 ? 0 : data.rowCacheStart, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
-    data.rowCacheStart === 0 ? 24 : data.rowCacheStart + 25, // 切片结束位置为 data.rowCacheStart + 25
+    data.rowCacheStart === 0 ? 0 : data.rowCacheStart + 2, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
+    data.rowCacheStart === 0 ? 34 : data.rowCacheEnd - 1, // 切片结束位置为 data.rowCacheStart + 25
   )
-  console.log(datas.value)
+
   ganttChart.setOption(getOption(ganttData()))
 }
 const rowSpanIndex = 0
@@ -541,26 +576,28 @@ let colors = {
   NotStart: '#ffb522',
   Active: '#4a8fe7',
 }
+let borderColor = (data) => {
+  if (data) {
+    return '#cf1322'
+  } else {
+  }
+}
 const renderItem = (type) => (params, api) => {
   let start = api.coord([api.value(1), api.value(0)])
   let end = api.coord([api.value(2), api.value(0)])
   let height = api.size([0, 1])[1]
   let y
   let span, basespan
-  if (datas.value.length < 24) {
-    span = 80
-    basespan = 40
-  } else {
-    span = 60
-    basespan = 30
-  }
+
+  y = (datas.value.length - api.value(0)) * 25
   if (type == 'base') {
-    height = 8
-    y = ((start[1] - basespan) / span) * 60 + 15
+    y = y + 45
+    height = 10
   } else {
-    height = 13
-    y = (start[1] / span) * 60
+    y = y + 8 + 40
+    height = 20
   }
+
   let shape = {
     x: start[0],
     y: y,
@@ -732,8 +769,9 @@ const renderItem = (type) => (params, api) => {
 
 /* -------------------------------------------------------------------------- */
 let ganttData = () => {
-  console.log(datas.value)
-  datas.value = filterDatas.value
+  // console.log(datas.value)
+  // datas.value = filterDatas.value
+  // console.log(datas.value)
   let ganttDatas = datas.value.map((ganttItem, idx) => {
     // const calculatedIdx = calculateIdx(datas.value.length - idx)
     const calculatedIdx = datas.value.length - idx
@@ -748,12 +786,14 @@ let ganttData = () => {
       ],
       itemStyle: {
         color: colors[ganttItem.status],
+        borderColor: borderColor(ganttItem.critical),
+        borderWidth: 2,
+        borderType: 'dashed',
       },
       taskOwner: ganttItem.taskOwner,
       status: ganttItem.status,
     }
   })
-
   let firstProject = ganttDatas.filter((e) => {
     return e.taskOwner == 'first'
   })
@@ -819,9 +859,12 @@ function getOption({ firstProject, secondProject }) {
     },
     yAxis: {
       name: 'tasks',
-      interval: 60, // 设置每个间隔的高度
-      splitNumber: 11, // 将整个 y 轴分成 20 个间隔
+      interval: 25, // 设置每个间隔的高度
+      splitNumber: 34, // 将整个 y 轴分成 20 个间隔
       show: true,
+      max: 34,
+      min: 34,
+
       // min: 1,
       // max: 60, // 设置 y 轴的最大值为总高度
     },
@@ -1033,8 +1076,8 @@ function getOption({ firstProject, secondProject }) {
       type: 'scroll',
     },
     grid: {
-      top: 0,
-      left: 0,
+      top: 40,
+      left: 50,
       right: 0,
       bottom: 0,
     },
@@ -1072,10 +1115,10 @@ function getOption({ firstProject, secondProject }) {
         {
           type: 'rect',
           left: 0, // 矩形左上角相对于 grid 的 x 坐标
-          top: 0, // 矩形左上角相对于 grid 的 y 坐标
+          top: 40, // 矩形左上角相对于 grid 的 y 坐标
           shape: {
             width: '1500', // 矩形的宽度
-            height: 60, // 矩形的高度
+            height: 50, // 矩形的高度
           },
           style: {
             fill: 'rgba(236,246,245,0.7)', // 矩形的填充颜色
@@ -1083,88 +1126,6 @@ function getOption({ firstProject, secondProject }) {
         },
       ],
     },
-    // tooltip: {
-    //   axisPointer: {
-    //     //坐标轴指示器，坐标轴触发有效，
-    //     // type: 'cross', //默认为line，line直线，cross十字准星，shadow阴影
-    //   },
-
-    //   formatter: (p) => {
-    //     console.log(p);
-    //     let resData = 'Resources: <br/>'
-    //     if (p.value[3].resources) {
-    //       for (const key in p.value[3].resources) {
-    //         let res = p.value[3].resources
-    //         let name = store.selectedData.newResources.find((resource) => {
-    //           return resource.id == key
-    //         })
-    //         if (!name) {
-    //           name = ''
-    //         }
-
-    //         resData += ` &nbsp&nbspResource &nbsp  ${
-    //           name?.name
-    //         } &nbsp id: ${key}  <br/>&nbsp&nbsp&nbsp&nbspunits/hour:${returnFloat(
-    //           res[key].plannedUnitsPerHour,
-    //         )}=> ${returnFloat(res[key].newUnitsPerHour)}<br/>`
-    //       }
-    //     }
-
-    //     function marker(str) {
-    //       let color
-    //       switch (str) {
-    //         case 'New':
-    //           if (!p.value[3].critical) {
-    //             color = '#b0e054'
-    //           } else {
-    //             color = 'red'
-    //           }
-    //           break
-    //         case 'Old':
-    //           if (!p.value[3].critical) {
-    //             color = '#5474c4'
-    //           } else {
-    //             color = 'pink'
-    //           }
-
-    //         default:
-    //           break
-    //       }
-
-    //       return `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`
-    //     }
-    //     return `${p.name}<br/>
-    //   <div style='margin-top:20px'>
-    //    ${marker('New')} New: ${baseItem(
-    //      utcTime(p.value[4].changeNew.start)
-    //        .replace('T', ' ')
-    //        .replace('Z', '')
-    //        .slice(0, 16),
-    //    )} -> ${baseItem(
-    //      utcTime(p.value[4].changeNew.finish)
-    //        .replace('T', ' ')
-    //        .replace('Z', '')
-    //        .slice(0, 16),
-    //    )}
-    //    (${p.value[4].changeNew.duration})
-    //   <br/>
-    //    ${marker('Old')} Old: ${baseItem(
-    //      utcTime(p.value[4].baseNew.start)
-    //        .replace('T', ' ')
-    //        .replace('Z', '')
-    //        .slice(0, 16),
-    //    )} -> ${baseItem(
-    //      utcTime(p.value[4].baseNew.finish)
-    //        .replace('T', ' ')
-    //        .replace('Z', '')
-    //        .slice(0, 16),
-    //    )}
-    //  (${p.value[4].baseNew.duration})
-    //    <br/>
-    //    ${resData}
-    //   </div>`
-    //   },
-    // },
   }
   return option
 }
@@ -1435,5 +1396,11 @@ function compareTasks(firstTask, secondTask) {
   background-color: #fff;
   border-radius: 16px;
   padding: 20px 20px 40px 20px;
+}
+.example-showcase .el-dropdown-link {
+  cursor: pointer;
+  color: var(--el-color-primary);
+  display: flex;
+  align-items: center;
 }
 </style>

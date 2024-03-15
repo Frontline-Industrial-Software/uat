@@ -263,6 +263,7 @@ function getMonthFromDateRange(dateRange) {
   align-items: center;
   flex-wrap: wrap;
   flex-direction: column-reverse;
+  margin-bottom: -40px;
 }
 .item {
   width: 100%;

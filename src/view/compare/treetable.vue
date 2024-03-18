@@ -11,7 +11,9 @@
       >
         Tasks
       </p>
-      <p style="color: #b5b5b5">overview of all tasks over time</p>
+      <p style="color: #ffa39e">
+        Please do not upload a file with the same name
+      </p>
       <!-- <div class="choosebox">
         <div class="choose">
           <div style="background-color: #b5b5b5" class="item"></div>
@@ -64,7 +66,7 @@
             :before-upload="uploadBase"
           >
             <template #trigger>
-              <el-button style="width: 200px">Chose Base file</el-button>
+              <el-button style="width: 200px">Choose Base File</el-button>
             </template>
             <template #tip>
               <div class="upload-text">
@@ -79,7 +81,7 @@
             :before-upload="uploadCompare"
           >
             <template #trigger>
-              <el-button style="width: 200px">Chose Compare file</el-button>
+              <el-button style="width: 200px">ChoOse Compare File</el-button>
             </template>
             <template #tip>
               <div class="upload-text">
@@ -99,6 +101,7 @@
             Compare Projects
           </el-button>
         </div>
+
         <div>
           <el-radio-group v-model="chosenDate" size="large">
             <el-radio-button label="Day" value="Day" />
@@ -296,6 +299,7 @@ watch(
 let filterDatas = computed(() => {
   if (fileData.value?.length > 0) {
     let _file = fileData.value[3].filter((e) => {
+      console.log(e)
       e.newStart = utcTime(e.newStart)
         .replace('T', ' ')
         .replace('Z', '')
@@ -309,6 +313,14 @@ let filterDatas = computed(() => {
         .replace('Z', '')
         .slice(0, 16)
       e.plannedFinish = utcTime(e.plannedFinish)
+        .replace('T', ' ')
+        .replace('Z', '')
+        .slice(0, 16)
+      e.actualStart = utcTime(e.actualStart)
+        .replace('T', ' ')
+        .replace('Z', '')
+        .slice(0, 16)
+      e.actualFinish = utcTime(e.actualFinish)
         .replace('T', ' ')
         .replace('Z', '')
         .slice(0, 16)
@@ -1321,6 +1333,9 @@ function baseItem(data) {
   return `<span >${data}</span>`
 }
 function utcTime(time) {
+  if (!time) {
+    return "It doesn't exist"
+  }
   const utcDate = new Date(time)
   const utcString = utcDate.toISOString()
 

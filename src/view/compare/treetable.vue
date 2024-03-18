@@ -12,15 +12,15 @@
         Tasks
       </p>
       <p style="color: #b5b5b5">overview of all tasks over time</p>
-      <div class="choosebox">
+      <!-- <div class="choosebox">
         <div class="choose">
           <div style="background-color: #b5b5b5" class="item"></div>
           <div>Baseline</div>
         </div>
-        <!-- <div class="choose">
+        <div class="choose">
           <div style="background-color: #00beae" class="item"></div>
           <div>WBS</div>
-        </div> -->
+        </div>
         <div class="choose">
           <div style="background-color: #ffb522" class="item"></div>
           <div>To-do</div>
@@ -37,16 +37,13 @@
           <div style="background-color: #4a8fe7" class="item"></div>
           <div>Delayed</div>
         </div>
-      </div>
+      </div> -->
       <el-divider />
       <div class="button">
         <div
-          style="display: flex; justify-content: space-between; width: 280px"
+          style="display: flex; justify-content: space-between; width: 650px"
         >
-          <el-button @click="controlFilter = true" :icon="Filter">
-            Filter
-          </el-button>
-          <el-upload
+          <!-- <el-upload
             action=""
             :multiple="true"
             :before-upload="beforeUpload"
@@ -58,7 +55,49 @@
               <Compare />
               Compare Projects
             </el-button>
+          </el-upload> -->
+
+          <el-upload
+            class="upload-demo"
+            action=""
+            :limit="1"
+            :before-upload="uploadBase"
+          >
+            <template #trigger>
+              <el-button style="width: 200px">Chose Base file</el-button>
+            </template>
+            <template #tip>
+              <div class="upload-text">
+                {{ baseProject }}
+              </div>
+            </template>
           </el-upload>
+          <el-upload
+            class="upload-demo"
+            action=""
+            :limit="1"
+            :before-upload="uploadCompare"
+          >
+            <template #trigger>
+              <el-button style="width: 200px">Chose Compare file</el-button>
+            </template>
+            <template #tip>
+              <div class="upload-text">
+                {{ compareProject }}
+              </div>
+            </template>
+          </el-upload>
+
+          <el-button
+            :disabled="files.length == 2 ? false : true"
+            style="width: 200px"
+            @click="Uploads"
+            :text="true"
+            type="success"
+          >
+            <!-- <Compare /> -->
+            Compare Projects
+          </el-button>
         </div>
         <div>
           <el-radio-group v-model="chosenDate" size="large">
@@ -84,6 +123,13 @@
             Tasks
           </p>
           <p style="color: #b5b5b5">overview of all tasks over time</p>
+          <el-button
+            style="margin-right: 150px"
+            @click="controlFilter = true"
+            :icon="Filter"
+          >
+            Filter
+          </el-button>
           <el-dropdown style="margin-right: 20px" split-button>
             <span class="el-dropdown-link">
               {{ searchType }}
@@ -101,8 +147,8 @@
           </el-dropdown>
           <el-input
             v-model="searchData"
-            style="width: 600px; height: 32px"
-            placeholder="Type something"
+            style="width: 320px; height: 32px"
+            placeholder="Please enter complete information"
           >
             <template #prefix>
               <el-icon class="el-input__icon"><search /></el-icon>
@@ -146,9 +192,9 @@
     <el-tabs v-model="activeName" class="demo-tabs">
       <el-tab-pane label="Activity Status" name="Activity Status">
         <div>Start Time</div>
-        <el-checkbox v-model="isDelayed" label="Delayed activities" />
-        <el-checkbox v-model="isAhead" label="Ahead activities" />
-        <el-checkbox v-model="isOnschedule" label="On schedule activities" />
+        <el-checkbox v-model="isDelayed" label="Delayed Activities" />
+        <el-checkbox v-model="isAhead" label="Ahead Activities" />
+        <el-checkbox v-model="isOnschedule" label="On schedule Activities" />
         <div>Status</div>
         <el-checkbox v-model="isActive" label="Active Tasks" />
         <el-checkbox v-model="isCompleted" label="Completed Tasks" />
@@ -186,6 +232,7 @@ import {
   ElIcon,
   ElPopover,
   TableV2FixedDir,
+  ElMessage,
 } from 'element-plus'
 import * as echarts from 'echarts'
 import { useRouter } from 'vue-router'
@@ -249,6 +296,22 @@ watch(
 let filterDatas = computed(() => {
   if (fileData.value?.length > 0) {
     let _file = fileData.value[3].filter((e) => {
+      e.newStart = utcTime(e.newStart)
+        .replace('T', ' ')
+        .replace('Z', '')
+        .slice(0, 16)
+      e.newFinish = utcTime(e.newFinish)
+        .replace('T', ' ')
+        .replace('Z', '')
+        .slice(0, 16)
+      e.plannedStart = utcTime(e.plannedStart)
+        .replace('T', ' ')
+        .replace('Z', '')
+        .slice(0, 16)
+      e.plannedFinish = utcTime(e.plannedFinish)
+        .replace('T', ' ')
+        .replace('Z', '')
+        .slice(0, 16)
       return (
         ((isDelayed.value && e.taskStatus === 'Delayed') ||
           (isAhead.value && e.taskStatus === 'Ahead') ||
@@ -318,17 +381,40 @@ let markLineData
 let startDate
 let endDate
 let uploadData
-let files = []
+let files = ref([])
+let baseProject = ref()
+let compareProject = ref()
+
 let fileData = ref([])
 function removeFile(file) {
-  files = []
+  files.value = []
 }
-async function Uploads(filess) {
-  let filed = filess.file
-  files.push(filed)
-  if (files.length == 2) {
+
+let uploadBase = (file) => {
+  if (file.type !== 'application/xer' && file.type !== 'text/xml') {
+    ElMessage.error('Please upload xer or xml file!')
+    return false
+  }
+  files.value[0] = file
+  baseProject.value = file.name
+  return false
+}
+let uploadCompare = (file) => {
+  if (file.type !== 'application/xer' && file.type !== 'text/xml') {
+    ElMessage.error('Please upload xer or xml file!')
+    return false
+  }
+  files.value[1] = file
+  compareProject.value = file.name
+  return false
+}
+async function Uploads() {
+  // let filed = filess.file
+  // files.push(filed)
+
+  if (files.value.length == 2) {
     fileData.value = []
-    files.map((file) => {
+    files.value.map((file) => {
       const originalFileName = file.name // 保存原始文件名
       const sanitizedFileName = sanitizeFileName(originalFileName) // 使用 sanitizeFileName 处理文件名
       const modifiedFile = new File([file], sanitizedFileName, {
@@ -336,25 +422,42 @@ async function Uploads(filess) {
       }) // 创建新的文件对象，修改文件名
       return modifiedFile
     })
-    let a = await api.sendFile(files, 'task') // 使用修改后的文件对象进行上传
+
+    let a = await api.sendFile(files.value, 'task') // 使用修改后的文件对象进行上传
     for (let attrName in a.data) {
       let attrValue = a.data[attrName]
       fileData.value.push(attrValue)
     }
+
     let fileDatas = alternateInsert(
       fileData.value[1].tasks,
       fileData.value[2].tasks,
     )
-    fileDatas.map((e) => {
-      if (e.resources) {
-        e.resources = null
+    fileDatas = fileDatas.map((e) => {
+      let resource = []
+      for (const key in e.resources) {
+        e.resources[key].parentId = e.resources[key].taskId
+        resource.push(e.resources[key])
       }
-      return
-    })
-    fileData.value.push(fileDatas)
-    initCharts()
-  }
 
+      e.resources = concatenateResources(resource)
+      return e
+    })
+    if (fileData.value[1].tasks.length != fileData.value[2].tasks) {
+      // fileDatas.map((e) => {
+      //   if (e.resources) {
+      //     e.resources = null
+      //   }
+      //   return e
+      // })
+      fileData.value.push(fileDatas)
+      initCharts()
+    }
+  }
+  if (fileData.value[1].tasks.length != fileData.value[2].tasks.length) {
+    ElMessage.error('Please upload a project with the same task')
+    fileData.value = []
+  }
   return false
 }
 const beforeUpload = async (event, file, fileList) => {}
@@ -555,20 +658,13 @@ let columns = computed(() => {
 
 let data = computed(() => {
   if (fileData.value.length > 0) {
-    fileData.value[3].map((e, index) => {
-      e.newFinish = timestampToUTC(e.newFinish)
-      e.newStart = timestampToUTC(e.newStart)
-      e.plannedFinish = timestampToUTC(e.plannedFinish)
-      e.plannedStart = timestampToUTC(e.plannedStart)
-      return e
-    })
     return fileData.value[3]
   } else {
     return []
   }
 })
 const pathSymbols = {
-  Ahead: 'path://M0,50 L50,0 L100,50 L150,0 L200,50 L200,100 L0,100 ',
+  Ahead: 'path://M0,0 L90,20 L10,20  L100,0  L100,50 L80,30 L20,30 L0,50 Z',
   delayed: 'path://M0,0 L100,0 L100,50 L80,30 L20,30 L0,50 Z',
 }
 /* -------------------------------------------------------------------------- */
@@ -589,7 +685,7 @@ const renderItem = (type) => (params, api) => {
   let height = api.size([0, 1])[1]
   let y
   let span, basespan
-
+  let x, width, points
   y = (datas.value.length - api.value(0)) * 25
   if (type == 'base') {
     y = y + 45
@@ -626,42 +722,33 @@ const renderItem = (type) => (params, api) => {
       }
       // 其他类型的渲染逻辑
       break
-    case 'Ahead ':
-      // const repeatInterval = Math.ceil(Math.max(end[0] - start[0], 1) / 5) /// 重复间隔
-      // // 计算颜色点的数组
-      // const colorStops = []
-      // const intervalColor = '#FFFFFF'
-      // const mainColor = '#1bb9cc'
-      // const intervalCount = 2 // 间隔颜色的数量
-      // for (let i = 0; i <= repeatInterval; i++) {
-      //   const offset = i / repeatInterval // 将 [0, repeatInterval] 映射到 [0, 0.5]
+    case 'Ahead':
+      x = start[0] // 矩形左上角 x 坐标
+      // let y = start[1] // 矩形左上角 y 坐标
+      width = Math.max(end[0] - start[0], 1) // 矩形宽度
+      // let height = 13
+      // 定义板凳形状的多边形顶点
+      points = [
+        [x, y],
+        [x + width - width * 0.8, y + 0.2 * height],
+        [x + width - width * 0.2, y + 0.2 * height],
+        [x + width, y],
+        [x + width, y + height],
+        [x + width - width * 0.2, y + 0.7 * height],
+        [x + width - width * 0.8, y + 0.7 * height],
+        // [(x + width)*0.8 - 1 ,( y + height)*0.8],
 
-      //   if (i % (intervalCount + 1) === 0) {
-      //     // 间隔颜色
-      //     colorStops.push({ offset, color: intervalColor })
-      //   } else {
-      //     // 主要颜色
-      //     colorStops.push({ offset, color: mainColor })
-      //   }
-      // }
-      // // 创建 Linear Gradient
-      // const linearGradient = new echarts.graphic.LinearGradient(
-      //   0,
-      //   0,
-      //   1,
-      //   1.1,
-      //   colorStops,
-      // )
-
+        [x, y + height],
+      ]
       result = {
-        type: 'rect',
-        shape,
+        type: 'polygon',
+        shape: {
+          points: points,
+        },
         style: {
           ...api.style(),
-          // radius: 10,
+          radius: 10,
         },
-        focus: 'self',
-        blurScope: 'coordinateSystem',
         emphasis: {},
       }
       break
@@ -681,12 +768,12 @@ const renderItem = (type) => (params, api) => {
       // 其他类型的渲染逻辑
       break
     case 'Delayed':
-      let x = start[0] // 矩形左上角 x 坐标
+      x = start[0] // 矩形左上角 x 坐标
       // let y = start[1] // 矩形左上角 y 坐标
-      let width = Math.max(end[0] - start[0], 1) // 矩形宽度
+      width = Math.max(end[0] - start[0], 1) // 矩形宽度
       // let height = 13
       // 定义板凳形状的多边形顶点
-      let points = [
+      points = [
         [x, y],
         [x + width, y],
         [x + width, y + height],
@@ -781,8 +868,8 @@ let ganttData = () => {
       name: ganttItem.name,
       value: [
         calculatedIdx,
-        utcTime(ganttItem.newStart),
-        utcTime(ganttItem.newFinish),
+        ganttItem.newStart,
+        ganttItem.newFinish,
         ganttItem,
       ],
       itemStyle: {
@@ -793,6 +880,7 @@ let ganttData = () => {
       },
       taskOwner: ganttItem.taskOwner,
       status: ganttItem.status,
+      taskStatus: ganttItem.taskStatus,
     }
   })
   let firstProject = ganttDatas.filter((e) => {
@@ -801,20 +889,20 @@ let ganttData = () => {
   let secondProject = ganttDatas.filter((e) => {
     return e.taskOwner == 'second'
   })
-  secondProject = secondProject.map((secondTask) => {
-    const correspondingFirstTask = firstProject.find((firstTask) => {
-      return (
-        firstTask.value[3].id === secondTask.value[3].id &&
-        firstTask.value[3].name === secondTask.value[3].name
-      )
-    })
+  // secondProject = secondProject.map((secondTask) => {
+  //   const correspondingFirstTask = firstProject.find((firstTask) => {
+  //     return (
+  //       firstTask.value[3].id === secondTask.value[3].id &&
+  //       firstTask.value[3].name === secondTask.value[3].name
+  //     )
+  //   })
 
-    if (correspondingFirstTask) {
-      return compareTasks(correspondingFirstTask, secondTask)
-    } else {
-      return secondTask
-    }
-  })
+  //   if (correspondingFirstTask) {
+  //     return compareTasks(correspondingFirstTask, secondTask)
+  //   } else {
+  //     return secondTask
+  //   }
+  // })
   return { firstProject, secondProject }
 }
 
@@ -822,11 +910,9 @@ function getOption({ firstProject, secondProject }) {
   const delayedTasks = secondProject.filter(
     (task) => task.taskStatus === 'Delayed',
   )
-  const aheadTasks = secondProject.filter(
-    (task) => task.taskStatus === 'Ahead of Schedule',
-  )
+  const aheadTasks = secondProject.filter((task) => task.taskStatus === 'Ahead')
   const onTrackTasks = secondProject.filter(
-    (task) => task.taskStatus === 'On Track',
+    (task) => task.taskStatus === 'On Schedule',
   )
   let option = {
     toolbox: {
@@ -862,13 +948,14 @@ function getOption({ firstProject, secondProject }) {
       name: 'tasks',
       interval: 25, // 设置每个间隔的高度
       splitNumber: 34, // 将整个 y 轴分成 20 个间隔
-      show: true,
+      show: false,
       max: 34,
       min: 34,
 
       // min: 1,
       // max: 60, // 设置 y 轴的最大值为总高度
     },
+    useUTC: true,
     selectedMode: 'single',
     series: [
       {
@@ -911,7 +998,7 @@ function getOption({ firstProject, secondProject }) {
         type: 'custom',
         data: aheadTasks,
         large: true,
-        renderItem: renderItem('Ahead of Schedule'),
+        renderItem: renderItem('Ahead'),
         encode: {
           x: [1, 2],
           y: 0,
@@ -1022,6 +1109,16 @@ function getOption({ firstProject, secondProject }) {
           width: 5,
         },
       },
+      {
+        name: 'Critical Task',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
     ],
     legend: {
       data: [
@@ -1054,14 +1151,14 @@ function getOption({ firstProject, secondProject }) {
         },
         {
           name: 'Ahead of Schedule',
-          icon: 'roundRect',
+          icon: pathSymbols.Ahead,
           itemStyle: {
             color: '#b5b5b5',
           },
         },
         {
           name: 'On Schedule',
-          icon: 'rect',
+          icon: 'roundRect',
           itemStyle: {
             color: '#b5b5b5',
           },
@@ -1073,12 +1170,22 @@ function getOption({ firstProject, secondProject }) {
             color: '#b5b5b5',
           },
         },
+        {
+          name: 'Critical Task',
+          icon: 'roundRect',
+          itemStyle: {
+            color: '#b5b5b5',
+            borderColor: '#cf1322',
+            borderWidth: 2,
+            borderType: 'dashed',
+          },
+        },
       ],
       type: 'scroll',
     },
     grid: {
       top: 40,
-      left: 50,
+      left: 0,
       right: 0,
       bottom: 0,
     },
@@ -1089,6 +1196,19 @@ function getOption({ firstProject, secondProject }) {
         saveAsImage: { show: true },
       },
     },
+    // calendar: {
+    //   range: [startTimeStamp.value, endTimeStamp.value],
+    //   height:890,
+    //   width:1200,
+    //   cellSize: 1,
+    //   dayLabel :{
+    //     position :'start',
+    //   },
+    //   monthLabel:{},
+    //   yearLabel:{
+    //     position:'top'
+    //   }
+    // },
     dataZoom: [
       {
         type: 'slider',
@@ -1127,10 +1247,79 @@ function getOption({ firstProject, secondProject }) {
         },
       ],
     },
+    tooltip: {
+      axisPointer: {
+        //坐标轴指示器，坐标轴触发有效，
+        // type: 'cross', //默认为line，line直线，cross十字准星，shadow阴影
+      },
+      trigger: 'item',
+      formatter: (p) => {
+        if (p.componentType == 'markLine') {
+          return
+        }
+
+        //   let resData = 'Resources: <br/>'
+        //   if (p.value[3].resources) {
+        //     for (const key in p.value[3].resources) {
+        //       let res = p.value[3].resources
+        //       let name = store.selectedData.newResources.find((resource) => {
+        //         return resource.id == key
+        //       })
+        //       if (!name) {
+        //         name = ''
+        //       }
+
+        //       resData += ` &nbsp&nbspResource &nbsp  ${
+        //         name?.name
+        //       } &nbsp id: ${key}  <br/>&nbsp&nbsp&nbsp&nbspunits/hour:${returnFloat(
+        //         res[key].plannedUnitsPerHour,
+        //       )}=> ${returnFloat(res[key].newUnitsPerHour)}<br/>`
+        //     }
+        //   }
+
+        //   function marker(str) {
+        //     let color
+        //     switch (str) {
+        //       case 'New':
+        //         if (!p.value[3].critical) {
+        //           color = '#b0e054'
+        //         } else {
+        //           color = 'red'
+        //         }
+        //         break
+        //       case 'Old':
+        //         if (!p.value[3].critical) {
+        //           color = '#5474c4'
+        //         } else {
+        //           color = 'pink'
+        //         }
+
+        //       default:
+        //         break
+        //     }
+
+        //     return `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`
+        //   }
+        return `${p.name}
+        <br/>
+        <div >
+          Start:${p.data.value[1]
+            .replace('T', ' ')
+            .replace('Z', '')
+            .slice(0, 16)}
+           <br/>
+         End:${p.data.value[2].replace('T', ' ').replace('Z', '').slice(0, 16)}
+          </div>`
+      },
+    },
   }
   return option
 }
 /* -------------------------------------------------------------------------- */
+function baseItem(data) {
+  // style="color:#8c8c8c"
+  return `<span >${data}</span>`
+}
 function utcTime(time) {
   const utcDate = new Date(time)
   const utcString = utcDate.toISOString()
@@ -1269,17 +1458,18 @@ function alternateInsert(array1, array2) {
   })
   let result = []
   let maxLength = Math.max(array1.length, array2.length)
+
   for (let i = 0; i < maxLength; i++) {
     if (i < array2.length) {
       if (!array1[i].newStart) {
         return
       }
       if (array1[i].plannedStart > array2[i].plannedStart) {
-        array1[i].taskStatus = 'Delayed'
-        array2[i].taskStatus = 'Delayed'
-      } else if (array1[i].plannedStart < array2[i].plannedStart) {
         array1[i].taskStatus = 'Ahead'
         array2[i].taskStatus = 'Ahead'
+      } else if (array1[i].plannedStart < array2[i].plannedStart) {
+        array1[i].taskStatus = 'Delayed'
+        array2[i].taskStatus = 'Delayed'
       } else {
         array1[i].taskStatus = 'On Schedule'
         array2[i].taskStatus = 'On Schedule'
@@ -1287,16 +1477,6 @@ function alternateInsert(array1, array2) {
       result.push(array2[i]) // 先添加 array2 中的元素
     }
     if (i < array1.length) {
-      if (array1[i].plannedStart > array2[i].plannedStart) {
-        array1[i].taskStatus = 'Delayed'
-        array2[i].taskStatus = 'Delayed'
-      } else if (array1[i].plannedStart < array2[i].plannedStart) {
-        array1[i].taskStatus = 'Ahead'
-        array2[i].taskStatus = 'Ahead'
-      } else {
-        array1[i].taskStatus = 'On Schedule'
-        array2[i].taskStatus = 'On Schedule'
-      }
       result.push(array1[i]) // 再添加 array1 中的元素
     }
   }
@@ -1304,25 +1484,6 @@ function alternateInsert(array1, array2) {
   return result
 }
 
-function timestampToUTC(timestamp) {
-  // 创建一个 Date 对象，参数为时间戳（单位为毫秒）
-  const date = new Date(timestamp)
-
-  // 使用 Date 对象的 UTC 相关方法获取对应的 UTC 时间
-  const utcYear = date.getUTCFullYear()
-  const utcMonth = date.getUTCMonth() + 1 // 月份从 0 开始，因此需要加 1
-  const utcDay = date.getUTCDate()
-  const utcHour = date.getUTCHours()
-  const utcMinute = date.getUTCMinutes()
-  const utcSecond = date.getUTCSeconds()
-
-  // 将获取到的 UTC 时间组合成一个字符串并返回
-  const utcTimeString = `${utcYear}-${padZero(utcMonth)}-${padZero(
-    utcDay,
-  )} ${padZero(utcHour)}:${padZero(utcMinute)}:${padZero(utcSecond)}`
-
-  return utcTimeString
-}
 function padZero(num) {
   return num < 10 ? `0${num}` : num
 }
@@ -1342,6 +1503,22 @@ function compareTasks(firstTask, secondTask) {
   }
 
   return { ...secondTask, taskStatus: status }
+}
+function concatenateResources(resources) {
+  let result = ''
+  for (const resource of resources) {
+    result += `Resource ID: ${resource.id}, `
+    result += `Resource ID: ${resource.resourceId}, `
+    result += `Task ID: ${resource.taskId}, `
+    result += `Planned Units: ${resource.plannedUnits}, `
+    result += `Planned Units Per Hour: ${resource.plannedUnitsPerHour}, `
+    result += `Actual Units: ${resource.actualUnits}, `
+    result += `Remaining Units: ${resource.remainingUnits}, `
+    result += `New Units Per Hour: ${resource.newUnitsPerHour}, `
+    result += `New Units Per Day: ${resource.newUnitsPerDay}, `
+    result += `Parent ID: ${resource.parentId}\n`
+  }
+  return result
 }
 </script>
 <style lang="scss" scoped>
@@ -1403,5 +1580,14 @@ function compareTasks(firstTask, secondTask) {
   color: var(--el-color-primary);
   display: flex;
   align-items: center;
+}
+.upload-item {
+  > div {
+    width: 200px;
+  }
+}
+.upload-text {
+  font-size: 17px;
+  text-align: center;
 }
 </style>

@@ -1230,7 +1230,7 @@ async function nextOptimized() {
   store.SummaryData = { ...SummaryData }
   store.selectedData = null
   store.selectedData = data.data
-  // console.log(store.selectedData);
+
   store.active = 2
   store.selectChange = true
 

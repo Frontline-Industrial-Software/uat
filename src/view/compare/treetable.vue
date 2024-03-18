@@ -299,31 +299,6 @@ watch(
 let filterDatas = computed(() => {
   if (fileData.value?.length > 0) {
     let _file = fileData.value[3].filter((e) => {
-      console.log(e)
-      e.newStart = utcTime(e.newStart)
-        .replace('T', ' ')
-        .replace('Z', '')
-        .slice(0, 16)
-      e.newFinish = utcTime(e.newFinish)
-        .replace('T', ' ')
-        .replace('Z', '')
-        .slice(0, 16)
-      e.plannedStart = utcTime(e.plannedStart)
-        .replace('T', ' ')
-        .replace('Z', '')
-        .slice(0, 16)
-      e.plannedFinish = utcTime(e.plannedFinish)
-        .replace('T', ' ')
-        .replace('Z', '')
-        .slice(0, 16)
-      e.actualStart = utcTime(e.actualStart)
-        .replace('T', ' ')
-        .replace('Z', '')
-        .slice(0, 16)
-      e.actualFinish = utcTime(e.actualFinish)
-        .replace('T', ' ')
-        .replace('Z', '')
-        .slice(0, 16)
       return (
         ((isDelayed.value && e.taskStatus === 'Delayed') ||
           (isAhead.value && e.taskStatus === 'Ahead') ||
@@ -344,6 +319,33 @@ function datasFilter() {
   controlFilter.value = false
   if (datas.value) {
     datas.value = filterDatas.value.slice(0, 34)
+    // data.value = datas.value.map((e) => {
+    //   e.newStart = utcTime(e.newStart)
+    //     .replace('T', ' ')
+    //     .replace('Z', '')
+    //     .slice(0, 16)
+    //   e.newFinish = utcTime(e.newFinish)
+    //     .replace('T', ' ')
+    //     .replace('Z', '')
+    //     .slice(0, 16)
+    //   e.plannedStart = utcTime(e.plannedStart)
+    //     .replace('T', ' ')
+    //     .replace('Z', '')
+    //     .slice(0, 16)
+    //   e.plannedFinish = utcTime(e.plannedFinish)
+    //     .replace('T', ' ')
+    //     .replace('Z', '')
+    //     .slice(0, 16)
+    //   e.actualStart = utcTime(e.actualStart)
+    //     .replace('T', ' ')
+    //     .replace('Z', '')
+    //     .slice(0, 16)
+    //   e.actualFinish = utcTime(e.actualFinish)
+    //     .replace('T', ' ')
+    //     .replace('Z', '')
+    //     .slice(0, 16)
+    //   return e
+    // })
     ganttChart.setOption(getOption(ganttData()))
   }
 }

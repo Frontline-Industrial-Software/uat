@@ -81,7 +81,7 @@
             :before-upload="uploadCompare"
           >
             <template #trigger>
-              <el-button style="width: 200px">ChoOse Compare File</el-button>
+              <el-button style="width: 200px">Choose Compare File</el-button>
             </template>
             <template #tip>
               <div class="upload-text">

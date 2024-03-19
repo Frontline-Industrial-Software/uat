@@ -14,32 +14,6 @@
       <p style="color: #ffa39e">
         Please do not upload a file with the same name
       </p>
-      <!-- <div class="choosebox">
-        <div class="choose">
-          <div style="background-color: #b5b5b5" class="item"></div>
-          <div>Baseline</div>
-        </div>
-        <div class="choose">
-          <div style="background-color: #00beae" class="item"></div>
-          <div>WBS</div>
-        </div>
-        <div class="choose">
-          <div style="background-color: #ffb522" class="item"></div>
-          <div>To-do</div>
-        </div>
-        <div class="choose">
-          <div style="background-color: #4a8fe7" class="item"></div>
-          <div>In Progress</div>
-        </div>
-        <div class="choose">
-          <div style="background-color: #10be00" class="item"></div>
-          <div>Completed</div>
-        </div>
-        <div class="choose">
-          <div style="background-color: #4a8fe7" class="item"></div>
-          <div>Delayed</div>
-        </div>
-      </div> -->
       <el-divider />
       <div class="button">
         <div
@@ -126,13 +100,15 @@
             Tasks
           </p>
           <p style="color: #b5b5b5">overview of all tasks over time</p>
+
           <el-button
-            style="margin-right: 150px"
+            style="margin-right: 50px"
             @click="controlFilter = true"
             :icon="Filter"
           >
             Filter
           </el-button>
+
           <el-dropdown style="margin-right: 20px" split-button>
             <span class="el-dropdown-link">
               {{ searchType }}
@@ -150,17 +126,51 @@
           </el-dropdown>
           <el-input
             v-model="searchData"
-            style="width: 320px; height: 32px"
+            style="width: 400px; height: 32px"
             placeholder="Please enter complete information"
           >
             <template #prefix>
               <el-icon class="el-input__icon"><search /></el-icon>
             </template>
           </el-input>
+          <el-dropdown>
+            <span
+              class="el-dropdown-link"
+              style="margin-top: 5px; margin-left: 20px"
+            >
+              <el-icon size="20"><Setting /></el-icon>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <!-- ShowAllColumns
+                <el-switch v-model="ShowAllColumns" size="small"></el-switch> -->
+                <div
+                  style="
+                    display: flex;
+                    width: 300px;
+                    justify-content: space-between;
+                    padding-left: 10px;
+                    padding-right: 10px;
+                    align-items: center;
+                  "
+                  v-for="(value, key) in columnDatas"
+                >
+                  <span style="width: 200px">
+                    {{ columnMapping[value.name] }}
+                  </span>
+                  <el-switch
+                    :key="key"
+                    v-model="value.bol"
+                    size="small"
+                  ></el-switch>
+                </div>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
         <el-table-v2
           ref="tableRef"
-          :columns="columns"
+          :columns="filteredColumns"
           :data="filterDatas"
           :width="700"
           :height="900"
@@ -175,6 +185,9 @@
           @row-expand="onRowExpanded"
           @expanded-rows-change="onExpandedRowsChange"
         >
+          <template #cell-critical="{ cellData }">
+            <div v-html="cellData"></div>
+          </template>
           <template #row="props">
             <Row v-bind="props" />
           </template>
@@ -219,7 +232,16 @@
 </template>
 
 <script setup>
-import { computed, ref, reactive, onMounted, watch, cloneVNode } from 'vue'
+import {
+  computed,
+  ref,
+  reactive,
+  onMounted,
+  watch,
+  cloneVNode,
+  toRefs,
+  h,
+} from 'vue'
 import {
   add,
   endOfWeek,
@@ -268,7 +290,75 @@ const props = defineProps({
 })
 let activeName = ref('Activity Status')
 let controlFilter = ref(false)
+/* -------------------------------------------------------------------------- */
+let ShowAllColumns = ref(true)
+// 监听 showAllColumns 的变化
+watch(ShowAllColumns, (newValue, oldValue) => {
+  if (newValue) {
+    columnDatas.value.map((e) => {
+      e.bol = true
+      return e
+    })
+  } else {
+    columnDatas.value.map((e) => {
+      e.bol = false
+      return e
+    })
+  }
+})
+let columnDatas = ref([
+  { name: 'id', bol: true },
+  { name: 'name', bol: true },
 
+  { name: 'critical', bol: true },
+  { name: 'status', bol: true },
+  { name: 'plannedDuration', bol: true },
+  { name: 'remainingDuration', bol: true },
+  { name: 'actualStart', bol: true },
+  { name: 'actualFinish', bol: true },
+  { name: 'plannedStart', bol: true },
+  { name: 'plannedFinish', bol: true },
+  { name: 'newStart', bol: true },
+  { name: 'newFinish', bol: true },
+  { name: 'newDuration', bol: true },
+  { name: 'resources', bol: true },
+  { name: 'type', bol: false },
+  { name: 'ignore', bol: false },
+  { name: 'durationRatio', bol: false },
+  { name: 'taskOwner', bol: false },
+  { name: 'taskStatus', bol: false },
+  { name: 'calendarId', bol: false },
+  { name: 'order', bol: false },
+  { name: 'wbsId', bol: false },
+  { name: 'extra', bol: false },
+])
+const columnMapping = {
+  id: 'ActiveID',
+  name: 'ActiveName',
+  type: 'Type',
+  calendarId: 'Calendar ID',
+  order: 'Order',
+  wbsId: 'WBS ID',
+  extra: 'Extra',
+  resources: 'Resources',
+  plannedDuration: 'Planned Duration',
+  remainingDuration: 'Remaining Duration',
+  actualStart: 'Actual Start',
+  actualFinish: 'Actual Finish',
+  plannedStart: 'Planned Start',
+  plannedFinish: 'Planned Finish',
+  newStart: 'New Start',
+  newFinish: 'New Finish',
+  newDuration: 'New Duration',
+  status: 'Status',
+  ignore: 'Ignore',
+  critical: 'Critical',
+  durationRatio: 'Duration Ratio',
+  taskOwner: 'Task Owner',
+  taskStatus: 'Task Status',
+}
+
+/* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 let isDelayed = ref(true)
 let isAhead = ref(true)
@@ -310,6 +400,7 @@ let filterDatas = computed(() => {
           (isNocritical.value && e.critical === null))
       )
     })
+
     return _file
   } else {
     return []
@@ -319,33 +410,7 @@ function datasFilter() {
   controlFilter.value = false
   if (datas.value) {
     datas.value = filterDatas.value.slice(0, 34)
-    // data.value = datas.value.map((e) => {
-    //   e.newStart = utcTime(e.newStart)
-    //     .replace('T', ' ')
-    //     .replace('Z', '')
-    //     .slice(0, 16)
-    //   e.newFinish = utcTime(e.newFinish)
-    //     .replace('T', ' ')
-    //     .replace('Z', '')
-    //     .slice(0, 16)
-    //   e.plannedStart = utcTime(e.plannedStart)
-    //     .replace('T', ' ')
-    //     .replace('Z', '')
-    //     .slice(0, 16)
-    //   e.plannedFinish = utcTime(e.plannedFinish)
-    //     .replace('T', ' ')
-    //     .replace('Z', '')
-    //     .slice(0, 16)
-    //   e.actualStart = utcTime(e.actualStart)
-    //     .replace('T', ' ')
-    //     .replace('Z', '')
-    //     .slice(0, 16)
-    //   e.actualFinish = utcTime(e.actualFinish)
-    //     .replace('T', ' ')
-    //     .replace('Z', '')
-    //     .slice(0, 16)
-    //   return e
-    // })
+
     ganttChart.setOption(getOption(ganttData()))
   }
 }
@@ -535,7 +600,7 @@ function getRenderData(data) {
 
   ganttChart.setOption(getOption(ganttData()))
 }
-const rowSpanIndex = 0
+
 const onRowExpanded = ({ expanded }) => {
   console.log('Expanded:', expanded)
 }
@@ -543,114 +608,29 @@ const onRowExpanded = ({ expanded }) => {
 const onExpandedRowsChange = (expandedKeys) => {
   expandedRowKeys.value = expandedKeys // 更新 expandedRowKeys
 }
-function getColumns(datas) {
-  let valuesArray = []
 
-  if (datas.length > 0) {
-    valuesArray = Object.keys(datas[0])
-  } else {
-    return [
-      {
-        key: 'column-0',
-        dataKey: 'column-0',
-        title: 'Column 0',
-        width: 150,
-      },
-    ]
-  }
-
-  let columned = valuesArray
-    .map((item) => {
-      let name = item
-      let width = 200
-      let hidden = true
-      switch (item) {
-        case 'id':
-          name = 'Activity ID'
-          width = 100
-          hidden = false
-          break
-        case 'ID':
-          name = 'ID name'
-          width = 50
-          hidden = false
-          break
-        case 'name':
-          name = 'Activity Name'
-          break
-
-        default:
-          break
-      }
-
-      return {
-        dataKey: item,
-        key: item,
-        title: name,
-        width: width,
-      }
-    })
-    .filter((item) => {
-      let bol = true
-      switch (item.dataKey) {
-        case 'id':
-          bol = false
-          break
-        case 'ID':
-          bol = false
-          break
-        case 'calendarId':
-          bol = false
-          break
-        case 'order':
-        case 'extra':
-          bol = false
-          break
-          bol = false
-          break
-        case 'wbsId':
-          bol = false
-          break
-        case 'extra':
-          bol = false
-          break
-        // case 'resources':
-        //   bol = false
-        //   break
-        case 'taskOwner':
-          bol = false
-          break
-        default:
-          break
-      }
-      return bol
-    })
-
-  columned[rowSpanIndex].rowSpan = function ({ rowIndex }) {
-    if (rowIndex % 2 === 0 && rowIndex <= datas.length - 2) {
-      return 2
-    } else {
-      return 1
-    }
-  }
-  return columned
-}
 const Row = ({ rowData, rowIndex, cells, columns }) => {
-  const rowSpan = columns[rowSpanIndex].rowSpan({ rowData, rowIndex })
-  if (rowSpan > 1) {
-    const cell = cells[rowSpanIndex]
-    const style = {
-      ...cell.props.style,
-      backgroundColor: '#ffffff',
-      height: `${rowSpan * 35 - 1}px`,
-      display: 'flex',
-      justifyContent: 'center', // 水平居中
-      alignItems: 'center', // 垂直居中
-      marginTop: '20px',
-      zIndex: 1,
+  let rowSpanIndex
+  columns.map((e, index) => {
+    if (e.rowSpan) {
+      const rowSpan = e.rowSpan(rowIndex)
+      if (rowSpan > 1) {
+        const cell = cells[index]
+        const style = {
+          ...cell.props.style,
+          backgroundColor: '#ffffff',
+          height: `${rowSpan * 35 - 1}px`,
+          display: 'flex',
+          justifyContent: 'flex-start', // 水平居中
+          alignItems: 'center', // 垂直居中
+          marginTop: '24px',
+          zIndex: 1,
+        }
+        cells[index] = cloneVNode(cell, { style })
+      }
     }
-    cells[rowSpanIndex] = cloneVNode(cell, { style })
-  }
+  })
+
   return cells
 }
 const rowClass = ({ rowIndex }) => {
@@ -661,13 +641,212 @@ const rowClass = ({ rowIndex }) => {
   }
   return ''
 }
+let filteredColumns = computed(() => {
+  let columned = columnDatas.value
+    .filter((item) => item.bol) // 过滤出值为 true 的键
+    .map((item) => {
+      let cellRenderer = null
+      switch (item.name) {
+        case 'name':
+          cellRenderer = (cellData) => {
+            return cellData.cellData
+          }
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 200,
+            headerAlign: 'center',
+            cellRenderer,
+            rowSpan: function (rowIndex) {
+              if (rowIndex % 2 === 0) {
+                return 2
+              } else {
+                return 1
+              }
+            },
+          }
+          break
+        case 'plannedStart':
+          cellRenderer = (cellData) => {
+            if (cellData.cellData) {
+              return utcTime(cellData.cellData)
+                .replace('T', ' ')
+                .replace('Z', '')
+                .slice(0, 16)
+            }
+          }
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 150,
+            cellRenderer,
+          }
+          break
+        case 'plannedFinish':
+          cellRenderer = (cellData) => {
+            if (cellData.cellData) {
+              return utcTime(cellData.cellData)
+                .replace('T', ' ')
+                .replace('Z', '')
+                .slice(0, 16)
+            }
+          }
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 150,
+            cellRenderer,
+          }
+          break
+        case 'newStart':
+          cellRenderer = (cellData) => {
+            if (cellData.cellData) {
+              return utcTime(cellData.cellData)
+                .replace('T', ' ')
+                .replace('Z', '')
+                .slice(0, 16)
+            }
+          }
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 150,
+            cellRenderer,
+          }
+          break
+        case 'newFinish':
+          cellRenderer = (cellData) => {
+            if (cellData.cellData) {
+              return utcTime(cellData.cellData)
+                .replace('T', ' ')
+                .replace('Z', '')
+                .slice(0, 16)
+            }
+          }
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 150,
+            cellRenderer,
+          }
+        case 'actualStart':
+          cellRenderer = (cellData) => {
+            if (cellData.cellData) {
+              return utcTime(cellData.cellData)
+                .replace('T', ' ')
+                .replace('Z', '')
+                .slice(0, 16)
+            }
+          }
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 150,
+            cellRenderer,
+          }
+        case 'actualFinish':
+          cellRenderer = (cellData) => {
+            if (cellData.cellData) {
+              return utcTime(cellData.cellData)
+                .replace('T', ' ')
+                .replace('Z', '')
+                .slice(0, 16)
+            }
+          }
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 150,
+            cellRenderer,
+          }
+          break
+        case 'critical':
+          cellRenderer = (cellData) => {
+            return h(ElButton, {
+              type: cellData.cellData == true ? 'danger' : 'success',
+              circle: true,
+              size: 'small',
+            }) //也可以写成字符串如'这是标签内容'，但控制台会有警告)
+          }
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 50,
+            cellRenderer,
+            rowSpan: function (rowIndex) {
+              if (rowIndex % 2 === 0) {
+                return 2
+              } else {
+                return 1
+              }
+            },
+          }
+          break
+        case 'resources':
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 150,
+            cellRenderer,
+          }
+          break
+        case 'plannedDuration':
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 150,
+            cellRenderer,
+          }
+          break
+        case 'remainingDuration':
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 150,
+            cellRenderer,
+          }
+          break
+        case 'newDuration':
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 150,
+            cellRenderer,
+          }
+          break
+        default:
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 120,
+            headerAlign: 'center',
+            cellRenderer,
+            rowSpan: function (rowIndex) {
+              if (rowIndex % 2 === 0) {
+                return 2
+              } else {
+                return 1
+              }
+            },
+          }
+          break
+      }
+    })
 
-let columns = computed(() => {
-  if (fileData.value.length > 0) {
-    return getColumns(fileData.value[3])
-  } else {
-    return getColumns([])
-  }
+  return columned
 })
 
 let data = computed(() => {
@@ -811,39 +990,6 @@ const renderItem = (type) => (params, api) => {
 
       // 其他类型的渲染逻辑
       break
-      // case 'To-Do':
-      //   color = '#00FF00' // 绿色，表示提前
-      //   result = {
-      //     type: 'rect',
-      //     shape,
-      //     style: {
-      //       ...api.style(),
-      //       radius: 10,
-      //       fill: color,
-      //     },
-      //     focus: 'self',
-      //     blurScope: 'coordinateSystem',
-      //     emphasis: {},
-      //   }
-      //   // 其他类型的渲染逻辑
-      //   break
-      // case 'In Progress':
-      //   color = '#00FF00' // 绿色，表示提前
-      //   result = {
-      //     type: 'rect',
-      //     shape,
-      //     style: {
-      //       ...api.style(),
-      //       radius: 10,
-      //       fill: color,
-      //     },
-      //     focus: 'self',
-      //     blurScope: 'coordinateSystem',
-      //     emphasis: {},
-      //   }
-      //   // 其他类型的渲染逻辑
-      //   break
-      // case 'Completed':
       color = '#00FF00' // 绿色，表示提前
       result = {
         type: 'rect',
@@ -1271,58 +1417,18 @@ function getOption({ firstProject, secondProject }) {
         if (p.componentType == 'markLine') {
           return
         }
-
-        //   let resData = 'Resources: <br/>'
-        //   if (p.value[3].resources) {
-        //     for (const key in p.value[3].resources) {
-        //       let res = p.value[3].resources
-        //       let name = store.selectedData.newResources.find((resource) => {
-        //         return resource.id == key
-        //       })
-        //       if (!name) {
-        //         name = ''
-        //       }
-
-        //       resData += ` &nbsp&nbspResource &nbsp  ${
-        //         name?.name
-        //       } &nbsp id: ${key}  <br/>&nbsp&nbsp&nbsp&nbspunits/hour:${returnFloat(
-        //         res[key].plannedUnitsPerHour,
-        //       )}=> ${returnFloat(res[key].newUnitsPerHour)}<br/>`
-        //     }
-        //   }
-
-        //   function marker(str) {
-        //     let color
-        //     switch (str) {
-        //       case 'New':
-        //         if (!p.value[3].critical) {
-        //           color = '#b0e054'
-        //         } else {
-        //           color = 'red'
-        //         }
-        //         break
-        //       case 'Old':
-        //         if (!p.value[3].critical) {
-        //           color = '#5474c4'
-        //         } else {
-        //           color = 'pink'
-        //         }
-
-        //       default:
-        //         break
-        //     }
-
-        //     return `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`
-        //   }
         return `${p.name}
         <br/>
         <div >
-          Start:${p.data.value[1]
+          Start:${utcTime(p.data.value[1])
             .replace('T', ' ')
             .replace('Z', '')
             .slice(0, 16)}
            <br/>
-         End:${p.data.value[2].replace('T', ' ').replace('Z', '').slice(0, 16)}
+         End:${utcTime(p.data.value[2])
+           .replace('T', ' ')
+           .replace('Z', '')
+           .slice(0, 16)}
           </div>`
       },
     },

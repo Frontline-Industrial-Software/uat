@@ -208,9 +208,13 @@
     <el-tabs v-model="activeName" class="demo-tabs">
       <el-tab-pane label="Activity Status" name="Activity Status">
         <div>Start Time</div>
-        <el-checkbox v-model="isDelayed" label="Delayed Activities" />
-        <el-checkbox v-model="isAhead" label="Ahead Activities" />
-        <el-checkbox v-model="isOnschedule" label="On schedule Activities" />
+        <el-checkbox v-model="isAheadschedule" label="Ahead of Schedule" />
+        <el-checkbox v-model="isOnschedule" label="On Schedule" />
+        <el-checkbox v-model="isBehindschedule" label="Behind Schedule" />
+        <div>Duration</div>
+        <el-checkbox v-model="isEarly" label="Early" />
+        <el-checkbox v-model="isOntime" label="On Time" />
+        <el-checkbox v-model="isDelayed" label="Delayed " />
         <div>Status</div>
         <el-checkbox v-model="isActive" label="Active Tasks" />
         <el-checkbox v-model="isCompleted" label="Completed Tasks" />
@@ -359,9 +363,14 @@ const columnMapping = {
 
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
+
+let isEarly = ref(true)
+let isOntime = ref(true)
 let isDelayed = ref(true)
-let isAhead = ref(true)
+
+let isAheadschedule = ref(true)
 let isOnschedule = ref(true)
+let isBehindschedule = ref(true)
 
 let isActive = ref(true)
 let isCompleted = ref(true)
@@ -369,6 +378,7 @@ let isNotStart = ref(true)
 
 let isCritical = ref(true)
 let isNocritical = ref(true)
+
 /* -------------------------------------------------------------------------- */
 watch(
   searchData,
@@ -389,17 +399,20 @@ let filterDatas = computed(() => {
   if (fileData.value?.length > 0) {
     let _file = fileData.value[3].filter((e) => {
       return (
-        ((isDelayed.value && e.taskStatus === 'Delayed') ||
-          (isAhead.value && e.taskStatus === 'Ahead') ||
+        ((isBehindschedule.value && e.taskStatus === 'Delayed') ||
+          (isAheadschedule.value && e.taskStatus === 'Ahead') ||
           (isOnschedule.value && e.taskStatus === 'On Schedule')) &&
-        ((isActive.value && e.status === 'Active') ||
-          (isCompleted.value && e.status === 'Complete') ||
-          (isNotStart.value && e.status === 'NotStart')) &&
-        ((isCritical.value && e.critical === true) ||
-          (isNocritical.value && e.critical === null))
+        ((isEarly.value && e.durationStatus === 'Early') ||
+          (isOntime.value && e.durationStatus === 'Ontime') ||
+          (isDelayed.value && e.durationStatus === 'Delayed')) &&
+        ((isActive.value && e.compareStatus === 'TK_Active') ||
+          (isCompleted.value && e.compareStatus === 'TK_Complete') ||
+          (isNotStart.value && e.compareStatus === 'TK_NotStart')) &&
+        ((isCritical.value && e.compareCritical === true) ||
+          (isNocritical.value && e.compareCritical === null))
       )
     })
-    console.log(_file)
+    // console.log(_file)
     return _file
   } else {
     return []
@@ -875,9 +888,25 @@ let colors = {
   Active: '#4a8fe7',
 }
 let borderColor = (data) => {
+  switch (data) {
+    case 'Early':
+      return '#cf1322'
+      break
+    case 'Ontime':
+      return '#000000'
+      break
+    case 'Delayed':
+      return '#00FFFF '
+      break
+    default:
+      break
+  }
+}
+let borderType = (data) => {
   if (data) {
-    return '#cf1322'
+    return 'dashed'
   } else {
+    return 'solid'
   }
 }
 const renderItem = (type) => (params, api) => {
@@ -890,10 +919,10 @@ const renderItem = (type) => (params, api) => {
   y = (datas.value.length - api.value(0)) * 25
   if (type == 'base') {
     y = y + 45
-    height = 10
+    height = 8
   } else {
     y = y + 8 + 40
-    height = 20
+    height = 15
   }
 
   let shape = {
@@ -1036,25 +1065,26 @@ let ganttData = () => {
       name: ganttItem.name,
       value: [
         calculatedIdx,
-        ganttItem.taskOwner == 'second'
-          ? ganttItem.newStart
-          : ganttItem.plannedStart,
-        ganttItem.taskOwner == 'second'
-          ? ganttItem.newFinish
-          : ganttItem.plannedFinish,
-        // ganttItem.newStart,
-        // ganttItem.newFinish,
+        // ganttItem.taskOwner == 'second'
+        //   ? ganttItem.newStart
+        //   : ganttItem.plannedStart,
+        // ganttItem.taskOwner == 'second'
+        //   ? ganttItem.newFinish
+        //   : ganttItem.plannedFinish,
+        ganttItem.newStart,
+        ganttItem.newFinish,
         ganttItem,
       ],
       itemStyle: {
         color: colors[ganttItem.status],
-        borderColor: borderColor(ganttItem.critical),
-        borderWidth: 2,
-        borderType: 'dashed',
+        borderColor: borderColor(ganttItem.durationStatus),
+        borderWidth: 3,
+        borderType: borderType(ganttItem.critical),
       },
       taskOwner: ganttItem.taskOwner,
       status: ganttItem.status,
       taskStatus: ganttItem.taskStatus,
+      durationStatus: ganttItem.durationStatus,
     }
   })
   let firstProject = ganttDatas.filter((e) => {
@@ -1274,7 +1304,37 @@ function getOption({ firstProject, secondProject }) {
         },
       },
       {
-        name: 'delayed',
+        name: 'Behind Schedule',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
+      {
+        name: 'Early',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
+      {
+        name: 'On Time',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
+      {
+        name: 'Delayed',
         type: 'line',
         smooth: 0.6,
         symbol: 'none',
@@ -1298,27 +1358,28 @@ function getOption({ firstProject, secondProject }) {
       data: [
         {
           name: 'Base',
+          icon: 'circle',
           itemStyle: {
             color: '#b5b5b5',
           },
         },
         {
           name: 'Completed',
-          icon: 'rect',
+          icon: 'circle',
           itemStyle: {
             color: '#10be00',
           },
         },
         {
           name: 'NotStart',
-          icon: 'rect',
+          icon: 'circle',
           itemStyle: {
             color: '#ffb522',
           },
         },
         {
           name: 'Active',
-          icon: 'rect',
+          icon: 'circle',
           itemStyle: {
             color: '#4a8fe7',
           },
@@ -1338,10 +1399,40 @@ function getOption({ firstProject, secondProject }) {
           },
         },
         {
-          name: 'Delayed',
+          name: 'Behind Schedule',
           icon: pathSymbols.delayed,
           itemStyle: {
             color: '#b5b5b5',
+          },
+        },
+        {
+          name: 'Early',
+          icon: 'roundRect',
+          itemStyle: {
+            color: '#b5b5b5',
+            borderColor: '#cf1322',
+            borderWidth: 2,
+            borderType: 'solid',
+          },
+        },
+        {
+          name: 'On Time',
+          icon: 'roundRect',
+          itemStyle: {
+            color: '#b5b5b5',
+            borderColor: '#000000',
+            borderWidth: 2,
+            borderType: 'solid',
+          },
+        },
+        {
+          name: 'Delayed',
+          icon: 'roundRect',
+          itemStyle: {
+            color: '#b5b5b5',
+            borderColor: '#00FFFF',
+            borderWidth: 2,
+            borderType: 'solid',
           },
         },
         {
@@ -1349,7 +1440,7 @@ function getOption({ firstProject, secondProject }) {
           icon: 'roundRect',
           itemStyle: {
             color: '#b5b5b5',
-            borderColor: '#cf1322',
+            borderColor: 'black',
             borderWidth: 2,
             borderType: 'dashed',
           },
@@ -1595,36 +1686,49 @@ function alternateInsert(array1, array2) {
   })
   let result = []
   let maxLength = Math.max(array1.length, array2.length)
-
-  for (let i = 0; i < maxLength; i++) {
-    if (i < array2.length) {
-      if (!array1[i].newStart) {
-        return
-      }
-      if (
-        array2[i].newStart < array2[i].plannedStart ||
-        array2[i].newFinish < array2[i].plannedFinish
-      ) {
-        array1[i].taskStatus = 'Ahead'
-        array2[i].taskStatus = 'Ahead'
-      } else if (
-        array2[i].newStart > array2[i].plannedStart ||
-        array2[i].newFinish > array2[i].plannedFinish
-      ) {
-        array1[i].taskStatus = 'Delayed'
-        array2[i].taskStatus = 'Delayed'
-      } else {
-        array1[i].taskStatus = 'On Schedule'
-        array2[i].taskStatus = 'On Schedule'
-      }
-      result.push(array2[i]) // 先添加 array2 中的元素
+  let results = []
+  array2.map((item2) => {
+    let item1 = array1.find((e2) => {
+      return e2.id == item2.id
+    })
+    if (!item1) {
+      results = []
+      ElMessage.error(
+        `Task id does not match. Please upload projects with the same task id.
+        TaskName:${item2.name}
+        `,
+      )
+      return
     }
-    if (i < array1.length) {
-      result.push(array1[i]) // 再添加 array1 中的元素
+    if (item2.newStart < item1.newStart) {
+      item2.taskStatus = 'Ahead'
+      item1.taskStatus = 'Ahead'
+    } else if (item2.newStart > item1.newStart) {
+      item1.taskStatus = 'Delayed'
+      item2.taskStatus = 'Delayed'
+    } else {
+      item2.taskStatus = 'On Schedule'
+      item1.taskStatus = 'On Schedule'
     }
-  }
+    if (item2.newDuration < item1.newDuration) {
+      item2.durationStatus = 'Early'
+      item1.durationStatus = 'Early'
+    } else if (item2.newDuration > item1.newDuration) {
+      item2.durationStatus = 'Delayed'
+      item1.durationStatus = 'Delayed'
+    } else {
+      item2.durationStatus = 'Ontime'
+      item1.durationStatus = 'Ontime'
+    }
+    item2.compareCritical = item2.critical
+    item1.compareCritical = item2.critical
+    item2.compareStatus = item2.status
+    item1.compareStatus = item2.status
 
-  return result
+    results.push(item2)
+    results.push(item1)
+  })
+  return results
 }
 
 function padZero(num) {

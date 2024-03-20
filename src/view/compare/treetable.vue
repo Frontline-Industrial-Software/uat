@@ -309,18 +309,17 @@ watch(ShowAllColumns, (newValue, oldValue) => {
 let columnDatas = ref([
   { name: 'id', bol: true },
   { name: 'name', bol: true },
-
-  { name: 'critical', bol: true },
   { name: 'status', bol: true },
+  { name: 'critical', bol: true },
   { name: 'plannedDuration', bol: true },
   { name: 'remainingDuration', bol: true },
+  { name: 'newDuration', bol: true },
   { name: 'actualStart', bol: true },
   { name: 'actualFinish', bol: true },
   { name: 'plannedStart', bol: true },
   { name: 'plannedFinish', bol: true },
   { name: 'newStart', bol: true },
   { name: 'newFinish', bol: true },
-  { name: 'newDuration', bol: true },
   { name: 'resources', bol: true },
   { name: 'type', bol: false },
   { name: 'ignore', bol: false },
@@ -400,7 +399,7 @@ let filterDatas = computed(() => {
           (isNocritical.value && e.critical === null))
       )
     })
-
+    console.log(_file)
     return _file
   } else {
     return []
@@ -781,13 +780,13 @@ let filteredColumns = computed(() => {
             title: columnMapping[item.name],
             width: 50,
             cellRenderer,
-            rowSpan: function (rowIndex) {
-              if (rowIndex % 2 === 0) {
-                return 2
-              } else {
-                return 1
-              }
-            },
+            // rowSpan: function (rowIndex) {
+            //   if (rowIndex % 2 === 0) {
+            //     return 2
+            //   } else {
+            //     return 1
+            //   }
+            // },
           }
           break
         case 'resources':
@@ -809,6 +808,15 @@ let filteredColumns = computed(() => {
           }
           break
         case 'remainingDuration':
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 150,
+            cellRenderer,
+          }
+          break
+        case 'status':
           return {
             dataKey: item.name,
             key: item.name,
@@ -1028,8 +1036,14 @@ let ganttData = () => {
       name: ganttItem.name,
       value: [
         calculatedIdx,
-        ganttItem.newStart,
-        ganttItem.newFinish,
+        ganttItem.taskOwner == 'second'
+          ? ganttItem.newStart
+          : ganttItem.plannedStart,
+        ganttItem.taskOwner == 'second'
+          ? ganttItem.newFinish
+          : ganttItem.plannedFinish,
+        // ganttItem.newStart,
+        // ganttItem.newFinish,
         ganttItem,
       ],
       itemStyle: {
@@ -1587,10 +1601,16 @@ function alternateInsert(array1, array2) {
       if (!array1[i].newStart) {
         return
       }
-      if (array1[i].plannedStart > array2[i].plannedStart) {
+      if (
+        array2[i].newStart < array2[i].plannedStart ||
+        array2[i].newFinish < array2[i].plannedFinish
+      ) {
         array1[i].taskStatus = 'Ahead'
         array2[i].taskStatus = 'Ahead'
-      } else if (array1[i].plannedStart < array2[i].plannedStart) {
+      } else if (
+        array2[i].newStart > array2[i].plannedStart ||
+        array2[i].newFinish > array2[i].plannedFinish
+      ) {
         array1[i].taskStatus = 'Delayed'
         array2[i].taskStatus = 'Delayed'
       } else {

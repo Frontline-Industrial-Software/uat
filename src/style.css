@@ -19,6 +19,11 @@ html {
   /* background-color: rgb(64, 170, 151) !important; */
   /* color:white !important; */
 }
+.sizeButton {
+  width: 14px !important;
+  height: 14px !important;
+  padding: 0;
+}
 /* .luckysheet-cell-loading{
 display: none !important;
 } */

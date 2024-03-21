@@ -262,6 +262,7 @@ import {
   ElPopover,
   TableV2FixedDir,
   ElMessage,
+  ElInput,
 } from 'element-plus'
 import * as echarts from 'echarts'
 import { useRouter } from 'vue-router'
@@ -277,6 +278,7 @@ import {
   Upload,
   Filter,
 } from '@element-plus/icons-vue'
+import AInput from './Ainput.vue'
 const store = useCounterStore()
 const router = useRouter()
 const GanttEcharts = ref(null)
@@ -294,6 +296,8 @@ const props = defineProps({
 })
 let activeName = ref('Activity Status')
 let controlFilter = ref(false)
+const shouldFilter = ref(false)
+
 /* -------------------------------------------------------------------------- */
 let ShowAllColumns = ref(true)
 // 监听 showAllColumns 的变化
@@ -311,13 +315,14 @@ watch(ShowAllColumns, (newValue, oldValue) => {
   }
 })
 let columnDatas = ref([
-  { name: 'id', bol: true },
+  { name: 'ID', bol: true },
   { name: 'name', bol: true },
   { name: 'status', bol: true },
   { name: 'critical', bol: true },
   { name: 'plannedDuration', bol: true },
   { name: 'remainingDuration', bol: true },
   { name: 'newDuration', bol: true },
+  { name: 'actualDuration', bol: true },
   { name: 'actualStart', bol: true },
   { name: 'actualFinish', bol: true },
   { name: 'plannedStart', bol: true },
@@ -336,7 +341,7 @@ let columnDatas = ref([
   { name: 'extra', bol: false },
 ])
 const columnMapping = {
-  id: 'ActiveID',
+  ID: 'ActiveID',
   name: 'ActiveName',
   type: 'Type',
   calendarId: 'Calendar ID',
@@ -353,6 +358,7 @@ const columnMapping = {
   newStart: 'New Start',
   newFinish: 'New Finish',
   newDuration: 'New Duration',
+  actualDuration: 'Actual Duration',
   status: 'Status',
   ignore: 'Ignore',
   critical: 'Critical',
@@ -378,6 +384,44 @@ let isNotStart = ref(true)
 
 let isCritical = ref(true)
 let isNocritical = ref(true)
+
+let openFilter = ref(false)
+const visible = ref(false)
+
+let filterType = ref({
+  ID: '',
+  name: '',
+  status: '',
+  critical: '',
+  plannedDuration: '',
+  remainingDuration: '',
+  newDuration: '',
+  actualDuration: '',
+  actualStart: '',
+  actualFinish: '',
+  plannedStart: '',
+  plannedFinish: '',
+  newStart: '',
+  newFinish: '',
+  resources: '',
+  type: '',
+  ignore: '',
+  durationRatio: '',
+  taskOwner: '',
+  taskStatus: '',
+  calendarId: '',
+  order: '',
+  wbsId: '',
+  extra: '',
+})
+
+let filterData = ref('default')
+// 在你的代码中定义 getFilterData 函数
+function getFilterData(newValue, title) {
+  filterData.value = newValue
+  filterType.value[title] = filterData.value
+  datasFilter()
+}
 
 /* -------------------------------------------------------------------------- */
 watch(
@@ -412,7 +456,30 @@ let filterDatas = computed(() => {
           (isNocritical.value && e.compareCritical === null))
       )
     })
-    // console.log(_file)
+    if (filterData.value !== 'default') {
+      _file = _file.filter((e) => {
+        // 初始化一个变量来判断当前对象是否满足所有条件
+        let satisfiesAllConditions = true
+
+        // 遍历 filterType 对象的属性
+        for (let key in filterType.value) {
+          // console.log(filterType.value[key]);
+          // 如果属性值不为 null，且当前对象的该属性的值不包含 filterData 的值，则设置 satisfiesAllConditions 为 false
+          if (
+            filterType.value[key] !== null &&
+            !convertToUTC(e[key])?.includes(filterType.value[key])
+          ) {
+            satisfiesAllConditions = false
+            // 如果有一个条件不满足，就不需要再继续检查其他属性了，可以直接跳出循环
+            break
+          }
+        }
+
+        // 返回 satisfiesAllConditions 的值，表示当前对象是否满足所有条件
+        return satisfiesAllConditions
+      })
+    }
+
     return _file
   } else {
     return []
@@ -645,6 +712,19 @@ const Row = ({ rowData, rowIndex, cells, columns }) => {
 
   return cells
 }
+
+let headerFunctions = (props) => {
+  return h('div', {}, [
+    props.column.title,
+    h(AInput, {
+      value: filterData.value,
+      'onUpdate:value': (data) => {
+        getFilterData(data, props.column.key) // 将标题作为参数传递给 getFilterData
+      },
+    }),
+  ])
+}
+
 const rowClass = ({ rowIndex }) => {
   if (rowIndex % 2 === 0) {
     return 'bg-blue-200'
@@ -677,6 +757,7 @@ let filteredColumns = computed(() => {
                 return 1
               }
             },
+            headerCellRenderer: headerFunctions,
           }
           break
         case 'plannedStart':
@@ -694,6 +775,7 @@ let filteredColumns = computed(() => {
             title: columnMapping[item.name],
             width: 150,
             cellRenderer,
+            headerCellRenderer: headerFunctions,
           }
           break
         case 'plannedFinish':
@@ -711,6 +793,7 @@ let filteredColumns = computed(() => {
             title: columnMapping[item.name],
             width: 150,
             cellRenderer,
+            headerCellRenderer: headerFunctions,
           }
           break
         case 'newStart':
@@ -728,6 +811,7 @@ let filteredColumns = computed(() => {
             title: columnMapping[item.name],
             width: 150,
             cellRenderer,
+            headerCellRenderer: headerFunctions,
           }
           break
         case 'newFinish':
@@ -745,6 +829,7 @@ let filteredColumns = computed(() => {
             title: columnMapping[item.name],
             width: 150,
             cellRenderer,
+            headerCellRenderer: headerFunctions,
           }
         case 'actualStart':
           cellRenderer = (cellData) => {
@@ -761,6 +846,7 @@ let filteredColumns = computed(() => {
             title: columnMapping[item.name],
             width: 150,
             cellRenderer,
+            headerCellRenderer: headerFunctions,
           }
         case 'actualFinish':
           cellRenderer = (cellData) => {
@@ -777,22 +863,25 @@ let filteredColumns = computed(() => {
             title: columnMapping[item.name],
             width: 150,
             cellRenderer,
+            headerCellRenderer: headerFunctions,
           }
           break
         case 'critical':
           cellRenderer = (cellData) => {
             return h(ElButton, {
-              type: cellData.cellData == true ? 'danger' : 'success',
+              type: cellData.cellData == true ? 'danger' : 'info',
               circle: true,
               size: 'small',
+              class: 'sizeButton',
             }) //也可以写成字符串如'这是标签内容'，但控制台会有警告)
           }
           return {
             dataKey: item.name,
             key: item.name,
             title: columnMapping[item.name],
-            width: 50,
+            width: 120,
             cellRenderer,
+            headerCellRenderer: headerFunctions,
             // rowSpan: function (rowIndex) {
             //   if (rowIndex % 2 === 0) {
             //     return 2
@@ -809,6 +898,7 @@ let filteredColumns = computed(() => {
             title: columnMapping[item.name],
             width: 150,
             cellRenderer,
+            headerCellRenderer: headerFunctions,
           }
           break
         case 'plannedDuration':
@@ -816,8 +906,9 @@ let filteredColumns = computed(() => {
             dataKey: item.name,
             key: item.name,
             title: columnMapping[item.name],
-            width: 150,
+            width: 170,
             cellRenderer,
+            headerCellRenderer: headerFunctions,
           }
           break
         case 'remainingDuration':
@@ -825,8 +916,19 @@ let filteredColumns = computed(() => {
             dataKey: item.name,
             key: item.name,
             title: columnMapping[item.name],
-            width: 150,
+            width: 200,
             cellRenderer,
+            headerCellRenderer: headerFunctions,
+          }
+          break
+        case 'actualDuration':
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 170,
+            cellRenderer,
+            headerCellRenderer: headerFunctions,
           }
           break
         case 'status':
@@ -836,6 +938,7 @@ let filteredColumns = computed(() => {
             title: columnMapping[item.name],
             width: 150,
             cellRenderer,
+            headerCellRenderer: headerFunctions,
           }
           break
         case 'newDuration':
@@ -845,6 +948,7 @@ let filteredColumns = computed(() => {
             title: columnMapping[item.name],
             width: 150,
             cellRenderer,
+            headerCellRenderer: headerFunctions,
           }
           break
         default:
@@ -855,6 +959,7 @@ let filteredColumns = computed(() => {
             width: 120,
             headerAlign: 'center',
             cellRenderer,
+            headerCellRenderer: headerFunctions,
             rowSpan: function (rowIndex) {
               if (rowIndex % 2 === 0) {
                 return 2
@@ -1541,9 +1646,28 @@ function getOption({ firstProject, secondProject }) {
   return option
 }
 /* -------------------------------------------------------------------------- */
-function baseItem(data) {
-  // style="color:#8c8c8c"
-  return `<span >${data}</span>`
+
+function convertToUTC(value) {
+  // 判断是否是时间戳
+
+  if (typeof value === 'number' && value.toString().length == 13) {
+    // 将时间戳转换为UTC时间
+    let date = new Date(value)
+    let utcDate = new Date(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
+    )
+
+    // 返回转换后的UTC时间
+    return utcDate.toISOString()
+  } else {
+    // 如果不是时间戳，则直接返回原始值
+    return value + ''
+  }
 }
 function utcTime(time) {
   if (!time) {
@@ -1710,10 +1834,16 @@ function alternateInsert(array1, array2) {
       item2.taskStatus = 'On Schedule'
       item1.taskStatus = 'On Schedule'
     }
-    if (item2.newDuration < item1.newDuration) {
+    if (
+      item2.actualDuration + item2.remainingDuration <
+      item1.actualDuration + item1.remainingDuration
+    ) {
       item2.durationStatus = 'Early'
       item1.durationStatus = 'Early'
-    } else if (item2.newDuration > item1.newDuration) {
+    } else if (
+      item2.actualDuration + item2.remainingDuration >
+      item1.actualDuration + item1.remainingDuration
+    ) {
       item2.durationStatus = 'Delayed'
       item1.durationStatus = 'Delayed'
     } else {
@@ -1836,5 +1966,8 @@ function concatenateResources(resources) {
 .upload-text {
   font-size: 17px;
   text-align: center;
+}
+.btn-filter {
+  border: 0px;
 }
 </style>

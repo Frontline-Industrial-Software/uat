@@ -19,20 +19,6 @@
         <div
           style="display: flex; justify-content: space-between; width: 650px"
         >
-          <!-- <el-upload
-            action=""
-            :multiple="true"
-            :before-upload="beforeUpload"
-            :limit="2"
-            :http-request="Uploads"
-            :on-remove="removeFile"
-          >
-            <el-button>
-              <Compare />
-              Compare Projects
-            </el-button>
-          </el-upload> -->
-
           <el-upload
             class="upload-demo"
             action=""
@@ -170,6 +156,7 @@
         </div>
         <el-table-v2
           ref="tableRef"
+          v-model:expanded-row-keys="expandedRowKeys"
           :columns="filteredColumns"
           :data="filterDatas"
           :width="700"
@@ -182,6 +169,8 @@
           fixed
           @rows-rendered="getRenderData"
           :row-class="rowClass"
+          expand-column-key="wbsId"
+          :default-expanded-row-keys="wbsIdArray"
           @row-expand="onRowExpanded"
           @expanded-rows-change="onExpandedRowsChange"
         >
@@ -315,6 +304,7 @@ watch(ShowAllColumns, (newValue, oldValue) => {
   }
 })
 let columnDatas = ref([
+  { name: 'wbsId', bol: true },
   { name: 'ID', bol: true },
   { name: 'name', bol: true },
   { name: 'status', bol: true },
@@ -337,7 +327,7 @@ let columnDatas = ref([
   { name: 'taskStatus', bol: false },
   { name: 'calendarId', bol: false },
   { name: 'order', bol: false },
-  { name: 'wbsId', bol: false },
+
   { name: 'extra', bol: false },
 ])
 const columnMapping = {
@@ -480,6 +470,7 @@ let filterDatas = computed(() => {
       })
     }
 
+    _file = convertToTreeFormat(_file)
     return _file
   } else {
     return []
@@ -496,7 +487,8 @@ function datasFilter() {
 // 甘特图
 const eventClick = {
   onMousemove(e) {
-    let index = datas.value.findIndex((item) => item.id === e.rowData.id)
+    let index = e.rowIndex
+
     if (index == 0) {
       index = 0
     } else {
@@ -566,31 +558,44 @@ let uploadCompare = (file) => {
   compareProject.value = file.name
   return false
 }
+let wbs = ref([])
 async function Uploads() {
   // let filed = filess.file
   // files.push(filed)
 
   if (files.value.length == 2) {
     fileData.value = []
-    files.value.map((file) => {
-      const originalFileName = file.name // 保存原始文件名
+
+    let stateName
+    if (files.value[0].name == files.value[1].name) {
+      stateName = 'new' + files.value[1].name
+    } else {
+      stateName = files.value[1].name
+    }
+    files.value = files.value.map((file, index) => {
+      const originalFileName = index === 1 ? stateName : file.name // 保存原始文件名
+
       const sanitizedFileName = sanitizeFileName(originalFileName) // 使用 sanitizeFileName 处理文件名
       const modifiedFile = new File([file], sanitizedFileName, {
         type: file.type,
       }) // 创建新的文件对象，修改文件名
       return modifiedFile
     })
-
     let a = await api.sendFile(files.value, 'task') // 使用修改后的文件对象进行上传
+
     for (let attrName in a.data) {
       let attrValue = a.data[attrName]
       fileData.value.push(attrValue)
     }
-
+    wbs.value.push(fileData.value[1].wbsName)
+    wbs.value.push(fileData.value[1].wbsNameArr)
+    wbsIdArray.value = Object.keys(fileData.value[1].wbsName)
+    expandedRowKeys.value = wbsIdArray.value
     let fileDatas = alternateInsert(
       fileData.value[1].tasks,
       fileData.value[2].tasks,
     )
+
     fileDatas = fileDatas.map((e) => {
       let resource = []
       for (const key in e.resources) {
@@ -650,8 +655,8 @@ function initCharts() {
     e.status = e.status.replace('TK_', '')
     return e
   })
-  datas.value = filterDatas.value.slice(0, 34)
 
+  datas.value = filterDatas.value.slice(0, 34)
   /* -------------------------------------------------------------------------- */
   if (ganttChart) {
     ganttChart.setOption(getOption(ganttData()))
@@ -660,6 +665,7 @@ function initCharts() {
       width: 1200,
       height: 890,
     })
+
     ganttChart.setOption(getOption(ganttData()))
     ganttChart.on('dataZoom', function (params, a, b) {
       let op = ganttChart.getOption()
@@ -679,13 +685,13 @@ function getRenderData(data) {
 
   ganttChart.setOption(getOption(ganttData()))
 }
-
-const onRowExpanded = ({ expanded }) => {
-  console.log('Expanded:', expanded)
-}
+let wbsIdArray = ref()
+const onRowExpanded = ({ expanded }) => {}
+const expandedRowKeys = ref([])
 
 const onExpandedRowsChange = (expandedKeys) => {
   expandedRowKeys.value = expandedKeys // 更新 expandedRowKeys
+  ganttChart.setOption(getOption(ganttData()))
 }
 
 const Row = ({ rowData, rowIndex, cells, columns }) => {
@@ -725,12 +731,27 @@ let headerFunctions = (props) => {
   ])
 }
 
-const rowClass = ({ rowIndex }) => {
-  if (rowIndex % 2 === 0) {
-    return 'bg-blue-200'
-  } else if (rowIndex % 1 === 0) {
-    return 'bg-red-100'
+const rowClass = (data) => {
+  // if (data.rowData.children.length > 0) {
+  //   return 'bg-red-100'
+  // } else {
+  //   return 'bg-red-100'
+  // }
+  // bg-blue-200
+  if (data.rowData.children.length > 0) {
+    return 'bg-wbs'
+  } else if (data.rowData.taskOwner == 'first') {
+    return 'bg-base'
+  } else if (data.rowData.taskOwner == 'second') {
+    return 'bg-compare'
+  } else {
+    return ''
   }
+  // if (rowIndex % 2 === 0) {
+  //   return 'bg-blue-200'
+  // } else if (rowIndex % 1 === 0) {
+  //   return 'bg-red-100'
+  // }
   return ''
 }
 let filteredColumns = computed(() => {
@@ -750,13 +771,13 @@ let filteredColumns = computed(() => {
             width: 200,
             headerAlign: 'center',
             cellRenderer,
-            rowSpan: function (rowIndex) {
-              if (rowIndex % 2 === 0) {
-                return 2
-              } else {
-                return 1
-              }
-            },
+            // rowSpan: function (rowIndex) {
+            //   if (rowIndex % 2 === 0) {
+            //     return 2
+            //   } else {
+            //     return 1
+            //   }
+            // },
             headerCellRenderer: headerFunctions,
           }
           break
@@ -950,6 +971,23 @@ let filteredColumns = computed(() => {
             cellRenderer,
             headerCellRenderer: headerFunctions,
           }
+        case 'wbsId':
+          cellRenderer = (cellData) => {
+            if (!cellData.rowData.children.length > 0) {
+              return ''
+            }
+            if (cellData.cellData) {
+              return wbs.value[0][cellData.cellData]
+            }
+          }
+          return {
+            dataKey: item.name,
+            key: item.name,
+            title: columnMapping[item.name],
+            width: 300,
+            cellRenderer,
+            headerCellRenderer: headerFunctions,
+          }
           break
         default:
           return {
@@ -960,13 +998,13 @@ let filteredColumns = computed(() => {
             headerAlign: 'center',
             cellRenderer,
             headerCellRenderer: headerFunctions,
-            rowSpan: function (rowIndex) {
-              if (rowIndex % 2 === 0) {
-                return 2
-              } else {
-                return 1
-              }
-            },
+            // rowSpan: function (rowIndex) {
+            //   if (rowIndex % 2 === 0) {
+            //     return 2
+            //   } else {
+            //     return 1
+            //   }
+            // },
           }
           break
       }
@@ -1161,37 +1199,40 @@ const renderItem = (type) => (params, api) => {
 let ganttData = () => {
   // console.log(datas.value)
   // datas.value = filterDatas.value
-  // console.log(datas.value)
-  let ganttDatas = datas.value.map((ganttItem, idx) => {
-    // const calculatedIdx = calculateIdx(datas.value.length - idx)
-    const calculatedIdx = datas.value.length - idx
+  let ganttDatas = flatToArr(datas.value)
+    .filter((item) => {
+      return item.expanded
+    })
+    .map((ganttItem, idx) => {
+      // const calculatedIdx = calculateIdx(datas.value.length - idx)
+      const calculatedIdx = datas.value.length - idx
 
-    return {
-      name: ganttItem.name,
-      value: [
-        calculatedIdx,
-        // ganttItem.taskOwner == 'second'
-        //   ? ganttItem.newStart
-        //   : ganttItem.plannedStart,
-        // ganttItem.taskOwner == 'second'
-        //   ? ganttItem.newFinish
-        //   : ganttItem.plannedFinish,
-        ganttItem.newStart,
-        ganttItem.newFinish,
-        ganttItem,
-      ],
-      itemStyle: {
-        color: colors[ganttItem.status],
-        borderColor: borderColor(ganttItem.durationStatus),
-        borderWidth: 3,
-        borderType: borderType(ganttItem.critical),
-      },
-      taskOwner: ganttItem.taskOwner,
-      status: ganttItem.status,
-      taskStatus: ganttItem.taskStatus,
-      durationStatus: ganttItem.durationStatus,
-    }
-  })
+      return {
+        name: ganttItem.name,
+        value: [
+          calculatedIdx,
+          // ganttItem.taskOwner == 'second'
+          //   ? ganttItem.newStart
+          //   : ganttItem.plannedStart,
+          // ganttItem.taskOwner == 'second'
+          //   ? ganttItem.newFinish
+          //   : ganttItem.plannedFinish,
+          ganttItem.newStart,
+          ganttItem.newFinish,
+          ganttItem,
+        ],
+        itemStyle: {
+          color: colors[ganttItem.status],
+          borderColor: borderColor(ganttItem.durationStatus),
+          borderWidth: 3,
+          borderType: borderType(ganttItem.critical),
+        },
+        taskOwner: ganttItem.taskOwner,
+        status: ganttItem.status,
+        taskStatus: ganttItem.taskStatus,
+        durationStatus: ganttItem.durationStatus,
+      }
+    })
   let firstProject = ganttDatas.filter((e) => {
     return e.taskOwner == 'first'
   })
@@ -1232,7 +1273,7 @@ function getOption({ firstProject, secondProject }) {
       },
     },
     xAxis: {
-      show: false,
+      show: true,
       name: 'date',
       type: 'time',
       splitNumber: 5,
@@ -1244,13 +1285,13 @@ function getOption({ firstProject, secondProject }) {
         show: true, // 显示刻度
         alignWithLabel: true, // 与标签对齐
       },
-      minInterval: 24 * 3600, // 设置最小刻度间隔为1小时 (3600秒 * 1000毫秒)
-      // maxInterval: 24 * 3600 * 1000 * 360 , // 设置最大刻度间隔为1天 (24小时 * 3600秒 * 1000毫秒)
+      minInterval: 24 * 3600 * 1000 * timeSpan, // 设置最小刻度间隔为1小时 (3600秒 * 1000毫秒)
+      maxInterval: 24 * 3600 * 1000 * timeSpan, // 设置最大刻度间隔为1天 (24小时 * 3600秒 * 1000毫秒)
       max: function (value) {
-        return value.max + (value.max - value.min) * 0.01
+        return value.max + (value.max - value.min) * 0.1 * timeSpan
       },
       min: function (value) {
-        return value.min - (value.max - value.min) * 0.01
+        return value.min - (value.max - value.min) * 0.1
       },
     },
     yAxis: {
@@ -1557,7 +1598,7 @@ function getOption({ firstProject, secondProject }) {
       top: 40,
       left: 0,
       right: 0,
-      bottom: 0,
+      bottom: 40,
     },
     toolbox: {
       show: true,
@@ -1566,30 +1607,19 @@ function getOption({ firstProject, secondProject }) {
         saveAsImage: { show: true },
       },
     },
-    // calendar: {
-    //   range: [startTimeStamp.value, endTimeStamp.value],
-    //   height:890,
-    //   width:1200,
-    //   cellSize: 1,
-    //   dayLabel :{
-    //     position :'start',
-    //   },
-    //   monthLabel:{},
-    //   yearLabel:{
-    //     position:'top'
-    //   }
-    // },
     dataZoom: [
       {
         type: 'slider',
         show: true,
         xAxisIndex: [0],
         startValue: startTimeStamp.value,
-        endValue: endTimeStamp.value,
-        zoomLock: true,
+        endValue:
+          endTimeStamp.value +
+          ((endTimeStamp.value - startTimeStamp.value) * 0.1 * timeSpan) / 2,
+        // zoomLock: true,
         showDetail: false,
-        maxValueSpan: 3600 * 24 * 1000 * 90,
-        minValueSpan: 3600 * 24 * 1000 * 90,
+        // maxValueSpan: 3600 * 24 * 1000 * 90,
+        // minValueSpan: 3600 * 24 * 1000 * 90,
         // maxSpan:,
       },
       {
@@ -1705,6 +1735,7 @@ function calculateNodes(startDate, endDate) {
   }
   return [nodes, startDate, endDate]
 }
+let timeSpan
 function getMaxMin() {
   // 获取最大和最小时间戳
   let endDate = Math.max(
@@ -1737,7 +1768,7 @@ function getMaxMin() {
   const startDateObj = new Date(startDate)
   const endDateObj = new Date(endDate)
   // calculateNodes(startDateObj, endDateObj)
-  let timeSpan
+
   switch (chosenDate.value) {
     case 'Day':
       timeSpan = 1
@@ -1802,10 +1833,12 @@ function getEndTimes(startDate, chosenDate) {
 function alternateInsert(array1, array2) {
   array1.map((e) => {
     e.taskOwner = 'first'
+    e.expanded = 'true'
     return e
   })
   array2.map((e) => {
     e.taskOwner = 'second'
+    e.expanded = 'true'
     return e
   })
   let result = []
@@ -1896,6 +1929,86 @@ function concatenateResources(resources) {
     result += `Parent ID: ${resource.parentId}\n`
   }
   return result
+}
+function mergeAndSwapKeyValue(obj) {
+  const result = {}
+
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      const value = obj[key].join('.') // 合并数组中的值为一个字符串
+      result[value] = key // 互换属性和属性值
+    }
+  }
+
+  return result
+}
+function flatten(treeData) {
+  let back = mergeAndSwapKeyValue(wbs.value[1])
+  const flatArray = []
+  Object.keys(treeData).forEach((e) => {
+    flatArray.push({
+      wbsId: e,
+      id: e,
+      parentId: back[wbs.value[1][e][wbs.value[1][e].length - 2]],
+      children: [],
+    })
+  })
+
+  return flatArray
+}
+function convertToTreeFormat(initialData) {
+  let idMap
+  let nodeData
+  idMap = flatten(wbs.value[0])
+  nodeData = initialData.map((e) => {
+    e.parentId = e.wbsId
+    return {
+      children: [],
+      ...e,
+    }
+  })
+  let x = flatToTree(idMap.concat(nodeData))
+  return x
+}
+
+function flatToTree(flatData, parentId = undefined) {
+  const tree = []
+
+  // 遍历flatData，找到parentId对应的子节点
+  for (const node of flatData) {
+    if (node.parentId === parentId) {
+      // 递归查找子节点
+      const children = flatToTree(flatData, node.id)
+
+      // 如果有子节点，则加入children属性中
+      if (children.length > 0) {
+        node.children = children
+      }
+
+      // 加入tree中
+      tree.push(node)
+    }
+  }
+
+  return tree
+}
+
+function flatToArr(tree, arr = [], expandedIds = []) {
+  tree.forEach((item) => {
+    // 结构item
+    const { children, ...props } = item
+    // 判断当前节点是否展开
+    const isExpanded = expandedRowKeys.value.includes(item.wbsId)
+    // 更新节点的状态
+    const updatedProps = { ...props, expanded: isExpanded }
+    // 添加除了children的属性
+    arr.push(updatedProps)
+    if (children.length !== 0) {
+      // 存在children递归将所有节点加入到结果集中
+      flatToArr(children, arr, expandedIds)
+    }
+  })
+  return arr
 }
 </script>
 <style lang="scss" scoped>

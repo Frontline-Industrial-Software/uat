@@ -325,12 +325,15 @@ export default {
       responseType: 'arraybuffer',
       // responseType: size > fileSizeThreshold ? "arraybuffer" : "json", // 设置响应数据类型为二进制数组
     })
+
     if (res.headers['content-type'] == 'application/gzip') {
       const byteArray = new Uint8Array(res.data) // 切换数据编码为Uint8Array
       const pakoArr = pako.inflate(byteArray, { to: 'string' }) // 调用 pako 的方法解压数据
+      console.log(res.data)
       res.data = JSON.parse(pakoArr)
     } else {
       res.data = this.arrayBufferToJson(res.data)
+      console.log(res.data)
     }
 
     return res

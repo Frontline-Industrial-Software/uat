@@ -30,6 +30,11 @@ const routes = [
     redirect: '/NotFound',
   },
   {
+    path: '/historical',
+    component: () => import('@/view/historical/historical.vue'),
+    name: 'historical',
+  },
+  {
     path: '/compare',
     component: () => import('@/view/compare/compare.vue'),
     name: 'compare',

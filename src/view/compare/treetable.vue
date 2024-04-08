@@ -11,9 +11,9 @@
       >
         Tasks
       </p>
-      <p style="color: #ffa39e">
+      <!-- <p style="color: #ffa39e">
         Please do not upload a file with the same name
-      </p>
+      </p> -->
       <el-divider />
       <div class="button">
         <div
@@ -185,8 +185,8 @@
       <div class="gantta-content">
         <TimeX
           class="time"
-          :startTime="startTimeStamp"
-          :endTime="endTimeStamp"
+          :startTime="timexstart"
+          :endTime="timexend"
           :chosenDate="chosenDate"
         />
         <div ref="GanttEcharts" id="GanttEcharts"></div>
@@ -208,6 +208,10 @@
         <el-checkbox v-model="isActive" label="Active Tasks" />
         <el-checkbox v-model="isCompleted" label="Completed Tasks" />
         <el-checkbox v-model="isNotStart" label="NotStart Tasks" />
+        <div>Compare Task</div>
+        <el-checkbox v-model="isAddTask" label="Add Tasks" />
+        <el-checkbox v-model="isRemoveTask" label="Remove Tasks" />
+        <el-checkbox v-model="isSameTask" label="Same Tasks" />
         <div>Other</div>
         <el-checkbox v-model="isCritical" label="Critical Tasks" />
         <el-checkbox v-model="isNocritical" label="Non-Critical Tasks" />
@@ -236,15 +240,6 @@ import {
   h,
 } from 'vue'
 import {
-  add,
-  endOfWeek,
-  startOfWeek,
-  endOfMonth,
-  endOfYear,
-  format,
-  isAfter,
-} from 'date-fns'
-import {
   ElButton,
   ElCheckbox,
   ElIcon,
@@ -268,8 +263,6 @@ import {
   Filter,
 } from '@element-plus/icons-vue'
 import AInput from './Ainput.vue'
-const store = useCounterStore()
-const router = useRouter()
 const GanttEcharts = ref(null)
 const chosenDate = ref('Week')
 const searchData = ref()
@@ -285,8 +278,6 @@ const props = defineProps({
 })
 let activeName = ref('Activity Status')
 let controlFilter = ref(false)
-const shouldFilter = ref(false)
-
 /* -------------------------------------------------------------------------- */
 let ShowAllColumns = ref(true)
 // 监听 showAllColumns 的变化
@@ -375,8 +366,9 @@ let isNotStart = ref(true)
 let isCritical = ref(true)
 let isNocritical = ref(true)
 
-let openFilter = ref(false)
-const visible = ref(false)
+let isAddTask = ref(true)
+let isRemoveTask = ref(true)
+let isSameTask = ref(true)
 
 let filterType = ref({
   ID: '',
@@ -430,56 +422,70 @@ watch(
 /* -------------------------------------------------------------------------- */
 
 let filterDatas = computed(() => {
-  if (fileData.value?.length > 0) {
-    let _file = fileData.value[3].filter((e) => {
-      return (
-        ((isBehindschedule.value && e.taskStatus === 'Delayed') ||
-          (isAheadschedule.value && e.taskStatus === 'Ahead') ||
-          (isOnschedule.value && e.taskStatus === 'On Schedule')) &&
-        ((isEarly.value && e.durationStatus === 'Early') ||
-          (isOntime.value && e.durationStatus === 'Ontime') ||
-          (isDelayed.value && e.durationStatus === 'Delayed')) &&
-        ((isActive.value && e.compareStatus === 'TK_Active') ||
-          (isCompleted.value && e.compareStatus === 'TK_Complete') ||
-          (isNotStart.value && e.compareStatus === 'TK_NotStart')) &&
-        ((isCritical.value && e.compareCritical === true) ||
-          (isNocritical.value && e.compareCritical === null))
-      )
-    })
-    if (filterData.value !== 'default') {
-      _file = _file.filter((e) => {
-        // 初始化一个变量来判断当前对象是否满足所有条件
-        let satisfiesAllConditions = true
-
-        // 遍历 filterType 对象的属性
-        for (let key in filterType.value) {
-          // console.log(filterType.value[key]);
-          // 如果属性值不为 null，且当前对象的该属性的值不包含 filterData 的值，则设置 satisfiesAllConditions 为 false
-          if (
-            filterType.value[key] !== null &&
-            !convertToUTC(e[key])?.includes(filterType.value[key])
-          ) {
-            satisfiesAllConditions = false
-            // 如果有一个条件不满足，就不需要再继续检查其他属性了，可以直接跳出循环
-            break
-          }
-        }
-
-        // 返回 satisfiesAllConditions 的值，表示当前对象是否满足所有条件
-        return satisfiesAllConditions
-      })
-    }
-
-    _file = convertToTreeFormat(_file)
-    return _file
-  } else {
+  if (!fileData.value || fileData.value.length === 0) {
     return []
   }
+
+  let _file = fileData.value[3].filter((e) => {
+    const statusConditions = {
+      Delayed: isBehindschedule.value,
+      Ahead: isAheadschedule.value,
+      'On Schedule': isOnschedule.value,
+      default: 'true',
+    }
+
+    const durationConditions = {
+      Early: isEarly.value,
+      Ontime: isOntime.value,
+      Delayed: isDelayed.value,
+      default: 'true',
+    }
+
+    const compareStatusConditions = {
+      TK_Active: isActive.value,
+      TK_Complete: isCompleted.value,
+      TK_NotStart: isNotStart.value,
+    }
+
+    const compareCriticalConditions = {
+      true: isCritical.value,
+      null: isNocritical.value,
+    }
+
+    const addorRemove = {
+      add: isAddTask.value,
+      remove: isRemoveTask.value,
+      same: isSameTask.value,
+    }
+    return (
+      statusConditions[e.taskStatus] &&
+      durationConditions[e.durationStatus] &&
+      compareStatusConditions[e.compareStatus] &&
+      compareCriticalConditions[e.compareCritical] &&
+      addorRemove[e.addorRemove]
+    )
+  })
+  if (filterData.value !== 'default') {
+    _file = _file.filter((e) => {
+      for (let key in filterType.value) {
+        const filterValue = filterType.value[key]
+        if (filterValue !== null && e[key] !== filterValue) {
+          return false // 提前返回，如果有属性不匹配条件，则立即返回 false
+        }
+      }
+      return true // 如果所有属性都匹配条件，则返回 true
+    })
+  }
+
+  _file = convertToTreeFormat(_file)
+
+  return _file
 })
+
 function datasFilter() {
   controlFilter.value = false
   if (datas.value) {
-    datas.value = filterDatas.value.slice(0, 34)
+    datas.value = flatToArr(filterDatas.value.slice(0, 34))
 
     ganttChart.setOption(getOption(ganttData()))
   }
@@ -488,7 +494,6 @@ function datasFilter() {
 const eventClick = {
   onMousemove(e) {
     let index = e.rowIndex
-
     if (index == 0) {
       index = 0
     } else {
@@ -523,9 +528,18 @@ onMounted(() => {
   // initCharts()
 })
 watch(chosenDate, (newValue, oldValue) => {
-  // 可以在这里触发相应的操作，例如重新渲染数据
+  const timeSpans = {
+    Day: 7 * 24 * 3600 * 1000,
+    Week: 30 * 24 * 3600 * 1000,
+    Month: 90 * 24 * 3600 * 1000,
+    Year: 365 * 24 * 3600 * 1000,
+  }
+
+  timeSpan = timeSpans[newValue] || 0
+
   ganttChart.setOption(getOption(ganttData()))
 })
+
 let timeX
 let markLineData
 let startDate
@@ -536,10 +550,6 @@ let baseProject = ref()
 let compareProject = ref()
 
 let fileData = ref([])
-function removeFile(file) {
-  files.value = []
-}
-
 let uploadBase = (file) => {
   if (file.type !== 'application/xer' && file.type !== 'text/xml') {
     ElMessage.error('Please upload xer or xml file!')
@@ -559,10 +569,8 @@ let uploadCompare = (file) => {
   return false
 }
 let wbs = ref([])
+let dataDate = ref([])
 async function Uploads() {
-  // let filed = filess.file
-  // files.push(filed)
-
   if (files.value.length == 2) {
     fileData.value = []
 
@@ -583,13 +591,21 @@ async function Uploads() {
     })
     let a = await api.sendFile(files.value, 'task') // 使用修改后的文件对象进行上传
 
+    // dataDate
+
     for (let attrName in a.data) {
       let attrValue = a.data[attrName]
+      dataDate.value.push(attrValue.dataDate)
       fileData.value.push(attrValue)
     }
-    wbs.value.push(fileData.value[1].wbsName)
-    wbs.value.push(fileData.value[1].wbsNameArr)
-    wbsIdArray.value = Object.keys(fileData.value[1].wbsName)
+
+    wbs.value.push(
+      mergeObjects(fileData.value[1].wbsName, fileData.value[2].wbsName),
+    )
+    wbs.value.push(
+      mergeObjects(fileData.value[1].wbsNameArr, fileData.value[2].wbsNameArr),
+    )
+    wbsIdArray.value = Object.keys(wbs.value[0])
     expandedRowKeys.value = wbsIdArray.value
     let fileDatas = alternateInsert(
       fileData.value[1].tasks,
@@ -606,24 +622,19 @@ async function Uploads() {
       e.resources = concatenateResources(resource)
       return e
     })
+
     if (fileData.value[1].tasks.length != fileData.value[2].tasks) {
-      // fileDatas.map((e) => {
-      //   if (e.resources) {
-      //     e.resources = null
-      //   }
-      //   return e
-      // })
       fileData.value.push(fileDatas)
+
       initCharts()
     }
   }
-  if (fileData.value[1].tasks.length != fileData.value[2].tasks.length) {
-    ElMessage.error('Please upload a project with the same task')
-    fileData.value = []
-  }
+  // if (fileData.value[1].tasks.length != fileData.value[2].tasks.length) {
+  //   ElMessage.error('Please upload a project with the same task')
+  //   fileData.value = []
+  // }
   return false
 }
-const beforeUpload = async (event, file, fileList) => {}
 function sanitizeFileName(fileName) {
   // 找到最后一个小数点的位置
   const lastDotIndex = fileName.lastIndexOf('.')
@@ -641,22 +652,38 @@ function sanitizeFileName(fileName) {
   // 如果没有小数点，则直接替换所有符号为下划线
   return fileName.replace(/[^\w\d]/g, '_')
 }
+
+let timexstart = ref()
+let timexend = ref()
 function initCharts() {
+  if (
+    !compareFirstProperty(fileData.value[1].wbsName, fileData.value[2].wbsName)
+  ) {
+    return
+  }
+  fileData.value[3] = fileData.value[3].map((e) => {
+    if (e && e.type) {
+      e.type = e.type.replace('TT_', '')
+    }
+    if (e && e.status) {
+      e.status = e.status.replace('TK_', '')
+    }
+
+    return e
+  })
+
+  datas.value = flatToArr(filterDatas.value.slice(0, 34))
+  /* -------------------------------------------------------------------------- */
   timeX = getMaxMin()
   markLineData = timeX[0]
   startTimeStamp.value = timeX[1]
   endTimeStamp.value = timeX[2]
-  startDate = new Date(startTimeStamp.value)
-  endDate = new Date(startDate)
-  endDate.setMonth(startDate.getMonth() + 3)
-
-  fileData.value[3] = fileData.value[3].map((e) => {
-    e.type = e.type.replace('TT_', '')
-    e.status = e.status.replace('TK_', '')
-    return e
-  })
-
-  datas.value = filterDatas.value.slice(0, 34)
+  timexstart.value = timeX[1]
+  timexend.value = timeX[2]
+  // startDate = new Date(startTimeStamp.value)
+  // endDate = new Date(startDate)
+  // endDate.setMonth(startDate.getMonth() + 3)
+  /* -------------------------------------------------------------------------- */
   /* -------------------------------------------------------------------------- */
   if (ganttChart) {
     ganttChart.setOption(getOption(ganttData()))
@@ -669,8 +696,8 @@ function initCharts() {
     ganttChart.setOption(getOption(ganttData()))
     ganttChart.on('dataZoom', function (params, a, b) {
       let op = ganttChart.getOption()
-      startTimeStamp.value = op.dataZoom[0].startValue
-      endTimeStamp.value = op.dataZoom[0].endValue
+      timexstart.value = op.dataZoom[0].startValue
+      timexend.value = op.dataZoom[0].endValue
     })
   }
 }
@@ -678,11 +705,10 @@ function getRenderData(data) {
   if (!ganttChart) {
     return
   }
-  datas.value = filterDatas.value.slice(
-    data.rowCacheStart === 0 ? 0 : data.rowCacheStart + 2, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
-    data.rowCacheStart === 0 ? 34 : data.rowCacheEnd - 1, // 切片结束位置为 data.rowCacheStart + 25
+  datas.value = flatToArr(filterDatas.value).slice(
+    data.rowCacheStart, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
+    data.rowCacheEnd, // 切片结束位置为 data.rowCacheStart + 25
   )
-
   ganttChart.setOption(getOption(ganttData()))
 }
 let wbsIdArray = ref()
@@ -732,14 +758,12 @@ let headerFunctions = (props) => {
 }
 
 const rowClass = (data) => {
-  // if (data.rowData.children.length > 0) {
-  //   return 'bg-red-100'
-  // } else {
-  //   return 'bg-red-100'
-  // }
-  // bg-blue-200
   if (data.rowData.children.length > 0) {
     return 'bg-wbs'
+  } else if (data.rowData.addorRemove == 'add') {
+    return 'bg-add'
+  } else if (data.rowData.addorRemove == 'remove') {
+    return 'bg-remove'
   } else if (data.rowData.taskOwner == 'first') {
     return 'bg-base'
   } else if (data.rowData.taskOwner == 'second') {
@@ -755,271 +779,69 @@ const rowClass = (data) => {
   return ''
 }
 let filteredColumns = computed(() => {
-  let columned = columnDatas.value
-    .filter((item) => item.bol) // 过滤出值为 true 的键
+  const columnConfigs = {
+    name: { width: 200 },
+    plannedStart: { width: 150, renderer: dateRenderer },
+    plannedFinish: { width: 150, renderer: dateRenderer },
+    newStart: { width: 150, renderer: dateRenderer },
+    newFinish: { width: 150, renderer: dateRenderer },
+    actualStart: { width: 150, renderer: dateRenderer },
+    actualFinish: { width: 150, renderer: dateRenderer },
+    critical: { width: 120, renderer: criticalRenderer },
+    wbsId: { width: 300, renderer: wbsRenderer },
+    // Add more column configurations as needed
+  }
+
+  return columnDatas.value
+    .filter((item) => item.bol)
     .map((item) => {
-      let cellRenderer = null
-      switch (item.name) {
-        case 'name':
-          cellRenderer = (cellData) => {
-            return cellData.cellData
-          }
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 200,
-            headerAlign: 'center',
-            cellRenderer,
-            // rowSpan: function (rowIndex) {
-            //   if (rowIndex % 2 === 0) {
-            //     return 2
-            //   } else {
-            //     return 1
-            //   }
-            // },
-            headerCellRenderer: headerFunctions,
-          }
-          break
-        case 'plannedStart':
-          cellRenderer = (cellData) => {
-            if (cellData.cellData) {
-              return utcTime(cellData.cellData)
-                .replace('T', ' ')
-                .replace('Z', '')
-                .slice(0, 16)
-            }
-          }
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 150,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-          }
-          break
-        case 'plannedFinish':
-          cellRenderer = (cellData) => {
-            if (cellData.cellData) {
-              return utcTime(cellData.cellData)
-                .replace('T', ' ')
-                .replace('Z', '')
-                .slice(0, 16)
-            }
-          }
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 150,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-          }
-          break
-        case 'newStart':
-          cellRenderer = (cellData) => {
-            if (cellData.cellData) {
-              return utcTime(cellData.cellData)
-                .replace('T', ' ')
-                .replace('Z', '')
-                .slice(0, 16)
-            }
-          }
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 150,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-          }
-          break
-        case 'newFinish':
-          cellRenderer = (cellData) => {
-            if (cellData.cellData) {
-              return utcTime(cellData.cellData)
-                .replace('T', ' ')
-                .replace('Z', '')
-                .slice(0, 16)
-            }
-          }
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 150,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-          }
-        case 'actualStart':
-          cellRenderer = (cellData) => {
-            if (cellData.cellData) {
-              return utcTime(cellData.cellData)
-                .replace('T', ' ')
-                .replace('Z', '')
-                .slice(0, 16)
-            }
-          }
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 150,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-          }
-        case 'actualFinish':
-          cellRenderer = (cellData) => {
-            if (cellData.cellData) {
-              return utcTime(cellData.cellData)
-                .replace('T', ' ')
-                .replace('Z', '')
-                .slice(0, 16)
-            }
-          }
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 150,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-          }
-          break
-        case 'critical':
-          cellRenderer = (cellData) => {
-            return h(ElButton, {
-              type: cellData.cellData == true ? 'danger' : 'info',
-              circle: true,
-              size: 'small',
-              class: 'sizeButton',
-            }) //也可以写成字符串如'这是标签内容'，但控制台会有警告)
-          }
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 120,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-            // rowSpan: function (rowIndex) {
-            //   if (rowIndex % 2 === 0) {
-            //     return 2
-            //   } else {
-            //     return 1
-            //   }
-            // },
-          }
-          break
-        case 'resources':
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 150,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-          }
-          break
-        case 'plannedDuration':
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 170,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-          }
-          break
-        case 'remainingDuration':
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 200,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-          }
-          break
-        case 'actualDuration':
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 170,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-          }
-          break
-        case 'status':
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 150,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-          }
-          break
-        case 'newDuration':
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 150,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-          }
-        case 'wbsId':
-          cellRenderer = (cellData) => {
-            if (!cellData.rowData.children.length > 0) {
-              return ''
-            }
-            if (cellData.cellData) {
-              return wbs.value[0][cellData.cellData]
-            }
-          }
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 300,
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-          }
-          break
-        default:
-          return {
-            dataKey: item.name,
-            key: item.name,
-            title: columnMapping[item.name],
-            width: 120,
-            headerAlign: 'center',
-            cellRenderer,
-            headerCellRenderer: headerFunctions,
-            // rowSpan: function (rowIndex) {
-            //   if (rowIndex % 2 === 0) {
-            //     return 2
-            //   } else {
-            //     return 1
-            //   }
-            // },
-          }
-          break
+      const config = columnConfigs[item.name] || {
+        width: 150,
+        renderer: defaultRenderer,
+      }
+      return {
+        dataKey: item.name,
+        key: item.name,
+        title: columnMapping[item.name],
+        width: config.width,
+        cellRenderer: config.renderer,
+        headerCellRenderer: headerFunctions,
       }
     })
-
-  return columned
 })
 
-let data = computed(() => {
-  if (fileData.value.length > 0) {
-    return fileData.value[3]
-  } else {
-    return []
+// Renderer functions
+function dateRenderer(cellData) {
+  if (cellData.cellData) {
+    return utcTime(cellData.cellData)
+      .replace('T', ' ')
+      .replace('Z', '')
+      .slice(0, 16)
   }
-})
+}
+
+function criticalRenderer(cellData) {
+  return h(ElButton, {
+    type: cellData.cellData === true ? 'danger' : 'info',
+    circle: true,
+    size: 'small',
+    class: 'sizeButton',
+  })
+}
+
+function wbsRenderer(cellData) {
+  if (!cellData.rowData.children.length > 0) {
+    return ''
+  }
+  if (cellData.cellData) {
+    return wbs.value[0][cellData.cellData]
+  }
+}
+
+function defaultRenderer(cellData) {
+  return cellData.cellData
+}
+
 const pathSymbols = {
   Ahead: 'path://M0,0 L90,20 L10,20  L100,0  L100,50 L80,30 L20,30 L0,50 Z',
   delayed: 'path://M0,0 L100,0 L100,50 L80,30 L20,30 L0,50 Z',
@@ -1031,20 +853,15 @@ let colors = {
   Active: '#4a8fe7',
 }
 let borderColor = (data) => {
-  switch (data) {
-    case 'Early':
-      return '#cf1322'
-      break
-    case 'Ontime':
-      return '#000000'
-      break
-    case 'Delayed':
-      return '#00FFFF '
-      break
-    default:
-      break
+  const colorMap = {
+    Early: '#cf1322',
+    Ontime: '#000000',
+    Delayed: '#00FFFF',
   }
+
+  return colorMap[data] || '' // 如果找不到匹配的颜色，则返回空字符串
 }
+
 let borderType = (data) => {
   if (data) {
     return 'dashed'
@@ -1195,64 +1012,43 @@ const renderItem = (type) => (params, api) => {
 
 /* -------------------------------------------------------------------------- */
 
-/* -------------------------------------------------------------------------- */
+/* ！甘特图数据处理 -------------------------------------------------------------------------- */
 let ganttData = () => {
-  // console.log(datas.value)
-  // datas.value = filterDatas.value
-  let ganttDatas = flatToArr(datas.value)
-    .filter((item) => {
-      return item.expanded
-    })
-    .map((ganttItem, idx) => {
-      // const calculatedIdx = calculateIdx(datas.value.length - idx)
-      const calculatedIdx = datas.value.length - idx
+  let chartData = datas.value.filter((item, idx) => {
+    const isExpanded = expandedRowKeys.value.includes(item.wbsId)
+    item.expanded = isExpanded
+    // item.calculatedIdx = datas.value.length - idx
+    return item.expanded
+  })
 
-      return {
-        name: ganttItem.name,
-        value: [
-          calculatedIdx,
-          // ganttItem.taskOwner == 'second'
-          //   ? ganttItem.newStart
-          //   : ganttItem.plannedStart,
-          // ganttItem.taskOwner == 'second'
-          //   ? ganttItem.newFinish
-          //   : ganttItem.plannedFinish,
-          ganttItem.newStart,
-          ganttItem.newFinish,
-          ganttItem,
-        ],
-        itemStyle: {
-          color: colors[ganttItem.status],
-          borderColor: borderColor(ganttItem.durationStatus),
-          borderWidth: 3,
-          borderType: borderType(ganttItem.critical),
-        },
-        taskOwner: ganttItem.taskOwner,
-        status: ganttItem.status,
-        taskStatus: ganttItem.taskStatus,
-        durationStatus: ganttItem.durationStatus,
-      }
-    })
+  let ganttDatas = chartData.map((ganttItem, idx) => {
+    return {
+      name: ganttItem.name,
+      value: [
+        ganttItem.calculatedIdx,
+        ganttItem.newStart,
+        ganttItem.newFinish,
+        ganttItem,
+      ],
+      itemStyle: {
+        color: colors[ganttItem.status],
+        borderColor: borderColor(ganttItem.durationStatus),
+        borderWidth: 3,
+        borderType: borderType(ganttItem.critical),
+      },
+      taskOwner: ganttItem.taskOwner,
+      status: ganttItem.status,
+      taskStatus: ganttItem.taskStatus,
+      durationStatus: ganttItem.durationStatus,
+    }
+  })
+
   let firstProject = ganttDatas.filter((e) => {
     return e.taskOwner == 'first'
   })
   let secondProject = ganttDatas.filter((e) => {
     return e.taskOwner == 'second'
   })
-  // secondProject = secondProject.map((secondTask) => {
-  //   const correspondingFirstTask = firstProject.find((firstTask) => {
-  //     return (
-  //       firstTask.value[3].id === secondTask.value[3].id &&
-  //       firstTask.value[3].name === secondTask.value[3].name
-  //     )
-  //   })
-
-  //   if (correspondingFirstTask) {
-  //     return compareTasks(correspondingFirstTask, secondTask)
-  //   } else {
-  //     return secondTask
-  //   }
-  // })
   return { firstProject, secondProject }
 }
 
@@ -1264,6 +1060,23 @@ function getOption({ firstProject, secondProject }) {
   const onTrackTasks = secondProject.filter(
     (task) => task.taskStatus === 'On Schedule',
   )
+  timexstart.value = startTimeStamp.value
+  timexend.value = startTimeStamp.value + timeSpan
+  let Label = {
+    label: {
+      normal: {
+        show: true, // 启用标签显示
+        color: 'black', // 标签的文本颜色
+        position: 'bottom', // 标签的文本位置
+        formatter: function (params) {
+          // 自定义标签内容
+
+          return params.data.name
+        },
+        fontSize: 12,
+      },
+    },
+  }
   let option = {
     toolbox: {
       show: true,
@@ -1285,15 +1098,34 @@ function getOption({ firstProject, secondProject }) {
         show: true, // 显示刻度
         alignWithLabel: true, // 与标签对齐
       },
-      minInterval: 24 * 3600 * 1000 * timeSpan, // 设置最小刻度间隔为1小时 (3600秒 * 1000毫秒)
-      maxInterval: 24 * 3600 * 1000 * timeSpan, // 设置最大刻度间隔为1天 (24小时 * 3600秒 * 1000毫秒)
-      max: function (value) {
-        return value.max + (value.max - value.min) * 0.1 * timeSpan
-      },
-      min: function (value) {
-        return value.min - (value.max - value.min) * 0.1
-      },
+      max: endTimeStamp.value + timeSpan,
+      min:
+        startTimeStamp.value - (endTimeStamp.value - startTimeStamp.value) * 2,
     },
+    dataZoom: [
+      {
+        type: 'slider',
+        show: true,
+        xAxisIndex: [0],
+        startValue:
+          startTimeStamp.value - (endTimeStamp.value - startTimeStamp.value),
+        endValue:
+          startTimeStamp.value -
+          (endTimeStamp.value - startTimeStamp.value) * 2 +
+          timeSpan,
+        showDetail: false,
+        minValueSpan: 7 * 24 * 3600 * 1000,
+        filterMode: 'none',
+      },
+      {
+        show: true,
+        type: 'inside',
+        xAxisIndex: [0],
+        // startValue: startTimeStamp.value,
+        // endValue: endTimeStamp.value,
+        zoomLock: true,
+      },
+    ],
     yAxis: {
       name: 'tasks',
       interval: 25, // 设置每个间隔的高度
@@ -1318,19 +1150,7 @@ function getOption({ firstProject, secondProject }) {
           x: [1, 2],
           y: 0,
         },
-        label: {
-          normal: {
-            show: true, // 启用标签显示
-            color: 'black', // 标签的文本颜色
-            position: 'bottom', // 标签的文本位置
-            formatter: function (params) {
-              // 自定义标签内容
-
-              return params.data.name
-            },
-            fontSize: 12,
-          },
-        },
+        ...Label,
       },
       {
         name: 'delayedTasks',
@@ -1342,6 +1162,7 @@ function getOption({ firstProject, secondProject }) {
           x: [1, 2],
           y: 0,
         },
+        ...Label,
       },
       {
         name: 'aheadTasks',
@@ -1353,6 +1174,7 @@ function getOption({ firstProject, secondProject }) {
           x: [1, 2],
           y: 0,
         },
+        ...Label,
       },
       {
         name: 'onTrackTasks',
@@ -1364,21 +1186,22 @@ function getOption({ firstProject, secondProject }) {
           x: [1, 2],
           y: 0,
         },
+        ...Label,
       },
-      {
-        type: 'line',
-        smooth: 0.6,
-        symbol: 'none',
-        lineStyle: {
-          color: '#5470C6',
-          width: 5,
-        },
-        markLine: {
-          symbol: ['none', 'none'],
-          label: { show: false },
-          data: getMaxMin()[0],
-        },
-      },
+      // {
+      //   type: 'line',
+      //   smooth: 0.6,
+      //   symbol: 'none',
+      //   lineStyle: {
+      //     color: '#5470C6',
+      //     width: 5,
+      //   },
+      //   markLine: {
+      //     symbol: ['none', 'none'],
+      //     label: { show: false },
+      //     data: getMaxMin()[0],
+      //   },
+      // },
       {
         name: 'NotStart',
         type: 'line',
@@ -1398,6 +1221,7 @@ function getOption({ firstProject, secondProject }) {
           color: '#5470C6',
           width: 5,
         },
+        ...Label,
       },
       {
         name: 'Delayed',
@@ -1408,6 +1232,7 @@ function getOption({ firstProject, secondProject }) {
           color: '#5470C6',
           width: 5,
         },
+        ...Label,
       },
       {
         name: 'Active',
@@ -1418,6 +1243,7 @@ function getOption({ firstProject, secondProject }) {
           color: '#5470C6',
           width: 5,
         },
+        ...Label,
       },
       {
         name: 'Completed',
@@ -1428,6 +1254,7 @@ function getOption({ firstProject, secondProject }) {
           color: '#5470C6',
           width: 5,
         },
+        ...Label,
       },
       {
         name: 'Ahead of Schedule',
@@ -1438,6 +1265,7 @@ function getOption({ firstProject, secondProject }) {
           color: '#5470C6',
           width: 5,
         },
+        ...Label,
       },
       {
         name: 'On Schedule',
@@ -1448,6 +1276,7 @@ function getOption({ firstProject, secondProject }) {
           color: '#5470C6',
           width: 5,
         },
+        ...Label,
       },
       {
         name: 'Behind Schedule',
@@ -1458,6 +1287,7 @@ function getOption({ firstProject, secondProject }) {
           color: '#5470C6',
           width: 5,
         },
+        ...Label,
       },
       {
         name: 'Early',
@@ -1468,6 +1298,7 @@ function getOption({ firstProject, secondProject }) {
           color: '#5470C6',
           width: 5,
         },
+        ...Label,
       },
       {
         name: 'On Time',
@@ -1478,6 +1309,7 @@ function getOption({ firstProject, secondProject }) {
           color: '#5470C6',
           width: 5,
         },
+        ...Label,
       },
       {
         name: 'Delayed',
@@ -1488,6 +1320,7 @@ function getOption({ firstProject, secondProject }) {
           color: '#5470C6',
           width: 5,
         },
+        ...Label,
       },
       {
         name: 'Critical Task',
@@ -1498,6 +1331,27 @@ function getOption({ firstProject, secondProject }) {
           color: '#5470C6',
           width: 5,
         },
+        ...Label,
+      },
+      {
+        name: 'dataDateBase',
+        type: 'bar',
+        data: [[dataDate.value[1], 50]],
+        barWidth: 3, // 设置柱状图的宽度为20像素
+        itemStyle: {
+          color: '#f5222d', // 设置柱状图的颜色为红色，透明度为0.7
+        },
+        ...Label,
+      },
+      {
+        name: 'dataDateNew',
+        type: 'bar',
+        data: [[dataDate.value[2], 50]],
+        barWidth: 3, // 设置柱状图的宽度为20像素
+        itemStyle: {
+          color: '#ffccc7', // 设置柱状图的颜色为红色，透明度为0.7
+        },
+        ...Label,
       },
     ],
     legend: {
@@ -1607,30 +1461,7 @@ function getOption({ firstProject, secondProject }) {
         saveAsImage: { show: true },
       },
     },
-    dataZoom: [
-      {
-        type: 'slider',
-        show: true,
-        xAxisIndex: [0],
-        startValue: startTimeStamp.value,
-        endValue:
-          endTimeStamp.value +
-          ((endTimeStamp.value - startTimeStamp.value) * 0.1 * timeSpan) / 2,
-        // zoomLock: true,
-        showDetail: false,
-        // maxValueSpan: 3600 * 24 * 1000 * 90,
-        // minValueSpan: 3600 * 24 * 1000 * 90,
-        // maxSpan:,
-      },
-      {
-        show: true,
-        type: 'inside',
-        xAxisIndex: [0],
-        startValue: startTimeStamp.value,
-        endValue: endTimeStamp.value,
-        zoomLock: true,
-      },
-    ],
+
     graphic: {
       elements: [
         {
@@ -1645,6 +1476,30 @@ function getOption({ firstProject, secondProject }) {
             fill: 'rgba(236,246,245,0.7)', // 矩形的填充颜色
           },
         },
+        // {
+        //   type: 'rect',
+        //   x: 300,
+        //   y: 0,
+        //   shape: {
+        //     width: 3, // 矩形的宽度
+        //     height: 850, // 矩形的高度
+        //   },
+        //   style: {
+        //     fill: 'rgba(255,0,0)', // 矩形的填充颜色
+        //   },
+        // },
+        // {
+        //   type: 'rect',
+        //   x: dataDate.value[2],
+        //   y: 1,
+        //   shape: {
+        //     width: 3, // 矩形的宽度
+        //     height: 850, // 矩形的高度
+        //   },
+        //   style: {
+        //     fill: 'rgba(255,0,0)', // 矩形的填充颜色
+        //   },
+        // },
       ],
     },
     tooltip: {
@@ -1673,32 +1528,11 @@ function getOption({ firstProject, secondProject }) {
       },
     },
   }
+
   return option
 }
 /* -------------------------------------------------------------------------- */
 
-function convertToUTC(value) {
-  // 判断是否是时间戳
-
-  if (typeof value === 'number' && value.toString().length == 13) {
-    // 将时间戳转换为UTC时间
-    let date = new Date(value)
-    let utcDate = new Date(
-      date.getUTCFullYear(),
-      date.getUTCMonth(),
-      date.getUTCDate(),
-      date.getUTCHours(),
-      date.getUTCMinutes(),
-      date.getUTCSeconds(),
-    )
-
-    // 返回转换后的UTC时间
-    return utcDate.toISOString()
-  } else {
-    // 如果不是时间戳，则直接返回原始值
-    return value + ''
-  }
-}
 function utcTime(time) {
   if (!time) {
     return "It doesn't exist"
@@ -1708,212 +1542,104 @@ function utcTime(time) {
 
   return utcString
 }
-function calculateIdx(inputNumber) {
-  if (inputNumber === 2) {
-    return 2
-  } else {
-    return inputNumber + (inputNumber - 2) * 0.5
-  }
-}
-function calculateNodes(startDate, endDate) {
-  const nodes = []
 
-  let currentDate = startOfWeek(new Date(startDate), { weekStartsOn: 1 }) // 设置起点为每周的周一
-
-  const endDateObj = new Date(endDate)
-
-  while (isAfter(new Date(startDate), endDateObj) === false) {
-    // 计算周的最后一天（周日）
-    const weekEndDate = endOfWeek(currentDate, { weekStartsOn: 1 })
-
-    if (isAfter(weekEndDate, endDateObj)) {
-      nodes.push(format(endDateObj, 'yyyy-MM-dd'))
-      break
-    }
-    nodes.push(format(weekEndDate, 'yyyy-MM-dd'))
-    currentDate = add(currentDate, { weeks: 1 })
-  }
-  return [nodes, startDate, endDate]
-}
-let timeSpan
+let timeSpan = 7
 function getMaxMin() {
+  let endDate = -Infinity
+  let startDate = Infinity
+
   // 获取最大和最小时间戳
-  let endDate = Math.max(
-    ...fileData.value[1].tasks.map((obj) => {
-      // 判断 plannedFinish 是否为字符串
-      if (typeof obj.plannedFinish === 'string') {
-        // 将字符串转换为时间戳
-        return new Date(obj.plannedFinish).getTime()
-      } else {
-        // 不是字符串则直接返回
-        return obj.plannedFinish
-      }
-    }),
-  )
+  datas.value.forEach((obj) => {
+    const finishTime = obj.newFinish - 0
+    if (!isNaN(finishTime)) {
+      endDate = Math.max(endDate, finishTime)
+      startDate = Math.min(startDate, finishTime)
+    }
+  })
 
-  let startDate = Math.min(
-    ...fileData.value[2].tasks.map((obj) => {
-      // 判断 plannedStart 是否为字符串
-      if (typeof obj.plannedStart === 'string') {
-        // 将字符串转换为时间戳
-        return new Date(obj.plannedStart).getTime()
-      } else {
-        // 不是字符串则直接返回
-        return obj.plannedStart
-      }
-    }),
-  )
-
-  // 转换为日期对象
-  const startDateObj = new Date(startDate)
-  const endDateObj = new Date(endDate)
-  // calculateNodes(startDateObj, endDateObj)
-
-  switch (chosenDate.value) {
-    case 'Day':
-      timeSpan = 1
-      break
-    case 'Week':
-      timeSpan = 7
-      break
-    case 'Month':
-      timeSpan = 30
-      break
-    case 'Year':
-      timeSpan = 365
-      break
-    default:
-      break
+  const timeSpans = {
+    Day: 7 * 24 * 3600 * 1000,
+    Week: 30 * 24 * 3600 * 1000,
+    Month: 90 * 24 * 3600 * 1000,
+    Year: 365 * 24 * 3600 * 1000,
   }
+
+  timeSpan = timeSpans[chosenDate.value] || 0
 
   const markLineData = []
-
-  for (
-    let timestamp = startDate;
-    timestamp <= endDate;
-    timestamp += timeSpan * 24 * 60 * 60 * 1000
-  ) {
-    const currentEndDate = getEndTimes(
-      new Date(timestamp).toISOString().slice(0, 10),
-      chosenDate.value,
-    )
-
-    markLineData.push({
-      xAxis: new Date(timestamp).toISOString().slice(0, 10),
-      endNode: currentEndDate,
-    })
-  }
   return [markLineData, startDate, endDate]
 }
-// 函数用于计算结束时间
-function getEndTimes(startDate, chosenDate) {
-  const startDateObj = new Date(startDate)
 
-  switch (chosenDate) {
-    case 'Day':
-      return startDate
-    case 'Week':
-      const weekEndDate = new Date(startDateObj)
-      weekEndDate.setDate(startDateObj.getDate() + 6)
-      return weekEndDate.toISOString().slice(0, 10)
-    case 'Month':
-      const monthEndDate = new Date(
-        startDateObj.getFullYear(),
-        startDateObj.getMonth() + 1,
-        0,
-      )
-      return monthEndDate.toISOString().slice(0, 10)
-    case 'Year':
-      const yearEndDate = new Date(startDateObj.getFullYear(), 11, 31)
-      return yearEndDate.toISOString().slice(0, 10)
-    default:
-      return startDate
-  }
-}
 function alternateInsert(array1, array2) {
-  array1.map((e) => {
-    e.taskOwner = 'first'
-    e.expanded = 'true'
-    return e
+  const results = []
+  const idMap = {} // 创建 ID 映射对象
+  const idMap2 = {}
+  // 遍历第一个数组，标记为 'first'
+  array1.forEach((item) => {
+    item.taskOwner = 'first'
+    item.expanded = true
+    item.addorRemove = 'same'
+    idMap[item.ID] = item // 将第一个数组的元素添加到 ID 映射对象中
   })
-  array2.map((e) => {
-    e.taskOwner = 'second'
-    e.expanded = 'true'
-    return e
-  })
-  let result = []
-  let maxLength = Math.max(array1.length, array2.length)
-  let results = []
-  array2.map((item2) => {
-    let item1 = array1.find((e2) => {
-      return e2.id == item2.id
-    })
-    if (!item1) {
-      results = []
-      ElMessage.error(
-        `Task id does not match. Please upload projects with the same task id.
-        TaskName:${item2.name}
-        `,
-      )
-      return
-    }
-    if (item2.newStart < item1.newStart) {
-      item2.taskStatus = 'Ahead'
-      item1.taskStatus = 'Ahead'
-    } else if (item2.newStart > item1.newStart) {
-      item1.taskStatus = 'Delayed'
-      item2.taskStatus = 'Delayed'
+  // console.log(idMap)
+  // 遍历第二个数组，标记为 'second'，并与第一个数组进行比较
+  array2.forEach((item) => {
+    item.taskOwner = 'second'
+    item.expanded = true
+    item.addorRemove = 'same'
+    let correspondingItem = idMap[item.ID] // 查找对应的第一个数组的元素
+    if (!correspondingItem) {
+      item.addorRemove = 'add'
+      item.taskStatus = 'default'
+      item.durationStatus = 'default'
+      item.compareCritical = item.critical
+      item.compareStatus = item.status
+      results.push(item)
     } else {
-      item2.taskStatus = 'On Schedule'
-      item1.taskStatus = 'On Schedule'
-    }
-    if (
-      item2.actualDuration + item2.remainingDuration <
-      item1.actualDuration + item1.remainingDuration
-    ) {
-      item2.durationStatus = 'Early'
-      item1.durationStatus = 'Early'
-    } else if (
-      item2.actualDuration + item2.remainingDuration >
-      item1.actualDuration + item1.remainingDuration
-    ) {
-      item2.durationStatus = 'Delayed'
-      item1.durationStatus = 'Delayed'
-    } else {
-      item2.durationStatus = 'Ontime'
-      item1.durationStatus = 'Ontime'
-    }
-    item2.compareCritical = item2.critical
-    item1.compareCritical = item2.critical
-    item2.compareStatus = item2.status
-    item1.compareStatus = item2.status
+      // 标记第二个数组的元素在第一个数组中有对应元素，表示不是新增元素
+      // 判断任务状态
+      if (item.newStart < correspondingItem.newStart) {
+        item.taskStatus = correspondingItem.taskStatus = 'Ahead'
+      } else if (item.newStart > correspondingItem.newStart) {
+        item.taskStatus = correspondingItem.taskStatus = 'Delayed'
+      } else {
+        item.taskStatus = correspondingItem.taskStatus = 'On Schedule'
+      }
 
-    results.push(item2)
-    results.push(item1)
+      // 判断持续时间状态
+      const durationSum1 =
+        correspondingItem.actualDuration + correspondingItem.remainingDuration
+      const durationSum2 = item.actualDuration + item.remainingDuration
+      if (durationSum2 < durationSum1) {
+        item.durationStatus = correspondingItem.durationStatus = 'Early'
+      } else if (durationSum2 > durationSum1) {
+        item.durationStatus = correspondingItem.durationStatus = 'Delayed'
+      } else {
+        item.durationStatus = correspondingItem.durationStatus = 'Ontime'
+      }
+
+      // 复制关键信息
+      item.compareCritical = correspondingItem.compareCritical = item.critical
+      item.compareStatus = correspondingItem.compareStatus = item.status
+      idMap2[item.ID] = true
+      results.push(item)
+      results.push(correspondingItem)
+    }
+  })
+
+  array1.forEach((item) => {
+    if (!array2.find((el) => el.ID === item.ID)) {
+      item.addorRemove = 'remove'
+      item.taskStatus = 'default'
+      item.durationStatus = 'default'
+      item.compareCritical = item.critical
+      item.compareStatus = item.status
+      results.push(item)
+    }
   })
   return results
 }
 
-function padZero(num) {
-  return num < 10 ? `0${num}` : num
-}
-function compareTasks(firstTask, secondTask) {
-  const taskStartDate = new Date(firstTask.value[1]) // 将 UTC 字符串转换为 Date 对象
-  const taskEndDate = new Date(firstTask.value[2]) // 将 UTC 字符串转换为 Date 对象
-  const correspondingTaskStartDate = new Date(secondTask.value[1]) // 将 UTC 字符串转换为 Date 对象
-  const correspondingTaskEndDate = new Date(secondTask.value[2]) // 将 UTC 字符串转换为 Date 对象
-  // 比较开始时间和结束时间，并考虑任务所有者
-
-  if (taskStartDate > correspondingTaskStartDate) {
-    status = 'Ahead of Schedule'
-  } else if (taskStartDate < correspondingTaskStartDate) {
-    status = 'Delayed'
-  } else {
-    status = 'On Track'
-  }
-
-  return { ...secondTask, taskStatus: status }
-}
 function concatenateResources(resources) {
   let result = ''
   for (const resource of resources) {
@@ -1944,6 +1670,7 @@ function mergeAndSwapKeyValue(obj) {
 }
 function flatten(treeData) {
   let back = mergeAndSwapKeyValue(wbs.value[1])
+
   const flatArray = []
   Object.keys(treeData).forEach((e) => {
     flatArray.push({
@@ -2008,7 +1735,33 @@ function flatToArr(tree, arr = [], expandedIds = []) {
       flatToArr(children, arr, expandedIds)
     }
   })
+
+  arr.map((e, idx) => {
+    e.calculatedIdx = arr.length - idx
+    return e
+  })
   return arr
+}
+function compareFirstProperty(obj1, obj2) {
+  // 获取第一个对象的第一个属性值
+  const firstValue1 = obj1[Object.keys(obj1)[0]]
+  // 获取第二个对象的第一个属性值
+  const firstValue2 = obj2[Object.keys(obj2)[0]]
+
+  // 比较两个属性值是否相同
+  return firstValue1 === firstValue2
+}
+function dateToTimestamp(dateString) {
+  // 将日期字符串转换为日期对象
+  var dateObject = new Date(dateString)
+  // 获取时间戳（单位：毫秒）
+  var timestamp = dateObject.getTime()
+  // 将毫秒转换为秒
+  var timestampInSeconds = Math.floor(timestamp / 1000)
+  return timestampInSeconds
+}
+function mergeObjects(obj1, obj2) {
+  return Object.assign({}, obj1, obj2)
 }
 </script>
 <style lang="scss" scoped>

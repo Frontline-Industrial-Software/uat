@@ -9,7 +9,7 @@
   >
     <div class="content">
       <div>
-        <span>Upload historical projects</span>
+        <span class="bold-text">Upload historical projects</span>
         <el-upload
           class="upload-demo"
           action=""
@@ -21,7 +21,7 @@
           </template>
         </el-upload>
       </div>
-      <div>
+      <div class="main">
         <el-checkbox-group
           text-color="#fffff"
           v-model="chosenHistory"
@@ -36,6 +36,24 @@
             border
           />
         </el-checkbox-group>
+        <el-table
+          ref="multipleTableRef"
+          :data="historyFiles"
+          style="width: 100%"
+          @selection-change="handleSelectionChange"
+        >
+          <!-- <el-table-column type="selection" width="55" />
+          <el-table-column label="Date" width="120">
+            <template #default="scope">{{ scope.row.date }}</template>
+          </el-table-column> -->
+          <el-table-column property="name" label="Name" width="120" />
+          <el-table-column property="size" label="Size" show-overflow-tooltip />
+          <el-table-column
+            property="lastModifiedDate"
+            label="Modification Date"
+            show-overflow-tooltip
+          />
+        </el-table>
       </div>
       <div class="footer">
         <el-button @click="Uploads" style="width: 200px">Next</el-button>
@@ -56,6 +74,11 @@ import {
   toRefs,
   h,
 } from 'vue'
+let multipleTableRef = ref()
+let multipleSelection = ref()
+const handleSelectionChange = (val) => {
+  multipleSelection.value = val
+}
 let chosenHistory = ref([])
 let historyFiles = ref([])
 let uploadHistory = (file) => {
@@ -65,6 +88,7 @@ let uploadHistory = (file) => {
   }
   historyFiles.value.push(file)
   chosenHistory.value.push(file.name)
+  console.log(historyFiles)
   return false
 }
 async function Uploads() {
@@ -81,11 +105,25 @@ async function Uploads() {
   height: 600px;
   background-color: #fff;
   border-radius: 16px;
+  padding: 20px;
 }
 .history-choose {
   height: 100px;
   width: 100px;
-  background-color: #d9d9d9;
+  background-color: #f0f0f0;
   white-space: pre-wrap; /* 在空白字符处换行 */
+}
+.bold-text {
+  font-size: 30px;
+  font-weight: bold;
+}
+.main {
+  height: 75%;
+  width: 100%;
+}
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  align-content: center;
 }
 </style>

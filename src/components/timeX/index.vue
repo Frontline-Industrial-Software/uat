@@ -1,17 +1,18 @@
 <template>
   <div class="Timecontent">
     <div class="item" v-for="(Range, index) in TimeArray" :key="index">
-      <!-- <div
+      <div
         v-if="Range.label === 'Day Range'"
         :class="Range.className"
         v-for="(data, dataindex) in Range.data"
         :key="dataindex"
         :style="`width: ${dayWidth}px`"
-      > -->
-      <!-- <span v-if="props.chosenDate === 'Day'">
+      >
+        <span v-if="props.chosenDate === 'Day'">
           {{ data.split('/')[2] }}
-        </span> -->
-      <!-- </div> -->
+        </span>
+      </div>
+
       <div
         v-if="Range.label === 'Week Range'"
         :class="Range.className"

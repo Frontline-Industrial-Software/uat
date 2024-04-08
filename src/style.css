@@ -39,6 +39,14 @@ display: none !important;
   --un-bg-opacity: 1;
   background-color: rgba(187, 222, 251, var(--un-bg-opacity));
 }
+.bg-add {
+  --un-bg-opacity: 1;
+  background-color: rgba(149, 222, 100, var(--un-bg-opacity));
+}
+.bg-remove {
+  --un-bg-opacity: 1;
+  background-color: rgba(255, 229, 143, var(--un-bg-opacity));
+}
 .el-overlay {
   z-index: 1000 !important;
 }

@@ -165,9 +165,9 @@
           :estimated-row-width="40"
           :row-event-handlers="eventClick"
           :scrollbar-always-on="true"
-          :catch="0"
+          :cache="0"
           fixed
-          @rows-rendered="getRenderData"
+          @rows-rendered="debounceGetRenderData"
           :row-class="rowClass"
           expand-column-key="wbsId"
           :default-expanded-row-keys="wbsIdArray"
@@ -421,50 +421,60 @@ watch(
 )
 /* -------------------------------------------------------------------------- */
 
+let lastDependencies = {} // 存储上一次的依赖值
+
 let filterDatas = computed(() => {
   if (!fileData.value || fileData.value.length === 0) {
     return []
   }
 
-  let _file = fileData.value[3].filter((e) => {
-    const statusConditions = {
+  let currentDependencies = {
+    statusConditions: {
       Delayed: isBehindschedule.value,
       Ahead: isAheadschedule.value,
       'On Schedule': isOnschedule.value,
       default: 'true',
-    }
-
-    const durationConditions = {
+    },
+    durationConditions: {
       Early: isEarly.value,
       Ontime: isOntime.value,
       Delayed: isDelayed.value,
-      default: 'true',
-    }
-
-    const compareStatusConditions = {
+      defaultAdd: 'true',
+      defaultRemove: 'true',
+    },
+    compareStatusConditions: {
       TK_Active: isActive.value,
       TK_Complete: isCompleted.value,
       TK_NotStart: isNotStart.value,
-    }
-
-    const compareCriticalConditions = {
+    },
+    compareCriticalConditions: {
       true: isCritical.value,
       null: isNocritical.value,
-    }
-
-    const addorRemove = {
+    },
+    addorRemove: {
       add: isAddTask.value,
       remove: isRemoveTask.value,
       same: isSameTask.value,
-    }
+    },
+  }
+
+  // 检查当前依赖值是否与上一次相同，如果相同则返回上一次的结果
+  if (
+    JSON.stringify(lastDependencies) === JSON.stringify(currentDependencies)
+  ) {
+    return _file
+  }
+  lastDependencies = currentDependencies // 更新上一次的依赖值
+  let _file = fileData.value[3].filter((e) => {
     return (
-      statusConditions[e.taskStatus] &&
-      durationConditions[e.durationStatus] &&
-      compareStatusConditions[e.compareStatus] &&
-      compareCriticalConditions[e.compareCritical] &&
-      addorRemove[e.addorRemove]
+      currentDependencies.statusConditions[e.taskStatus] &&
+      currentDependencies.durationConditions[e.durationStatus] &&
+      currentDependencies.compareStatusConditions[e.compareStatus] &&
+      currentDependencies.compareCriticalConditions[e.compareCritical] &&
+      currentDependencies.addorRemove[e.addorRemove]
     )
   })
+
   if (filterData.value !== 'default') {
     _file = _file.filter((e) => {
       for (let key in filterType.value) {
@@ -478,7 +488,6 @@ let filterDatas = computed(() => {
   }
 
   _file = convertToTreeFormat(_file)
-
   return _file
 })
 
@@ -486,7 +495,10 @@ function datasFilter() {
   controlFilter.value = false
   if (datas.value) {
     datas.value = flatToArr(filterDatas.value.slice(0, 34))
-
+    datas.value.map((e, idx) => {
+      e.calculatedIdx = datas.value.length - idx
+      return e
+    })
     ganttChart.setOption(getOption(ganttData()))
   }
 }
@@ -527,14 +539,14 @@ const eventClick = {
 onMounted(() => {
   // initCharts()
 })
+const timeSpans = {
+  Day: 7 * 24 * 3600 * 1000,
+  Week: 30 * 24 * 3600 * 1000,
+  Month: 90 * 24 * 3600 * 1000,
+  Year: 365 * 24 * 3600 * 1000,
+}
+let timeSpan = timeSpans['Week']
 watch(chosenDate, (newValue, oldValue) => {
-  const timeSpans = {
-    Day: 7 * 24 * 3600 * 1000,
-    Week: 30 * 24 * 3600 * 1000,
-    Month: 90 * 24 * 3600 * 1000,
-    Year: 365 * 24 * 3600 * 1000,
-  }
-
   timeSpan = timeSpans[newValue] || 0
 
   ganttChart.setOption(getOption(ganttData()))
@@ -595,10 +607,11 @@ async function Uploads() {
 
     for (let attrName in a.data) {
       let attrValue = a.data[attrName]
-      dataDate.value.push(attrValue.dataDate)
+      if (attrValue.dataDate) {
+        dataDate.value.push(attrValue.dataDate)
+      }
       fileData.value.push(attrValue)
     }
-
     wbs.value.push(
       mergeObjects(fileData.value[1].wbsName, fileData.value[2].wbsName),
     )
@@ -656,11 +669,11 @@ function sanitizeFileName(fileName) {
 let timexstart = ref()
 let timexend = ref()
 function initCharts() {
-  if (
-    !compareFirstProperty(fileData.value[1].wbsName, fileData.value[2].wbsName)
-  ) {
-    return
-  }
+  // if (
+  //   !compareFirstProperty(fileData.value[1].wbsName, fileData.value[2].wbsName)
+  // ) {
+  //   return
+  // }
   fileData.value[3] = fileData.value[3].map((e) => {
     if (e && e.type) {
       e.type = e.type.replace('TT_', '')
@@ -671,15 +684,14 @@ function initCharts() {
 
     return e
   })
-
-  datas.value = flatToArr(filterDatas.value.slice(0, 34))
+  datas.value = flatToArr(filterDatas.value).slice(0, 34)
   /* -------------------------------------------------------------------------- */
-  timeX = getMaxMin()
-  markLineData = timeX[0]
-  startTimeStamp.value = timeX[1]
-  endTimeStamp.value = timeX[2]
-  timexstart.value = timeX[1]
-  timexend.value = timeX[2]
+  datas.value.map((e, idx) => {
+    e.calculatedIdx = datas.value.length - idx
+    return e
+  })
+  timexstart.value = startTimeStamp.value
+  timexend.value = endTimeStamp.value
   // startDate = new Date(startTimeStamp.value)
   // endDate = new Date(startDate)
   // endDate.setMonth(startDate.getMonth() + 3)
@@ -705,12 +717,19 @@ function getRenderData(data) {
   if (!ganttChart) {
     return
   }
+
   datas.value = flatToArr(filterDatas.value).slice(
     data.rowCacheStart, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
     data.rowCacheEnd, // 切片结束位置为 data.rowCacheStart + 25
   )
+  datas.value.map((e, idx) => {
+    e.calculatedIdx = datas.value.length - idx
+    return e
+  })
   ganttChart.setOption(getOption(ganttData()))
 }
+const debounceGetRenderData = debounce(getRenderData, 100) // 使用防抖函数，300 毫秒
+
 let wbsIdArray = ref()
 const onRowExpanded = ({ expanded }) => {}
 const expandedRowKeys = ref([])
@@ -857,6 +876,8 @@ let borderColor = (data) => {
     Early: '#cf1322',
     Ontime: '#000000',
     Delayed: '#00FFFF',
+    defaultAdd: '#95de64',
+    defaultRemove: '#ffe58f',
   }
 
   return colorMap[data] || '' // 如果找不到匹配的颜色，则返回空字符串
@@ -1020,7 +1041,6 @@ let ganttData = () => {
     // item.calculatedIdx = datas.value.length - idx
     return item.expanded
   })
-
   let ganttDatas = chartData.map((ganttItem, idx) => {
     return {
       name: ganttItem.name,
@@ -1060,6 +1080,9 @@ function getOption({ firstProject, secondProject }) {
   const onTrackTasks = secondProject.filter(
     (task) => task.taskStatus === 'On Schedule',
   )
+  const onDefaultTasks = secondProject.filter(
+    (task) => task.taskStatus === 'default',
+  )
   timexstart.value = startTimeStamp.value
   timexend.value = startTimeStamp.value + timeSpan
   let Label = {
@@ -1098,21 +1121,16 @@ function getOption({ firstProject, secondProject }) {
         show: true, // 显示刻度
         alignWithLabel: true, // 与标签对齐
       },
-      max: endTimeStamp.value + timeSpan,
-      min:
-        startTimeStamp.value - (endTimeStamp.value - startTimeStamp.value) * 2,
+      max: endTimeStamp.value + timeSpan + 30 * 24 * 3600 * 1000,
+      min: startTimeStamp.value - 30 * 24 * 3600 * 1000,
     },
     dataZoom: [
       {
         type: 'slider',
         show: true,
         xAxisIndex: [0],
-        startValue:
-          startTimeStamp.value - (endTimeStamp.value - startTimeStamp.value),
-        endValue:
-          startTimeStamp.value -
-          (endTimeStamp.value - startTimeStamp.value) * 2 +
-          timeSpan,
+        startValue: startTimeStamp.value,
+        endValue: startTimeStamp.value + timeSpan,
         showDetail: false,
         minValueSpan: 7 * 24 * 3600 * 1000,
         filterMode: 'none',
@@ -1144,6 +1162,18 @@ function getOption({ firstProject, secondProject }) {
         name: 'Base',
         type: 'custom',
         data: firstProject,
+        large: true,
+        renderItem: renderItem('base'),
+        encode: {
+          x: [1, 2],
+          y: 0,
+        },
+        ...Label,
+      },
+      {
+        name: 'onDefaultTasks',
+        type: 'custom',
+        data: onDefaultTasks,
         large: true,
         renderItem: renderItem('base'),
         encode: {
@@ -1202,6 +1232,36 @@ function getOption({ firstProject, secondProject }) {
       //     data: getMaxMin()[0],
       //   },
       // },
+      {
+        name: 'AddTasks',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
+      {
+        name: 'RemoveTasks',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
+      {
+        name: 'NotStart',
+        type: 'line',
+        smooth: 0.6,
+        symbol: 'none',
+        lineStyle: {
+          color: '#5470C6',
+          width: 5,
+        },
+      },
       {
         name: 'NotStart',
         type: 'line',
@@ -1336,7 +1396,7 @@ function getOption({ firstProject, secondProject }) {
       {
         name: 'dataDateBase',
         type: 'bar',
-        data: [[dataDate.value[1], 50]],
+        data: [[dataDate.value[0], 50]],
         barWidth: 3, // 设置柱状图的宽度为20像素
         itemStyle: {
           color: '#f5222d', // 设置柱状图的颜色为红色，透明度为0.7
@@ -1346,7 +1406,7 @@ function getOption({ firstProject, secondProject }) {
       {
         name: 'dataDateNew',
         type: 'bar',
-        data: [[dataDate.value[2], 50]],
+        data: [[dataDate.value[1], 50]],
         barWidth: 3, // 设置柱状图的宽度为20像素
         itemStyle: {
           color: '#ffccc7', // 设置柱状图的颜色为红色，透明度为0.7
@@ -1436,6 +1496,26 @@ function getOption({ firstProject, secondProject }) {
           },
         },
         {
+          name: 'AddTasks',
+          icon: 'roundRect',
+          itemStyle: {
+            color: '#b5b5b5',
+            borderColor: '#95de64',
+            borderWidth: 2,
+            borderType: 'solid',
+          },
+        },
+        {
+          name: 'RemoveTasks',
+          icon: 'roundRect',
+          itemStyle: {
+            color: '#b5b5b5',
+            borderColor: '#ffe58f',
+            borderWidth: 2,
+            borderType: 'solid',
+          },
+        },
+        {
           name: 'Critical Task',
           icon: 'roundRect',
           itemStyle: {
@@ -1447,6 +1527,7 @@ function getOption({ firstProject, secondProject }) {
         },
       ],
       type: 'scroll',
+      width: 1100,
     },
     grid: {
       top: 40,
@@ -1509,7 +1590,7 @@ function getOption({ firstProject, secondProject }) {
       },
       trigger: 'item',
       formatter: (p) => {
-        if (p.componentType == 'markLine') {
+        if (p.componentType == 'markLine' || p.componentSubType == 'bar') {
           return
         }
         return `${p.name}
@@ -1543,47 +1624,36 @@ function utcTime(time) {
   return utcString
 }
 
-let timeSpan = 7
-function getMaxMin() {
-  let endDate = -Infinity
-  let startDate = Infinity
-
-  // 获取最大和最小时间戳
-  datas.value.forEach((obj) => {
-    const finishTime = obj.newFinish - 0
-    if (!isNaN(finishTime)) {
-      endDate = Math.max(endDate, finishTime)
-      startDate = Math.min(startDate, finishTime)
-    }
-  })
-
-  const timeSpans = {
-    Day: 7 * 24 * 3600 * 1000,
-    Week: 30 * 24 * 3600 * 1000,
-    Month: 90 * 24 * 3600 * 1000,
-    Year: 365 * 24 * 3600 * 1000,
-  }
-
-  timeSpan = timeSpans[chosenDate.value] || 0
-
-  const markLineData = []
-  return [markLineData, startDate, endDate]
-}
-
 function alternateInsert(array1, array2) {
+  let minPropertyValue = Infinity
+  let maxPropertyValue = -Infinity
   const results = []
   const idMap = {} // 创建 ID 映射对象
   const idMap2 = {}
+
   // 遍历第一个数组，标记为 'first'
   array1.forEach((item) => {
+    if (item.newStart < minPropertyValue) {
+      minPropertyValue = item.newStart // 如果当前属性值比最小值小，则更新最小值
+    }
+    if (item.newFinish > maxPropertyValue) {
+      maxPropertyValue = item.newStart // 如果当前属性值比最大值大，则更新最大值
+    }
     item.taskOwner = 'first'
     item.expanded = true
     item.addorRemove = 'same'
+
     idMap[item.ID] = item // 将第一个数组的元素添加到 ID 映射对象中
   })
   // console.log(idMap)
   // 遍历第二个数组，标记为 'second'，并与第一个数组进行比较
   array2.forEach((item) => {
+    if (item.newStart < minPropertyValue) {
+      minPropertyValue = item.newStart // 如果当前属性值比最小值小，则更新最小值
+    }
+    if (item.newFinish > maxPropertyValue) {
+      maxPropertyValue = item.newStart // 如果当前属性值比最大值大，则更新最大值
+    }
     item.taskOwner = 'second'
     item.expanded = true
     item.addorRemove = 'same'
@@ -1591,7 +1661,7 @@ function alternateInsert(array1, array2) {
     if (!correspondingItem) {
       item.addorRemove = 'add'
       item.taskStatus = 'default'
-      item.durationStatus = 'default'
+      item.durationStatus = 'defaultAdd'
       item.compareCritical = item.critical
       item.compareStatus = item.status
       results.push(item)
@@ -1631,12 +1701,14 @@ function alternateInsert(array1, array2) {
     if (!array2.find((el) => el.ID === item.ID)) {
       item.addorRemove = 'remove'
       item.taskStatus = 'default'
-      item.durationStatus = 'default'
+      item.durationStatus = 'defaultRemove'
       item.compareCritical = item.critical
       item.compareStatus = item.status
       results.push(item)
     }
   })
+  startTimeStamp.value = minPropertyValue
+  endTimeStamp.value = maxPropertyValue
   return results
 }
 
@@ -1719,7 +1791,7 @@ function flatToTree(flatData, parentId = undefined) {
 
   return tree
 }
-
+let startTime = performance.now() // 记录开始时间
 function flatToArr(tree, arr = [], expandedIds = []) {
   tree.forEach((item) => {
     // 结构item
@@ -1735,11 +1807,11 @@ function flatToArr(tree, arr = [], expandedIds = []) {
       flatToArr(children, arr, expandedIds)
     }
   })
+  // let endTime = performance.now() // 记录结束时间
 
-  arr.map((e, idx) => {
-    e.calculatedIdx = arr.length - idx
-    return e
-  })
+  // let executionTime = endTime - startTime // 计算执行时间
+
+  // console.log('tree.forEach 执行时间:', executionTime/1000, '毫秒')
   return arr
 }
 function compareFirstProperty(obj1, obj2) {
@@ -1762,6 +1834,33 @@ function dateToTimestamp(dateString) {
 }
 function mergeObjects(obj1, obj2) {
   return Object.assign({}, obj1, obj2)
+}
+// 防抖函数
+function debounce(func, wait) {
+  let timeout
+  return function () {
+    const context = this
+    const args = arguments
+    clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      func.apply(context, args)
+    }, wait)
+  }
+}
+
+// 节流函数
+function throttle(func, wait) {
+  let timeout
+  return function () {
+    const context = this
+    const args = arguments
+    if (!timeout) {
+      timeout = setTimeout(() => {
+        func.apply(context, args)
+        timeout = null
+      }, wait)
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>

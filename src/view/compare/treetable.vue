@@ -424,6 +424,7 @@ watch(
 let lastDependencies = {} // 存储上一次的依赖值
 
 let filterDatas = computed(() => {
+  let _file
   if (!fileData.value || fileData.value.length === 0) {
     return []
   }
@@ -457,15 +458,16 @@ let filterDatas = computed(() => {
       same: isSameTask.value,
     },
   }
-
+  console.log(111)
   // 检查当前依赖值是否与上一次相同，如果相同则返回上一次的结果
-  if (
-    JSON.stringify(lastDependencies) === JSON.stringify(currentDependencies)
-  ) {
-    return _file
-  }
+  // if (
+  //   JSON.stringify(lastDependencies) === JSON.stringify(currentDependencies)
+  // ) {
+  //   return _file
+  // }
+  console.log(111)
   lastDependencies = currentDependencies // 更新上一次的依赖值
-  let _file = fileData.value[3].filter((e) => {
+  _file = fileData.value[3].filter((e) => {
     return (
       currentDependencies.statusConditions[e.taskStatus] &&
       currentDependencies.durationConditions[e.durationStatus] &&
@@ -486,7 +488,7 @@ let filterDatas = computed(() => {
       return true // 如果所有属性都匹配条件，则返回 true
     })
   }
-
+  console.log(_file)
   _file = convertToTreeFormat(_file)
   return _file
 })
@@ -636,16 +638,10 @@ async function Uploads() {
       return e
     })
 
-    if (fileData.value[1].tasks.length != fileData.value[2].tasks) {
-      fileData.value.push(fileDatas)
-
-      initCharts()
-    }
+    fileData.value.push(fileDatas)
+    console.log(fileData.value)
+    initCharts()
   }
-  // if (fileData.value[1].tasks.length != fileData.value[2].tasks.length) {
-  //   ElMessage.error('Please upload a project with the same task')
-  //   fileData.value = []
-  // }
   return false
 }
 function sanitizeFileName(fileName) {
@@ -681,9 +677,9 @@ function initCharts() {
     if (e && e.status) {
       e.status = e.status.replace('TK_', '')
     }
-
     return e
   })
+
   datas.value = flatToArr(filterDatas.value).slice(0, 34)
   /* -------------------------------------------------------------------------- */
   datas.value.map((e, idx) => {

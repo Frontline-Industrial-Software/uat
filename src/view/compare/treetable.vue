@@ -458,14 +458,13 @@ let filterDatas = computed(() => {
       same: isSameTask.value,
     },
   }
-  console.log(111)
+
   // 检查当前依赖值是否与上一次相同，如果相同则返回上一次的结果
   // if (
   //   JSON.stringify(lastDependencies) === JSON.stringify(currentDependencies)
   // ) {
   //   return _file
   // }
-  console.log(111)
   lastDependencies = currentDependencies // 更新上一次的依赖值
   _file = fileData.value[3].filter((e) => {
     return (
@@ -488,7 +487,6 @@ let filterDatas = computed(() => {
       return true // 如果所有属性都匹配条件，则返回 true
     })
   }
-  console.log(_file)
   _file = convertToTreeFormat(_file)
   return _file
 })
@@ -504,33 +502,38 @@ function datasFilter() {
     ganttChart.setOption(getOption(ganttData()))
   }
 }
+// 定义 move 函数
+let move = (e) => {
+  let index = datas.value.findIndex((e2) => e2.ID == e.rowData.ID)
+  if (index == 0) {
+    index = 0
+  } else {
+    index = 25 * index
+  }
+  ganttChart.setOption({
+    graphic: {
+      elements: [
+        {
+          type: 'rect',
+          left: 0,
+          top: 40 + index,
+          shape: {
+            width: '1500',
+            height: 50,
+          },
+          style: {
+            fill: 'rgba(236,246,245,0.7)',
+          },
+        },
+      ],
+    },
+  })
+}
 // 甘特图
 const eventClick = {
   onMousemove(e) {
-    let index = e.rowIndex
-    if (index == 0) {
-      index = 0
-    } else {
-      index = 25 * index
-    }
-    ganttChart.setOption({
-      graphic: {
-        elements: [
-          {
-            type: 'rect',
-            left: 0, // 矩形左上角相对于 grid 的 x 坐标
-            top: 40 + index, // 矩形左上角相对于 grid 的 y 坐标
-            shape: {
-              width: '1500', // 矩形的宽度
-              height: 50, // 矩形的高度
-            },
-            style: {
-              fill: 'rgba(236,246,245,0.7)', // 矩形的填充颜色
-            },
-          },
-        ],
-      },
-    })
+    debounce(() => move(e), 100)()
+
     // ganttChart.dispatchAction({
     //   type: 'highlight',
     //   dataIndex: index,
@@ -538,6 +541,7 @@ const eventClick = {
     // })
   },
 }
+
 onMounted(() => {
   // initCharts()
 })
@@ -639,7 +643,6 @@ async function Uploads() {
     })
 
     fileData.value.push(fileDatas)
-    console.log(fileData.value)
     initCharts()
   }
   return false
@@ -687,7 +690,7 @@ function initCharts() {
     return e
   })
   timexstart.value = startTimeStamp.value
-  timexend.value = endTimeStamp.value
+  timexend.value = startTimeStamp.value + timeSpan
   // startDate = new Date(startTimeStamp.value)
   // endDate = new Date(startDate)
   // endDate.setMonth(startDate.getMonth() + 3)
@@ -715,7 +718,7 @@ function getRenderData(data) {
   }
 
   datas.value = flatToArr(filterDatas.value).slice(
-    data.rowCacheStart, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
+    data.rowCacheStart + 1, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
     data.rowCacheEnd, // 切片结束位置为 data.rowCacheStart + 25
   )
   datas.value.map((e, idx) => {
@@ -724,7 +727,7 @@ function getRenderData(data) {
   })
   ganttChart.setOption(getOption(ganttData()))
 }
-const debounceGetRenderData = debounce(getRenderData, 100) // 使用防抖函数，300 毫秒
+const debounceGetRenderData = debounce(getRenderData, 0) // 使用防抖函数，300 毫秒
 
 let wbsIdArray = ref()
 const onRowExpanded = ({ expanded }) => {}
@@ -849,7 +852,13 @@ function wbsRenderer(cellData) {
     return ''
   }
   if (cellData.cellData) {
-    return wbs.value[0][cellData.cellData]
+    return h(
+      'span',
+      {
+        class: 'wbsClass',
+      },
+      wbs.value[0][cellData.cellData],
+    )
   }
 }
 
@@ -1079,8 +1088,6 @@ function getOption({ firstProject, secondProject }) {
   const onDefaultTasks = secondProject.filter(
     (task) => task.taskStatus === 'default',
   )
-  timexstart.value = startTimeStamp.value
-  timexend.value = startTimeStamp.value + timeSpan
   let Label = {
     label: {
       normal: {
@@ -1125,8 +1132,8 @@ function getOption({ firstProject, secondProject }) {
         type: 'slider',
         show: true,
         xAxisIndex: [0],
-        startValue: startTimeStamp.value,
-        endValue: startTimeStamp.value + timeSpan,
+        startValue: timexstart.value,
+        endValue: timexstart.value + timeSpan,
         showDetail: false,
         minValueSpan: 7 * 24 * 3600 * 1000,
         filterMode: 'none',

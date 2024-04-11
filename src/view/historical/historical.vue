@@ -7,7 +7,7 @@
       align-items: center;
     "
   >
-    <div class="content">
+    <div v-show="isNext" class="content">
       <div>
         <span class="bold-text">Upload historical projects</span>
         <el-upload
@@ -27,14 +27,14 @@
           v-model="chosenHistory"
           size="small"
         >
-          <el-checkbox
-            class="history-choose"
-            v-for="(item, index) in historyFiles"
-            :key="index"
-            :label="item.name"
-            :value="item.name"
-            border
-          />
+          <template v-for="(item, index) in historyFiles" :key="index">
+            <el-checkbox
+              border
+              class="history-choose"
+              :value="item.uid"
+              :label="item.name"
+            />
+          </template>
         </el-checkbox-group>
         <el-table
           ref="multipleTableRef"
@@ -42,10 +42,6 @@
           style="width: 100%"
           @selection-change="handleSelectionChange"
         >
-          <!-- <el-table-column type="selection" width="55" />
-          <el-table-column label="Date" width="120">
-            <template #default="scope">{{ scope.row.date }}</template>
-          </el-table-column> -->
           <el-table-column property="name" label="Name" width="120" />
           <el-table-column property="size" label="Size" show-overflow-tooltip />
           <el-table-column
@@ -59,6 +55,7 @@
         <el-button @click="Uploads" style="width: 200px">Next</el-button>
       </div>
     </div>
+    <HistoryTable :data="tableData" v-show="!isNext" />
   </div>
 </template>
 
@@ -74,8 +71,11 @@ import {
   toRefs,
   h,
 } from 'vue'
+import HistoryTable from './historyTable.vue'
+let isNext = ref(true)
 let multipleTableRef = ref()
 let multipleSelection = ref()
+let tableData = ref([])
 const handleSelectionChange = (val) => {
   multipleSelection.value = val
 }
@@ -88,14 +88,31 @@ let uploadHistory = (file) => {
   }
   historyFiles.value.push(file)
   chosenHistory.value.push(file.name)
-  console.log(historyFiles)
   return false
 }
 async function Uploads() {
   // let filed = filess.file
   // files.push(filed)
-  let a = await api.sendFile(historyFiles.value, 'history') // 使用修改后的文件对象进行上传
-  console.log(a)
+  let data = historyFiles.value.filter((e) => {
+    return chosenHistory.value.includes(e.name)
+  })
+  console.log(data)
+  // console.log(chosenHistory.value)
+  // console.log(data)
+
+  let a = await api.sendFile(data, 'history') // 使用修改后的文件对象进行上传
+
+  if (a.data.type == 'error') {
+    return
+  }
+  let arr = []
+  for (const key in a.data) {
+    arr.push(a.data[key])
+  }
+  tableData.value = arr
+  console.log(tableData.value)
+  isNext.value = false
+  // console.log(a)
 }
 </script>
 

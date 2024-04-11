@@ -26,7 +26,7 @@
     "dhtmlx-gantt": "^8.0.6",
     "echarts": "^5.4.2",
     "echarts-stat": "^1.2.0",
-    "element-plus": "^2.3.7",
+    "element-plus": "^2.6.3",
     "exceljs": "^4.3.0",
     "file-saver": "^2.0.5",
     "handsontable": "^13.0.0",

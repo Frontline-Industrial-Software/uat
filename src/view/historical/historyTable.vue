@@ -1,15 +1,13 @@
 <template>
   <div class="table-content">
-    <p style="height: 40px; font-weight: bolder; margin-left: 30px">
-      P2 - Tasks
-    </p>
+    <p class="bold-text">P2 - Tasks</p>
 
     <div class="table">
       <el-table-v2
         :columns="columnsFilter"
         :data="datasFilter"
         :width="700"
-        :height="690"
+        :height="670"
         fixed
       />
       <div style="margin-left: 100px">
@@ -27,7 +25,6 @@ const props = defineProps({ data: Object })
 watch(
   props,
   (newval, oldval) => {
-    console.log(datasFilter.value, columnsFilter.value)
     initChart()
   },
   { deep: true },
@@ -91,14 +88,14 @@ let columnsFilter = computed(() => {
 let boxplotChart = ref()
 
 let chartData = ref()
-let option = () => {
-  // chartData.value = getChartData(datasFilter.value)
-  chartData.value = [
-    [80, 80, 47.5, 15, 5, 32.5],
-    [80, 80, 47.5, 15, 2, 32.5],
-    [15, 80, 80, 80, 2, 0],
-  ]
-  option = {
+let options = () => {
+  chartData.value = getChartData(datasFilter.value)
+  // chartData.value = [
+  //   [80, 80, 47.5, 15, 5, 32.5],
+  //   [80, 80, 47.5, 15, 2, 32.5],
+  //   [15, 80, 80, 80, 2, 0],
+  // ]
+  let option = {
     tooltip: {
       trigger: 'item', // 触发类型，可以设置为 'item' 或 'axis'
       formatter: function (params) {
@@ -191,7 +188,7 @@ const initChart = () => {
     width: 450,
     height: 700,
   })
-  boxplotChart.setOption(option())
+  boxplotChart.setOption(options())
 }
 
 function getChartData(data) {
@@ -229,13 +226,20 @@ function getChartData(data) {
 <style lang="scss" scoped>
 .table-content {
   width: 1200px;
-  height: 100%;
+  height: 110%;
   background-color: white;
-  margin-top: 300px;
+  margin-top: 150px;
+  border-radius: 16px;
 }
 .table {
   padding: 30px;
   padding-right: 0px;
   display: flex;
+}
+.bold-text {
+  font-size: 30px;
+  font-weight: bold;
+  padding-left: 10px;
+  margin-top: 20px;
 }
 </style>

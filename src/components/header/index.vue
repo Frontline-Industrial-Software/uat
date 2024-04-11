@@ -119,7 +119,7 @@
               Compare(Beta)
             </v-list-item>
             <v-list-item @click="router.push('/historical')">
-              historical(Beta)
+              Historical(Beta)
             </v-list-item>
             <v-list-item @click="logout">Log out</v-list-item>
           </v-list>

@@ -5,6 +5,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
     "
   >
     <div v-show="isNext" class="content">
@@ -56,10 +57,23 @@
       </div>
     </div>
     <HistoryTable :data="tableData" v-show="!isNext" />
+    <el-button
+      style="position: absolute; right: 17%; top: 15%"
+      :icon="ArrowLeftBold"
+      @click="isNext = !isNext"
+    ></el-button>
   </div>
 </template>
 
 <script setup>
+import {
+  Delete,
+  Edit,
+  Search,
+  Share,
+  Upload,
+  ArrowLeftBold,
+} from '@element-plus/icons-vue'
 import api from '@/api/index.js'
 import {
   computed,
@@ -87,16 +101,15 @@ let uploadHistory = (file) => {
     return false
   }
   historyFiles.value.push(file)
-  chosenHistory.value.push(file.name)
+  chosenHistory.value.push(file.uid)
   return false
 }
 async function Uploads() {
   // let filed = filess.file
   // files.push(filed)
   let data = historyFiles.value.filter((e) => {
-    return chosenHistory.value.includes(e.name)
+    return chosenHistory.value.includes(e.uid)
   })
-  console.log(data)
   // console.log(chosenHistory.value)
   // console.log(data)
 
@@ -110,7 +123,6 @@ async function Uploads() {
     arr.push(a.data[key])
   }
   tableData.value = arr
-  console.log(tableData.value)
   isNext.value = false
   // console.log(a)
 }

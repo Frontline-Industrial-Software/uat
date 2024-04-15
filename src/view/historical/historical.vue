@@ -58,7 +58,7 @@
     </div>
     <HistoryTable :data="tableData" v-show="!isNext" />
     <el-button
-      style="position: absolute; right: 17%; top: 15%"
+      class="btn"
       :icon="ArrowLeftBold"
       @click="isNext = !isNext"
     ></el-button>
@@ -66,6 +66,15 @@
 </template>
 
 <script setup>
+import {
+  ElButton,
+  ElCheckbox,
+  ElIcon,
+  ElPopover,
+  TableV2FixedDir,
+  ElMessage,
+  ElInput,
+} from 'element-plus'
 import {
   Delete,
   Edit,
@@ -115,6 +124,12 @@ async function Uploads() {
 
   let a = await api.sendFile(data, 'history') // 使用修改后的文件对象进行上传
   if (a.data.type == 'error') {
+    console.log(a.data.error)
+    ElMessage.error({
+      message: `${a.data.error} Please upload or select a qualified project!`,
+      duration: 0, // 设置为 5000 毫秒（即 5 秒）,
+      showClose: true,
+    })
     return
   }
   let arr = []
@@ -166,5 +181,9 @@ function filterData(data) {}
   display: flex;
   justify-content: flex-end;
   align-content: center;
+}
+.btn {
+  margin-bottom: 500px;
+  margin-left: -70px;
 }
 </style>

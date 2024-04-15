@@ -209,8 +209,8 @@
         <el-checkbox v-model="isCompleted" label="Completed Tasks" />
         <el-checkbox v-model="isNotStart" label="NotStart Tasks" />
         <div>Compare Task</div>
-        <el-checkbox v-model="isAddTask" label="Add Tasks" />
-        <el-checkbox v-model="isRemoveTask" label="Remove Tasks" />
+        <el-checkbox v-model="isAddTask" label="Additional Tasks" />
+        <el-checkbox v-model="isRemoveTask" label="Deleted Tasks" />
         <el-checkbox v-model="isSameTask" label="Same Tasks" />
         <div>Other</div>
         <el-checkbox v-model="isCritical" label="Critical Tasks" />
@@ -591,7 +591,7 @@ let dataDate = ref([])
 async function Uploads() {
   if (files.value.length == 2) {
     fileData.value = []
-
+    wbs.value = []
     let stateName
     if (files.value[0].name == files.value[1].name) {
       stateName = 'new' + files.value[1].name

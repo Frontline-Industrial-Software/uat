@@ -1,7 +1,7 @@
 <template>
   <div class="Timecontent">
     <div class="item" v-for="(Range, index) in TimeArray" :key="index">
-      <div
+      <!-- <div
         v-if="Range.label === 'Day Range'"
         :class="Range.className"
         v-for="(data, dataindex) in Range.data"
@@ -11,7 +11,7 @@
         <span v-if="props.chosenDate === 'Day'">
           {{ data.split('/')[2] }}
         </span>
-      </div>
+      </div> -->
 
       <div
         v-if="Range.label === 'Week Range'"
@@ -203,18 +203,18 @@ function formatDateStringRange(dateStringRange) {
   const endDate = new Date(endDateString)
 
   const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
     'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ]
 
   const startMonth = monthNames[startDate.getMonth()]
@@ -265,6 +265,7 @@ function getMonthFromDateRange(dateRange) {
   flex-wrap: wrap;
   flex-direction: column-reverse;
   margin-bottom: -40px;
+  overflow: hidden;
 }
 .item {
   width: 100%;

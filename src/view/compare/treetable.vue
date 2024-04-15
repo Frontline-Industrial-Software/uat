@@ -682,7 +682,7 @@ function initCharts() {
     }
     return e
   })
-
+  console.log(filterDatas.value)
   datas.value = flatToArr(filterDatas.value).slice(0, 34)
   /* -------------------------------------------------------------------------- */
   datas.value.map((e, idx) => {
@@ -848,7 +848,7 @@ function criticalRenderer(cellData) {
 }
 
 function wbsRenderer(cellData) {
-  if (!cellData.rowData.children.length > 0) {
+  if (cellData.rowData.type != 'wbs') {
     return ''
   }
   if (cellData.cellData) {
@@ -1093,7 +1093,7 @@ function getOption({ firstProject, secondProject }) {
       normal: {
         show: true, // 启用标签显示
         color: 'black', // 标签的文本颜色
-        position: 'bottom', // 标签的文本位置
+        position: 'right', // 标签的文本位置
         formatter: function (params) {
           // 自定义标签内容
 
@@ -1112,7 +1112,7 @@ function getOption({ firstProject, secondProject }) {
       },
     },
     xAxis: {
-      show: true,
+      show: false,
       name: 'date',
       type: 'time',
       splitNumber: 5,
@@ -1134,9 +1134,28 @@ function getOption({ firstProject, secondProject }) {
         xAxisIndex: [0],
         startValue: timexstart.value,
         endValue: timexstart.value + timeSpan,
+        // maxValueSpan: Math.max(
+        //   3600 * 24 * 1000 * 90,
+        //   endTimeStamp.value + timeSpan + 30 * 24 * 3600 * 1000,
+        // ),
         showDetail: false,
         minValueSpan: 7 * 24 * 3600 * 1000,
         filterMode: 'none',
+
+        brushSelect: false,
+        fillerColor: 'rgba(64, 158, 255)',
+        borderRadius: '50%',
+        moveHandleSize: 0,
+        moveHandleStyle: {},
+        height: 12,
+        handleSize: '80%',
+        handleIcon:
+          'path://M512,512m-448,0a448,448,0,1,0,896,0a448,448,0,1,0,-896,0Z',
+        handleStyle: {
+          borderWidth: 0,
+          color: 'rgba(64, 158, 255)',
+        },
+        bottom: 0,
       },
       {
         show: true,
@@ -1404,7 +1423,7 @@ function getOption({ firstProject, secondProject }) {
         itemStyle: {
           color: '#f5222d', // 设置柱状图的颜色为红色，透明度为0.7
         },
-        ...Label,
+        // ...Label,
       },
       {
         name: 'dataDateNew',
@@ -1414,7 +1433,7 @@ function getOption({ firstProject, secondProject }) {
         itemStyle: {
           color: '#ffccc7', // 设置柱状图的颜色为红色，透明度为0.7
         },
-        ...Label,
+        // ...Label,
       },
     ],
     legend: {
@@ -1731,31 +1750,28 @@ function concatenateResources(resources) {
   }
   return result
 }
-function mergeAndSwapKeyValue(obj) {
-  const result = {}
-
-  for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      const value = obj[key].join('.') // 合并数组中的值为一个字符串
-      result[value] = key // 互换属性和属性值
-    }
+function getLastDataBeforeLastDot(str) {
+  const lastIndex = str.lastIndexOf('.') // 找到最后一个 '.' 的索引位置
+  if (lastIndex !== -1) {
+    // 如果找到了 '.'，则执行下面的操作
+    return str.substring(0, lastIndex) // 使用 substring 方法获取从字符串开头到最后一个 '.' 之前的子字符串
+  } else {
+    // 如果没有找到 '.'，则返回整个字符串
+    return undefined
   }
-
-  return result
 }
 function flatten(treeData) {
-  let back = mergeAndSwapKeyValue(wbs.value[1])
-
   const flatArray = []
   Object.keys(treeData).forEach((e) => {
     flatArray.push({
       wbsId: e,
       id: e,
-      parentId: back[wbs.value[1][e][wbs.value[1][e].length - 2]],
+      parentId: getLastDataBeforeLastDot(e),
       children: [],
+      type: 'wbs',
     })
   })
-
+  // console.log(flatArray);
   return flatArray
 }
 function convertToTreeFormat(initialData) {
@@ -1769,7 +1785,9 @@ function convertToTreeFormat(initialData) {
       ...e,
     }
   })
+  // console.log(nodeData);
   let x = flatToTree(idMap.concat(nodeData))
+  console.log(x)
   return x
 }
 

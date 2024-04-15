@@ -114,18 +114,30 @@ async function Uploads() {
   // console.log(data)
 
   let a = await api.sendFile(data, 'history') // 使用修改后的文件对象进行上传
-
   if (a.data.type == 'error') {
     return
   }
   let arr = []
   for (const key in a.data) {
+    a.data[key].pastTask = a.data[key].pastTasks.map((e) => {
+      e = a.data[e].name
+      return e
+    })
+    a.data[key].pastTasks = a.data[key].pastTasks.map((e) => {
+      e = a.data[e].actualDuration
+      return e
+    })
+
+    // a.data[key].pastTasks.push(0)
+    // a.data[key]
+
     arr.push(a.data[key])
   }
   tableData.value = arr
   isNext.value = false
   // console.log(a)
 }
+function filterData(data) {}
 </script>
 
 <style lang="scss" scoped>

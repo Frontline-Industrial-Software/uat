@@ -7,10 +7,11 @@
         :columns="columnsFilter"
         :data="datasFilter"
         :width="700"
-        :height="670"
+        :height="650"
+        @rows-rendered="getRenderData"
         fixed
       />
-      <div style="margin-left: 100px">
+      <div style="margin-left: 100px; margin-top: 50px">
         <div ref="BoxplotChart"></div>
       </div>
     </div>
@@ -29,7 +30,16 @@ watch(
   },
   { deep: true },
 )
-
+function getRenderData(data) {
+  if (!BoxplotChart) {
+    return
+  }
+  chartData.value = ChartDatas.value.slice(
+    data.rowCacheStart + 1, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
+    data.rowCacheEnd, // 切片结束位置为 data.rowCacheStart + 25
+  )
+  boxplotChart.setOption(options())
+}
 let datasFilter = computed(() => {
   if (props.data) {
     return props.data
@@ -38,6 +48,7 @@ let datasFilter = computed(() => {
   }
 })
 let columnDatas = ref([
+  { name: 'project', bol: true },
   { name: 'ID', bol: true },
   { name: 'actualDuration', bol: true },
   { name: 'id', bol: true },
@@ -49,10 +60,10 @@ let columnDatas = ref([
   { name: 'pastNum', bol: true },
   { name: 'pastStd', bol: true },
   { name: 'uid', bol: true },
-  { name: 'pastTasks', bol: true },
-  { name: 'project', bol: true },
+  { name: 'pastTask', bol: true },
 ])
 const columnMapping = {
+  project: 'Project',
   ID: 'ActiveID',
   actualDuration: 'Actual_Duration',
   id: 'id',
@@ -65,8 +76,7 @@ const columnMapping = {
   pastNum: 'Past_Num',
   pastStd: 'Past_Std',
   uid: 'Uid',
-  pastTasks: 'Past_Tasks',
-  project: 'Project',
+  pastTask: 'Past_Task',
 }
 let columnsFilter = computed(() => {
   if (props.data) {
@@ -80,6 +90,7 @@ let columnsFilter = computed(() => {
           width: 150,
         }
       })
+    // console.log(a);
     return a
   } else {
     return []
@@ -89,7 +100,6 @@ let boxplotChart = ref()
 
 let chartData = ref()
 let options = () => {
-  chartData.value = getChartData(datasFilter.value)
   // chartData.value = [
   //   [80, 80, 47.5, 15, 5, 32.5],
   //   [80, 80, 47.5, 15, 2, 32.5],
@@ -129,8 +139,8 @@ let options = () => {
     grid: {
       left: 5,
       right: 0,
-      bottom: 30,
-      top: 100,
+      bottom: 0,
+      top: 0,
     },
     dataZoom: [
       // {
@@ -155,9 +165,14 @@ let options = () => {
     yAxis: {
       type: 'category',
       boundaryGap: true,
-      nameGap: 30,
       min: 1,
       max: 12,
+      axisLabel: {
+        interval: 50, // 设置标签显示间隔为 50，即每个标签显示一次
+      },
+      axisTick: {
+        length: 50, // 设置刻度线的长度为 50，从而使每个格子的高度为 50px
+      },
       inverse: true,
       show: false,
     },
@@ -183,11 +198,14 @@ let options = () => {
   }
   return option
 }
+let ChartDatas = ref()
 const initChart = () => {
   boxplotChart = echarts.init(BoxplotChart.value, 'purple-passion', {
     width: 450,
-    height: 700,
+    height: 600,
   })
+  ChartDatas.value = getChartData(datasFilter.value)
+  chartData.value = ChartDatas.value.slice(0, 12)
   boxplotChart.setOption(options())
 }
 
@@ -195,15 +213,9 @@ function getChartData(data) {
   let arrAll = []
   data.map((e) => {
     let arr = []
-    arr.push(
-      e.actualDuration,
-      e.pastMax,
-      e.pastMean,
-      e.pastMin,
-      e.pastNum,
-      e.pastStd,
-    )
-    arrAll.push(arr)
+    // echarts.dataTool.prepareBoxplotData(e.pastTasks)
+    arr.push(e.pastTasks)
+    arrAll.push(...arr)
   })
   return arrAll
 }

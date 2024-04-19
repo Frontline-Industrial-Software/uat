@@ -101,12 +101,13 @@ export default {
    * @function 上传初始工程文件
    * @param {*} file 文件内容
    */
-  async sendFile(file, detailReg) {
+  async sendFile(file, detailReg, minSimilarity) {
     let formData = new FormData()
     if (detailReg) {
       formData.append('file', file[0])
       formData.append('file', file[1])
       formData.append('detailReq', detailReg)
+      formData.append('minSimilarity', minSimilarity)
       let res = await instance.post('upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',

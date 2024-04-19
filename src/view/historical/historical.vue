@@ -1,67 +1,89 @@
 <template>
-  <div
-    style="
-      height: 60vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-    "
-  >
-    <div v-show="isNext" class="content">
-      <div>
-        <span class="bold-text">Upload historical projects</span>
-        <el-upload
-          class="upload-demo"
-          action=""
-          :limit="1"
-          :before-upload="uploadHistory"
-        >
-          <template #trigger>
-            <el-button style="width: 200px">Upload history files</el-button>
-          </template>
-        </el-upload>
-      </div>
-      <div class="main">
-        <el-checkbox-group
-          text-color="#fffff"
-          v-model="chosenHistory"
-          size="small"
-        >
-          <template v-for="(item, index) in historyFiles" :key="index">
-            <el-checkbox
-              border
-              class="history-choose"
-              :value="item.uid"
-              :label="item.name"
+  <div style="display: flex; justify-content: center; align-items: center">
+    <div
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        margin-top: 10vh;
+        margin-bottom: 10vh;
+        width: 1200px;
+      "
+    >
+      <el-button class="btn" :icon="iconValue" @click="tab"></el-button>
+      <div v-show="isNext" class="content">
+        <div>
+          <span class="bold-text">Upload historical projects</span>
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <el-upload
+              class="upload-demo"
+              action=""
+              :limit="1"
+              :before-upload="uploadHistory"
+            >
+              <template #trigger>
+                <el-button style="width: 200px">Upload history files</el-button>
+              </template>
+            </el-upload>
+            <el-slider
+              size="small"
+              style="width: 300px"
+              :max="1"
+              :min="0.1"
+              :step="0.1"
+              v-model="Similar"
+              show-input
             />
-          </template>
-        </el-checkbox-group>
-        <el-table
-          ref="multipleTableRef"
-          :data="historyFiles"
-          style="width: 100%"
-          @selection-change="handleSelectionChange"
-        >
-          <el-table-column property="name" label="Name" width="120" />
-          <el-table-column property="size" label="Size" show-overflow-tooltip />
-          <el-table-column
-            property="lastModifiedDate"
-            label="Modification Date"
-            show-overflow-tooltip
-          />
-        </el-table>
+          </div>
+        </div>
+        <div class="main">
+          <el-checkbox-group
+            text-color="#fffff"
+            v-model="chosenHistory"
+            size="small"
+          >
+            <template v-for="(item, index) in historyFiles" :key="index">
+              <el-checkbox
+                border
+                class="history-choose"
+                :value="item.uid"
+                :label="item.name"
+              />
+            </template>
+          </el-checkbox-group>
+          <el-table
+            ref="multipleTableRef"
+            :data="historyFiles"
+            style="width: 100%"
+            @selection-change="handleSelectionChange"
+            max-height="380"
+          >
+            <el-table-column property="name" label="Name" width="120" />
+            <el-table-column
+              property="size"
+              label="Size"
+              show-overflow-tooltip
+            />
+            <el-table-column
+              property="lastModifiedDate"
+              label="Modification Date"
+              show-overflow-tooltip
+            />
+          </el-table>
+        </div>
+        <div class="footer">
+          <el-button @click="Uploads" style="width: 200px">Next</el-button>
+        </div>
       </div>
-      <div class="footer">
-        <el-button @click="Uploads" style="width: 200px">Next</el-button>
-      </div>
+      <HistoryTable :data="tableData" v-show="!isNext" />
     </div>
-    <HistoryTable :data="tableData" v-show="!isNext" />
-    <el-button
-      class="btn"
-      :icon="ArrowLeftBold"
-      @click="isNext = !isNext"
-    ></el-button>
   </div>
 </template>
 
@@ -82,6 +104,7 @@ import {
   Share,
   Upload,
   ArrowLeftBold,
+  ArrowRightBold,
 } from '@element-plus/icons-vue'
 import api from '@/api/index.js'
 import {
@@ -95,6 +118,7 @@ import {
   h,
 } from 'vue'
 import HistoryTable from './historyTable.vue'
+let Similar = ref(0.9)
 let isNext = ref(true)
 let multipleTableRef = ref()
 let multipleSelection = ref()
@@ -102,6 +126,13 @@ let tableData = ref([])
 const handleSelectionChange = (val) => {
   multipleSelection.value = val
 }
+let iconValue = ref(ArrowRightBold)
+function tab() {
+  isNext.value = !isNext.value
+}
+watch(isNext, () => {
+  iconValue.value = isNext.value === true ? ArrowRightBold : ArrowLeftBold
+})
 let chosenHistory = ref([])
 let historyFiles = ref([])
 let uploadHistory = (file) => {
@@ -120,9 +151,8 @@ async function Uploads() {
     return chosenHistory.value.includes(e.uid)
   })
   // console.log(chosenHistory.value)
-  // console.log(data)
 
-  let a = await api.sendFile(data, 'history') // 使用修改后的文件对象进行上传
+  let a = await api.sendFile(data, 'history', Similar.value) // 使用修改后的文件对象进行上传
   if (a.data.type == 'error') {
     console.log(a.data.error)
     ElMessage.error({
@@ -157,11 +187,12 @@ function filterData(data) {}
 
 <style lang="scss" scoped>
 .content {
-  width: 1200px;
-  height: 600px;
+  min-width: 1200px;
+  // height: 600px;
   background-color: #fff;
   border-radius: 16px;
   padding: 20px;
+  min-height: 600px;
 }
 .history-choose {
   height: 100px;
@@ -181,9 +212,16 @@ function filterData(data) {}
   display: flex;
   justify-content: flex-end;
   align-content: center;
+  margin-top: 100px;
 }
 .btn {
-  margin-bottom: 500px;
-  margin-left: -70px;
+  position: absolute;
+  right: 50px;
+  top: 10px;
+}
+
+.slider-demo-block .el-slider {
+  margin-top: 0;
+  margin-left: 12px;
 }
 </style>

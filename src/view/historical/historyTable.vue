@@ -1,6 +1,6 @@
 <template>
   <div class="table-content">
-    <p class="bold-text">P2 - Tasks</p>
+    <p class="bold-text">Tasks</p>
 
     <div class="table">
       <el-table-v2
@@ -8,8 +8,10 @@
         :data="datasFilter"
         :width="700"
         :height="650"
+        :cache="0"
         @rows-rendered="getRenderData"
         fixed
+        :row-event-handlers="eventClick"
       />
       <div style="margin-left: 100px; margin-top: 50px">
         <div ref="BoxplotChart"></div>
@@ -21,6 +23,9 @@
 <script setup>
 import { ref, watch, computed, onMounted } from 'vue'
 import * as echarts from 'echarts'
+import { ElMessage, ElMessageBox } from 'element-plus'
+
+let boxplotChart = ref()
 const BoxplotChart = ref()
 const props = defineProps({ data: Object })
 watch(
@@ -30,15 +35,101 @@ watch(
   },
   { deep: true },
 )
+const eventClick = {
+  onMousemove(e) {
+    let index = chartData.value.findIndex((e2) => e2.id == e.rowData.uid)
+    index = 50 * index
+    boxplotChart.setOption({
+      graphic: {
+        elements: [
+          {
+            type: 'rect',
+            left: 0,
+            top: index,
+            shape: {
+              width: '1500',
+              height: 50,
+            },
+            style: {
+              fill: 'rgba(236,246,245,0.7)',
+            },
+          },
+        ],
+      },
+    })
+  },
+  onClick(e) {
+    move(e)
+
+    // ganttChart.dispatchAction({
+    //   type: 'highlight',
+    //   dataIndex: index,
+    //   // name: e.rowData.name,
+    // })
+  },
+}
+function crossMergeWithDelimiter(arr1, arr2, delimiter) {
+  const result = []
+  const minLength = Math.min(arr1.length, arr2.length)
+
+  for (let i = 0; i < minLength; i++) {
+    result.push(arr1[i] + delimiter + arr2[i])
+  }
+
+  // 将剩余的元素添加到结果数组中
+  if (arr1.length > minLength) {
+    for (let i = minLength; i < arr1.length; i++) {
+      result.push(arr1[i])
+    }
+  } else if (arr2.length > minLength) {
+    for (let i = minLength; i < arr2.length; i++) {
+      result.push(arr2[i])
+    }
+  }
+
+  return result.join(',')
+}
+
+let move = (e) => {
+  let _data = crossMergeWithDelimiter(
+    e.rowData.pastTask,
+    e.rowData.pastTasks,
+    ':',
+  )
+  ElMessageBox.alert(_data, 'Similar duration', {
+    // if you want to disable its autofocus
+    // autofocus: false,
+    confirmButtonText: 'OK',
+    // callback: (action) => {
+    //   ElMessage({
+    //     type: 'info',
+    //     message: `action: ${action}`,
+    //   })
+    // },
+  })
+}
+function debounce(func, wait) {
+  let timeout
+  return function () {
+    const context = this
+    const args = arguments
+    clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      func.apply(context, args)
+    }, wait)
+  }
+}
 function getRenderData(data) {
   if (!BoxplotChart) {
     return
   }
-  chartData.value = ChartDatas.value.slice(
-    data.rowCacheStart + 1, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
-    data.rowCacheEnd, // 切片结束位置为 data.rowCacheStart + 25
-  )
-  boxplotChart.setOption(options())
+  if (chartData.value) {
+    chartData.value = ChartDatas.value.slice(
+      data.rowCacheStart + 1, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
+      data.rowCacheEnd, // 切片结束位置为 data.rowCacheStart + 25
+    )
+    debounce(boxplotChart.setOption(options()), 100)
+  }
 }
 let datasFilter = computed(() => {
   if (props.data) {
@@ -48,10 +139,11 @@ let datasFilter = computed(() => {
   }
 })
 let columnDatas = ref([
+  { name: 'uid', bol: true },
   { name: 'project', bol: true },
   { name: 'ID', bol: true },
   { name: 'actualDuration', bol: true },
-  { name: 'id', bol: true },
+  // { name: 'id', bol: true },
   { name: 'minSimilarity', bol: true },
   { name: 'name', bol: true },
   { name: 'pastMax', bol: true },
@@ -59,7 +151,7 @@ let columnDatas = ref([
   { name: 'pastMin', bol: true },
   { name: 'pastNum', bol: true },
   { name: 'pastStd', bol: true },
-  { name: 'uid', bol: true },
+
   { name: 'pastTask', bol: true },
 ])
 const columnMapping = {
@@ -96,7 +188,6 @@ let columnsFilter = computed(() => {
     return []
   }
 })
-let boxplotChart = ref()
 
 let chartData = ref()
 let options = () => {
@@ -121,21 +212,21 @@ let options = () => {
         return tooltipContent
       },
     },
-    dataset: [
-      {
-        // prettier-ignore
-        source:chartData.value,
-      },
-      {
-        transform: {
-          type: 'boxplot',
-        },
-      },
-      {
-        fromDatasetIndex: 1,
-        fromTransformResult: 1,
-      },
-    ],
+    // dataset: [
+    //   {
+    //     // prettier-ignore
+    //     source:chartData.value,
+    //   },
+    //   {
+    //     transform: {
+    //       type: 'boxplot',
+    //     },
+    //   },
+    //   {
+    //     fromDatasetIndex: 1,
+    //     fromTransformResult: 1,
+    //   },
+    // ],
     grid: {
       left: 5,
       right: 0,
@@ -162,6 +253,22 @@ let options = () => {
       //   yAxisIndex: [0],
       // },
     ],
+    graphic: {
+      elements: [
+        {
+          type: 'rect',
+          left: 0, // 矩形左上角相对于 grid 的 x 坐标
+          top: 0, // 矩形左上角相对于 grid 的 y 坐标
+          shape: {
+            width: '1500', // 矩形的宽度
+            height: 50, // 矩形的高度
+          },
+          style: {
+            fill: 'rgba(236,246,245,0.7)', // 矩形的填充颜色
+          },
+        },
+      ],
+    },
     yAxis: {
       type: 'category',
       boundaryGap: true,
@@ -192,7 +299,8 @@ let options = () => {
       {
         name: 'boxplot',
         type: 'boxplot',
-        datasetIndex: 1,
+        // datasetIndex: 1,
+        data: chartData.value,
       },
     ],
   }
@@ -205,7 +313,7 @@ const initChart = () => {
     height: 600,
   })
   ChartDatas.value = getChartData(datasFilter.value)
-  chartData.value = ChartDatas.value.slice(0, 12)
+  chartData.value = ChartDatas.value.slice(0, 11)
   boxplotChart.setOption(options())
 }
 
@@ -213,34 +321,72 @@ function getChartData(data) {
   let arrAll = []
   data.map((e) => {
     let arr = []
-    // echarts.dataTool.prepareBoxplotData(e.pastTasks)
-    arr.push(e.pastTasks)
+
+    arr.push({ value: e.pastTasks, id: e.uid })
     arrAll.push(...arr)
   })
-  return arrAll
+  let _a = prepareBoxplotData(arrAll)
+  return _a.boxData
 }
-// onMounted(() => {
-//   initChart()
-// })
-// function dateRenderer(cellData) {
-//   if (cellData.cellData) {
-//     return utcTime(cellData.cellData)
-//       .replace('T', ' ')
-//       .replace('Z', '')
-//       .slice(0, 16)
-//   }
-// }
-// function defaultRenderer(cellData) {
-//   return cellData.cellData
-// }
+function asc(arr) {
+  arr.sort(function (a, b) {
+    return a - b
+  })
+  return arr
+}
+function quantile(ascArr, p) {
+  var H = (ascArr.length - 1) * p + 1
+  var h = Math.floor(H)
+  var v = +ascArr[h - 1]
+  var e = H - h
+  return e ? v + e * (ascArr[h] - v) : v
+}
+function prepareBoxplotData(rawData, opt) {
+  opt = opt || {}
+  var boxData = []
+  var outliers = []
+  var axisData = []
+  var boundIQR = opt.boundIQR
+  var useExtreme = boundIQR === 'none' || boundIQR === 0
+
+  for (var i = 0; i < rawData.length; i++) {
+    axisData.push(i + '')
+    var ascList = asc(rawData[i].value.slice())
+    var Q1 = quantile(ascList, 0.25)
+    var Q2 = quantile(ascList, 0.5)
+    var Q3 = quantile(ascList, 0.75)
+    var min = ascList[0]
+    var max = ascList[ascList.length - 1]
+    var bound = (boundIQR == null ? 1.5 : boundIQR) * (Q3 - Q1)
+    var low = useExtreme ? min : Math.max(min, Q1 - bound)
+    var high = useExtreme ? max : Math.min(max, Q3 + bound)
+    boxData.push({ value: [low, Q1, Q2, Q3, high], id: rawData[i].id })
+
+    for (var j = 0; j < ascList.length; j++) {
+      var dataItem = ascList[j]
+
+      if (dataItem < low || dataItem > high) {
+        var outlier = [i, dataItem]
+        opt.layout === 'vertical' && outlier.reverse()
+        outliers.push(outlier)
+      }
+    }
+  }
+
+  return {
+    boxData: boxData,
+    outliers: outliers,
+    axisData: axisData,
+  }
+}
 </script>
 
 <style lang="scss" scoped>
 .table-content {
   width: 1200px;
   height: 110%;
+  min-height: 750px;
   background-color: white;
-  margin-top: 150px;
   border-radius: 16px;
 }
 .table {

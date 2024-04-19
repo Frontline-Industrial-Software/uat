@@ -171,7 +171,6 @@
           :row-class="rowClass"
           expand-column-key="wbsId"
           :default-expanded-row-keys="wbsIdArray"
-          @row-expand="onRowExpanded"
           @expanded-rows-change="onExpandedRowsChange"
         >
           <template #cell-critical="{ cellData }">
@@ -494,7 +493,7 @@ let filterDatas = computed(() => {
 function datasFilter() {
   controlFilter.value = false
   if (datas.value) {
-    datas.value = flatToArr(filterDatas.value.slice(0, 34))
+    datas.value = flatToArr(filterDatas.value).slice(0, 34)
     datas.value.map((e, idx) => {
       e.calculatedIdx = datas.value.length - idx
       return e
@@ -682,8 +681,11 @@ function initCharts() {
     }
     return e
   })
-  console.log(filterDatas.value)
-  datas.value = flatToArr(filterDatas.value).slice(0, 34)
+
+  datas.value = flatToArr(filterDatas.value).slice(
+    dataStart.value,
+    dataEnd.value,
+  )
   /* -------------------------------------------------------------------------- */
   datas.value.map((e, idx) => {
     e.calculatedIdx = datas.value.length - idx
@@ -712,14 +714,17 @@ function initCharts() {
     })
   }
 }
+let dataStart = ref(0)
+let dataEnd = ref(34)
 function getRenderData(data) {
   if (!ganttChart) {
     return
   }
-
+  dataStart.value = data.rowCacheStart + 1
+  dataEnd.value = data.rowCacheEnd
   datas.value = flatToArr(filterDatas.value).slice(
-    data.rowCacheStart + 1, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
-    data.rowCacheEnd, // 切片结束位置为 data.rowCacheStart + 25
+    dataStart.value, // 如果 data.rowCacheStart 是 0，则切片开始位置为 0，否则为 data.rowCacheStart
+    dataEnd.value, // 切片结束位置为 data.rowCacheStart + 25
   )
   datas.value.map((e, idx) => {
     e.calculatedIdx = datas.value.length - idx
@@ -730,11 +735,23 @@ function getRenderData(data) {
 const debounceGetRenderData = debounce(getRenderData, 0) // 使用防抖函数，300 毫秒
 
 let wbsIdArray = ref()
-const onRowExpanded = ({ expanded }) => {}
+// const onRowExpanded = (e) => {
+//   console.log(e.rowdata.wbsId)
+// }
 const expandedRowKeys = ref([])
 
 const onExpandedRowsChange = (expandedKeys) => {
   expandedRowKeys.value = expandedKeys // 更新 expandedRowKeys
+
+  // datas.value
+  // let _a = flattenFilterTreeData(filterDatas.value, expandedKeys)
+  // console.log(_a)
+  // datas.value = _a
+
+  // datas.value = flatToArr(filterDatas.value).slice(
+  //   dataStart.value,
+  //   dataEnd.value,
+  // )
   ganttChart.setOption(getOption(ganttData()))
 }
 
@@ -885,7 +902,7 @@ let borderColor = (data) => {
     defaultRemove: '#ffe58f',
   }
 
-  return colorMap[data] || '' // 如果找不到匹配的颜色，则返回空字符串
+  return colorMap[data] || 'white' // 如果找不到匹配的颜色，则返回空字符串
 }
 
 let borderType = (data) => {
@@ -931,6 +948,21 @@ const renderItem = (type) => (params, api) => {
           ...api.style(),
           radius: 10,
           fill: color,
+        },
+        focus: 'self',
+        blurScope: 'coordinateSystem',
+        emphasis: {},
+      }
+      // 其他类型的渲染逻辑
+      break
+    case 'WBS':
+      result = {
+        type: 'rect',
+        shape,
+        style: {
+          ...api.style(),
+          radius: 10,
+          fill: '#08979c',
         },
         focus: 'self',
         blurScope: 'coordinateSystem',
@@ -1040,12 +1072,14 @@ const renderItem = (type) => (params, api) => {
 
 /* ！甘特图数据处理 -------------------------------------------------------------------------- */
 let ganttData = () => {
-  let chartData = datas.value.filter((item, idx) => {
-    const isExpanded = expandedRowKeys.value.includes(item.wbsId)
+  let chartData = datas.value.filter((item) => {
+    let isExpanded = expandedRowKeys.value.includes(item.wbsId)
+
     item.expanded = isExpanded
-    // item.calculatedIdx = datas.value.length - idx
+
     return item.expanded
   })
+  // .map((item2, idx) => (item2.calculatedIdx = datas.value.length - idx))
   let ganttDatas = chartData.map((ganttItem, idx) => {
     return {
       name: ganttItem.name,
@@ -1074,10 +1108,13 @@ let ganttData = () => {
   let secondProject = ganttDatas.filter((e) => {
     return e.taskOwner == 'second'
   })
-  return { firstProject, secondProject }
+  let wbsProject = ganttDatas.filter((e) => {
+    return e.taskOwner == 'WBS'
+  })
+  return { firstProject, secondProject, wbsProject }
 }
 
-function getOption({ firstProject, secondProject }) {
+function getOption({ firstProject, secondProject, wbsProject }) {
   const delayedTasks = secondProject.filter(
     (task) => task.taskStatus === 'Delayed',
   )
@@ -1096,7 +1133,6 @@ function getOption({ firstProject, secondProject }) {
         position: 'right', // 标签的文本位置
         formatter: function (params) {
           // 自定义标签内容
-
           return params.data.name
         },
         fontSize: 12,
@@ -1186,6 +1222,18 @@ function getOption({ firstProject, secondProject }) {
         data: firstProject,
         large: true,
         renderItem: renderItem('base'),
+        encode: {
+          x: [1, 2],
+          y: 0,
+        },
+        ...Label,
+      },
+      {
+        name: 'WBS',
+        type: 'custom',
+        data: wbsProject,
+        large: true,
+        renderItem: renderItem('WBS'),
         encode: {
           x: [1, 2],
           y: 0,
@@ -1678,7 +1726,6 @@ function alternateInsert(array1, array2) {
     }
     item.taskOwner = 'second'
     item.expanded = true
-    item.addorRemove = 'same'
     let correspondingItem = idMap[item.ID] // 查找对应的第一个数组的元素
     if (!correspondingItem) {
       item.addorRemove = 'add'
@@ -1771,7 +1818,6 @@ function flatten(treeData) {
       type: 'wbs',
     })
   })
-  // console.log(flatArray);
   return flatArray
 }
 function convertToTreeFormat(initialData) {
@@ -1787,7 +1833,6 @@ function convertToTreeFormat(initialData) {
   })
   // console.log(nodeData);
   let x = flatToTree(idMap.concat(nodeData))
-  console.log(x)
   return x
 }
 
@@ -1803,6 +1848,11 @@ function flatToTree(flatData, parentId = undefined) {
       // 如果有子节点，则加入children属性中
       if (children.length > 0) {
         node.children = children
+        const childMinMax = calculateMinMax(children)
+        node.newStart = childMinMax.min
+        node.newFinish = childMinMax.max
+        node.taskOwner = 'WBS'
+        node.name = wbs.value[0][node.id]
       }
 
       // 加入tree中
@@ -1812,6 +1862,23 @@ function flatToTree(flatData, parentId = undefined) {
 
   return tree
 }
+// 计算子节点的最大最小值
+function calculateMinMax(nodes) {
+  let min = Number.MAX_SAFE_INTEGER
+  let max = Number.MIN_SAFE_INTEGER
+
+  for (const node of nodes) {
+    if (node.newStart < min) {
+      min = node.newStart
+    }
+    if (node.newFinish > max) {
+      max = node.newFinish
+    }
+  }
+
+  return { min, max }
+}
+
 let startTime = performance.now() // 记录开始时间
 function flatToArr(tree, arr = [], expandedIds = []) {
   tree.forEach((item) => {
@@ -1882,6 +1949,49 @@ function throttle(func, wait) {
       }, wait)
     }
   }
+}
+
+// 递归遍历树状结构，筛选符合条件的节点及其子节点
+// 递归遍历树状结构，将符合条件的节点及其子节点放置在同一级别上
+function flattenFilterTreeData(treeData, filterIds) {
+  const result = []
+  for (const node of treeData) {
+    if (filterIds.includes(node.wbsId)) {
+      // 如果当前节点的 id 在筛选条件中，则将当前节点及其子节点加入结果中
+      result.push(node)
+      if (node.children) {
+        // 如果当前节点有子节点，则递归处理子节点
+        result.push(...flattenFilterTreeData(node.children, filterIds))
+      }
+    } else if (node.children) {
+      // 如果当前节点不在筛选条件中，但有子节点，则递归筛选子节点
+      result.push(...flattenFilterTreeData(node.children, filterIds))
+    }
+  }
+  return result
+}
+// 递归遍历树状结构，筛选符合条件的节点及其子节点
+function filterTreeData(treeData, filterIds) {
+  const result = []
+  for (const node of treeData) {
+    if (filterIds.includes(node.id)) {
+      // 如果当前节点的 id 在筛选条件中，则将当前节点及其子节点加入结果中
+      result.push({
+        ...node,
+        children: filterTreeData(node.children || [], filterIds),
+      })
+    } else if (node.children) {
+      // 如果当前节点不在筛选条件中，但有子节点，则递归筛选子节点
+      const filteredChildren = filterTreeData(node.children, filterIds)
+      if (filteredChildren.length > 0) {
+        result.push({
+          ...node,
+          children: filteredChildren,
+        })
+      }
+    }
+  }
+  return result
 }
 </script>
 <style lang="scss" scoped>

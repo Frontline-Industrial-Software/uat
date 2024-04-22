@@ -1,64 +1,69 @@
 <template>
-  <div class="Timecontent">
-    <div class="item" v-for="(Range, index) in TimeArray" :key="index">
-      <!-- <div
-        v-if="Range.label === 'Day Range'"
-        :class="Range.className"
-        v-for="(data, dataindex) in Range.data"
-        :key="dataindex"
-        :style="`width: ${dayWidth}px`"
-      >
-        <span v-if="props.chosenDate === 'Day'">
-          {{ data.split('/')[2] }}
-        </span>
-      </div> -->
-
+  <div v-if="TimeArray.length != 0" class="Timecontent">
+    <div class="item" v-for="(Range, index) in timeData" :key="index">
       <div
-        v-if="Range.label === 'Week Range'"
-        :class="Range.className"
         v-for="(data, dataindex) in Range.data"
         :style="`width: ${data.days * dayWidth}px`"
-      >
-        <span>
-          <p>{{ formatDateStringRange(data.data)[0] }}</p>
-          <p>{{ formatDateStringRange(data.data)[1] }}</p>
-        </span>
-      </div>
-      <div
-        v-if="Range.label === 'Month Range'"
         :class="Range.className"
-        v-for="(data, dataindex) in Range.data"
-        :style="`width: ${data.days * dayWidth}px`"
       >
-        <!-- 默认处理方式 -->
-        <span>
-          {{ getMonthFromDateRange(data.data) }}
+        <span v-if="Range.label == 'Year Range'">
+          <p>{{ data.data }}</p>
         </span>
-      </div>
-      <div
-        v-if="Range.label === 'Year Range'"
-        :class="Range.className"
-        v-for="(data, dataindex) in Range.data"
-        :style="`width: ${data.days * dayWidth}px`"
-      >
-        <span>
-          {{ data.data.split('/')[0] }}
+        <span v-if="Range.label == 'Quarter Range'">
+          <p>{{ data[0] }} {{ data[1] }}</p>
+        </span>
+        <span v-if="Range.label == 'Month Range'">
+          <p>{{ data.data }}</p>
         </span>
 
-        <!-- {{ data.split('/')[2] }} -->
+        <span v-if="Range.label == 'Week Range'">
+          <p>{{ data.data[0] }}</p>
+          <p>{{ data.data[1] }}</p>
+        </span>
+        <span v-if="Range.label == 'Day Range'">
+          <p>{{ data }}</p>
+        </span>
       </div>
+      <div></div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 const dayWidth = 15 // 每天的宽度
 let TimeArray = ref([])
 const props = defineProps({
   startTime: Number,
   endTime: Number,
   chosenDate: String,
+})
+let timeData = computed(() => {
+  let _data = []
+  if (TimeArray.value) {
+    switch (props.chosenDate) {
+      case 'Day':
+        _data.push(TimeArray.value[0])
+        _data.push(TimeArray.value[1])
+        break
+      case 'Week':
+        _data.push(TimeArray.value[1])
+        _data.push(TimeArray.value[2])
+        break
+      case 'Month':
+        _data.push(TimeArray.value[2])
+        _data.push(TimeArray.value[3])
+        break
+      case 'Year':
+        _data.push(TimeArray.value[3])
+        _data.push(TimeArray.value[4])
+        break
+      default:
+        break
+    }
+  }
+
+  return _data
 })
 setTimeout(() => {
   if (props.startTime == null) {
@@ -88,11 +93,13 @@ function getRanges(startTimestamp, endTimestamp) {
   const weekRange = []
   const monthRange = []
   const yearRange = []
+  const quarterRange = []
 
   let currentDay = startDay
   let currentWeek = []
   let currentMonth = []
   let currentYear = []
+  let currentQuarter = []
 
   while (currentDay <= endDay) {
     const currentDate = new Date(currentDay)
@@ -101,7 +108,7 @@ function getRanges(startTimestamp, endTimestamp) {
 
     dayRange.push(currentDate.toLocaleDateString())
 
-    // 计算周的逻辑
+    // Calculate week logic
     if (currentDate.getDay() === 1) {
       if (currentWeek.length > 0) {
         weekRange.push(
@@ -112,7 +119,7 @@ function getRanges(startTimestamp, endTimestamp) {
     }
     currentWeek.push(currentDate.toLocaleDateString())
 
-    // 计算月的逻辑
+    // Calculate month logic
     if (currentDate.getDate() === 1 && currentMonth.length > 0) {
       monthRange.push(
         formatDateRange(currentMonth[0], currentMonth[currentMonth.length - 1]),
@@ -121,7 +128,7 @@ function getRanges(startTimestamp, endTimestamp) {
     }
     currentMonth.push(currentDate.toLocaleDateString())
 
-    // 计算年的逻辑
+    // Calculate year logic
     if (
       currentDate.getMonth() === 0 &&
       currentDate.getDate() === 1 &&
@@ -130,15 +137,28 @@ function getRanges(startTimestamp, endTimestamp) {
       yearRange.push(
         formatDateRange(currentYear[0], currentYear[currentYear.length - 1]),
       )
-
       currentYear = []
     }
     currentYear.push(currentDate.toLocaleDateString())
 
+    // Calculate quarter logic
+    let Quarter
+    let Month = currentDate.getMonth() + 1
+    let Year = currentDate.getFullYear()
+    if (Month >= 1 && Month <= 3) {
+      Quarter = [Year, 'Q1']
+    } else if (Month >= 4 && Month <= 6) {
+      Quarter = [Year, 'Q2']
+    } else if (Month >= 7 && Month <= 9) {
+      Quarter = [Year, 'Q3']
+    } else {
+      Quarter = [Year, 'Q4']
+    }
+    currentQuarter.push(Quarter)
     currentDay = nextDay
   }
 
-  // 处理最后一周、最后一个月和最后一年
+  // Handle the last week, month, year, and quarter
   if (currentWeek.length > 0) {
     weekRange.push(
       formatDateRange(currentWeek[0], currentWeek[currentWeek.length - 1]),
@@ -154,32 +174,63 @@ function getRanges(startTimestamp, endTimestamp) {
       formatDateRange(currentYear[0], currentYear[currentYear.length - 1]),
     )
   }
+  if (currentQuarter.length > 0) {
+    quarterRange.push(
+      currentQuarter[0],
+      currentQuarter[currentQuarter.length - 1],
+    )
+  }
+
   return [
     {
       label: 'Day Range',
-      data: addNumberAttribute(dayRange),
+      data: addNumberAttribute(dayRange, 'day'),
       className: 'day-range',
     },
     {
       label: 'Week Range',
-      data: addNumberAttribute(weekRange),
+      data: addNumberAttribute(weekRange, 'week'),
       className: 'week-range',
     },
     {
       label: 'Month Range',
-      data: addNumberAttribute(monthRange),
+      data: addNumberAttribute(monthRange, 'month'),
       className: 'month-range',
     },
     {
+      label: 'Quarter Range',
+      data: addNumberAttribute(quarterRange, 'quarter'),
+      className: 'quarter-range',
+    },
+    {
       label: 'Year Range',
-      data: addNumberAttribute(yearRange),
+      data: addNumberAttribute(yearRange, 'year'),
       className: 'year-range',
     },
   ]
-  // return [dayRange, weekRange, monthRange, yearRange];
 }
 
-const addNumberAttribute = (data) => {
+const addNumberAttribute = (data, type) => {
+  data.map((e) => {
+    switch (type) {
+      case 'day':
+        e = e.split('/')[2]
+        break
+      case 'week':
+        e.data = formatDateStringRange(e.data)
+        break
+      case 'month':
+        e.data = getMonthFromDateRange(e.data)
+        break
+
+      case 'year':
+        e.data = e.data.split('/')[0]
+        break
+      default:
+        break
+    }
+    return e
+  })
   return data
 }
 function formatDateRange(start, end) {
@@ -298,5 +349,10 @@ function getMonthFromDateRange(dateRange) {
   font-size: 20px;
   text-align: center;
   // border: 0.5px solid #f0f0f0;
+}
+.quarter-range {
+  height: 100%;
+  font-size: 18px;
+  text-align: center;
 }
 </style>

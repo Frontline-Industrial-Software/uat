@@ -465,6 +465,7 @@ let filterDatas = computed(() => {
   //   return _file
   // }
   lastDependencies = currentDependencies // 更新上一次的依赖值
+
   _file = fileData.value[3].filter((e) => {
     return (
       currentDependencies.statusConditions[e.taskStatus] &&
@@ -474,7 +475,7 @@ let filterDatas = computed(() => {
       currentDependencies.addorRemove[e.addorRemove]
     )
   })
-
+  console.log(_file.length)
   if (filterData.value !== 'default') {
     _file = _file.filter((e) => {
       for (let key in filterType.value) {
@@ -486,6 +487,7 @@ let filterDatas = computed(() => {
       return true // 如果所有属性都匹配条件，则返回 true
     })
   }
+  console.log(_file.length)
   _file = convertToTreeFormat(_file)
   return _file
 })
@@ -554,6 +556,7 @@ let timeSpan = timeSpans['Week']
 watch(chosenDate, (newValue, oldValue) => {
   timeSpan = timeSpans[newValue] || 0
 
+  timexend.value = timexstart.value + timeSpan
   ganttChart.setOption(getOption(ganttData()))
 })
 
@@ -629,7 +632,7 @@ async function Uploads() {
       fileData.value[1].tasks,
       fileData.value[2].tasks,
     )
-
+    console.log(fileDatas.length)
     fileDatas = fileDatas.map((e) => {
       let resource = []
       for (const key in e.resources) {
@@ -962,7 +965,7 @@ const renderItem = (type) => (params, api) => {
         style: {
           ...api.style(),
           radius: 10,
-          fill: '#08979c',
+          fill: '#000000',
         },
         focus: 'self',
         blurScope: 'coordinateSystem',
@@ -1238,7 +1241,18 @@ function getOption({ firstProject, secondProject, wbsProject }) {
           x: [1, 2],
           y: 0,
         },
-        ...Label,
+        label: {
+          normal: {
+            show: true, // 启用标签显示
+            color: 'black', // 标签的文本颜色
+            position: 'left', // 标签的文本位置
+            formatter: function (params) {
+              // 自定义标签内容
+              return params.data.name
+            },
+            fontSize: 12,
+          },
+        },
       },
       {
         name: 'onDefaultTasks',
@@ -1724,9 +1738,12 @@ function alternateInsert(array1, array2) {
     if (item.newFinish > maxPropertyValue) {
       maxPropertyValue = item.newStart // 如果当前属性值比最大值大，则更新最大值
     }
+    item.addorRemove = 'same'
     item.taskOwner = 'second'
     item.expanded = true
+
     let correspondingItem = idMap[item.ID] // 查找对应的第一个数组的元素
+
     if (!correspondingItem) {
       item.addorRemove = 'add'
       item.taskStatus = 'default'
@@ -2047,6 +2064,7 @@ function filterTreeData(treeData, filterIds) {
   background-color: #fff;
   border-radius: 16px;
   padding: 20px 20px 40px 20px;
+  width: 1200px;
 }
 .example-showcase .el-dropdown-link {
   cursor: pointer;

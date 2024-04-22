@@ -475,7 +475,7 @@ let filterDatas = computed(() => {
       currentDependencies.addorRemove[e.addorRemove]
     )
   })
-  console.log(_file.length)
+
   if (filterData.value !== 'default') {
     _file = _file.filter((e) => {
       for (let key in filterType.value) {
@@ -487,7 +487,6 @@ let filterDatas = computed(() => {
       return true // 如果所有属性都匹配条件，则返回 true
     })
   }
-  console.log(_file.length)
   _file = convertToTreeFormat(_file)
   return _file
 })
@@ -632,7 +631,7 @@ async function Uploads() {
       fileData.value[1].tasks,
       fileData.value[2].tasks,
     )
-    console.log(fileDatas.length)
+
     fileDatas = fileDatas.map((e) => {
       let resource = []
       for (const key in e.resources) {
